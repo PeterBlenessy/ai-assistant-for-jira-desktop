@@ -7,12 +7,20 @@ This template should help get you started developing with Tauri + Vue 3 in Vite.
 - [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
 
-##
-´´´bash
+## Creating the app
+
+
+```bash
 
 yarn create tauri-app
 yarn install
 yarn run tauri add http
 yarn run tauri add window-state
 
-´´´
+git init
+git add .
+git commit -m "Initial commit"
+gh repo create ai-assistant-for-jira-desktop --public --source=. --remote=origin
+git push -u origin master
+
+```
