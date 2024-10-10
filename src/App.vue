@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { QBtn, QInput, QIcon, QFooter, QToolbar, QToolbarTitle } from "quasar";
+import { QBtn, QInput, QIcon, QFooter, QToolbar, QToolbarTitle, QLayout, QPageContainer, QHeader } from "quasar";
 import Greet from "./components/Greet.vue";
 import { useStore } from "./store/index.js";
 import { invoke } from "@tauri-apps/api/core";
@@ -13,36 +13,42 @@ async function greet() {
 </script>
 
 <template>
-  <q-page class="container">
-    <q-toolbar>
-      <q-toolbar-title>
-        <q-icon name="menu" />
-        AI Assistant for Jira
-      </q-toolbar-title>
-    </q-toolbar>
+  <q-layout>
+    <q-header>
+      <q-toolbar>
+        <q-toolbar-title>
+          <q-icon name="menu" />
+          AI Assistant for Jira
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-header>
 
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
+    <q-page-container>
+      <q-page class="container">
+        <div class="row">
+          <a href="https://vitejs.dev" target="_blank">
+            <img src="/vite.svg" class="logo vite" alt="Vite logo" />
+          </a>
+          <a href="https://tauri.app" target="_blank">
+            <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
+          </a>
+          <a href="https://vuejs.org/" target="_blank">
+            <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
+          </a>
+        </div>
 
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
+        <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
 
-    <q-form @submit.prevent="greet">
-      <q-input v-model="store.name" placeholder="Enter a name..." />
-      <q-btn type="submit" label="Greet" />
-    </q-form>
+        <q-form @submit.prevent="greet">
+          <q-input v-model="store.name" placeholder="Enter a name..." />
+          <q-btn type="submit" label="Greet" />
+        </q-form>
 
-    <p>{{ store.greetMsg }}</p>
+        <p>{{ store.greetMsg }}</p>
 
-    <Greet />
+        <Greet />
+      </q-page>
+    </q-page-container>
 
     <q-footer>
       <q-toolbar>
@@ -52,7 +58,7 @@ async function greet() {
         </q-toolbar-title>
       </q-toolbar>
     </q-footer>
-  </q-page>
+  </q-layout>
 </template>
 
 <style scoped>
