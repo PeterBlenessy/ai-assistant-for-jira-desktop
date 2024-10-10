@@ -5,12 +5,3 @@ export const useStore = defineStore('main', {
     name: ''
   }),
 });
-
-export function useGreetStore() {
-  const store = useStore();
-  return {
-    get greetMsg() {
-      return `Hello, ${store.name}!`;
-    }
-  };
-}
