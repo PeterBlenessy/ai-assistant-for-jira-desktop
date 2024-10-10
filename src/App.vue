@@ -2,12 +2,13 @@
 import { ref } from "vue";
 import { QBtn, QInput, QIcon, QFooter, QToolbar, QToolbarTitle } from "quasar";
 import Greet from "./components/Greet.vue";
+import { useStore } from "./store/index.js";
+import { invoke } from "@tauri-apps/api/core";
 
-const greetMsg = ref("");
-const name = ref("");
+const store = useStore();
 
 async function greet() {
-  greetMsg.value = await invoke("greet", { name: name.value });
+  store.greetMsg = await invoke("greet", { name: store.name });
 }
 </script>
 
@@ -35,11 +36,11 @@ async function greet() {
     <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
 
     <q-form @submit.prevent="greet">
-      <q-input v-model="name" placeholder="Enter a name..." />
+      <q-input v-model="store.name" placeholder="Enter a name..." />
       <q-btn type="submit" label="Greet" />
     </q-form>
 
-    <p>{{ greetMsg }}</p>
+    <p>{{ store.greetMsg }}</p>
 
     <Greet />
 
