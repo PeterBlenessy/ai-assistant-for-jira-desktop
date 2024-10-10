@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
-import { usePersistedStore } from "../stores/persisted-store";
+import { usePersistedStore } from "./stores/persisted-store";
 import { JiraClient } from "@atlassian/jira";
 
 const showSettingsDialog = ref(false);
@@ -71,8 +71,14 @@ onMounted(() => {
         <q-footer>
             <q-toolbar>
                 <q-toolbar-title>
-                    <q-icon :name="isConnected ? 'mdi-lan-connect' : 'mdi-lan-disconnect'" />
-                    {{ isConnected ? 'Connected' : 'Disconnected' }}
+                    <q-icon
+                        :name="
+                            isConnected
+                                ? 'mdi-lan-connect'
+                                : 'mdi-lan-disconnect'
+                        "
+                        @click="isConnected ? openSettingsDialog : ''"
+                    />
                 </q-toolbar-title>
             </q-toolbar>
         </q-footer>
