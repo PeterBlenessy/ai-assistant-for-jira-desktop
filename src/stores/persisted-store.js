@@ -7,6 +7,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     const jiraServerAddress = ref(loadStateFromLocalStorage("jiraServerAddress") || "");
     const jiraPersonalAccessToken = ref(loadStateFromLocalStorage("jiraPersonalAccessToken") || "");
 
+
     function saveStateToLocalStorage(key, value) {
         localStorage.setItem(key, JSON.stringify(value));
     }

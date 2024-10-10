@@ -17,7 +17,8 @@
     "vue": "^3.3.4",
     "@quasar/extras": "^1.0.0",
     "quasar": "^2.0.0",
-    "pinia": "^2.0.0"
+    "pinia": "^2.0.0",
+    "@atlassian/jira": "^2.0.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": ">=2.0.0",
