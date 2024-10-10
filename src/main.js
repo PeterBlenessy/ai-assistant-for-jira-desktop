@@ -1,15 +1,36 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import { Quasar } from "quasar";
-import "@quasar/extras/material-icons/material-icons.css";
-import "quasar/src/css/index.sass";
-import { createPinia } from "pinia";
-import { usePersistedStore } from "./stores/settings-store";
 
+// ---------------------------------------------------------------------------------------------
+// Create the app
 const app = createApp(App);
+
+// ---------------------------------------------------------------------------------------------
+// Make pinia available in the app
+import { createPinia } from "pinia";
 const pinia = createPinia();
 app.use(pinia);
-app.use(Quasar);
-app.mount("#app");
 
-const persistedStore = usePersistedStore();
+// ---------------------------------------------------------------------------------------------
+// Import and make Quasar available in the app
+import { Quasar, Dark, Notify } from "quasar";
+import quasarIconSet from "quasar/icon-set/svg-mdi-v7";
+import "@quasar/extras/mdi-v7/mdi-v7.css";
+import "quasar/dist/quasar.css";
+// Custom styles
+import "./styles.css";
+
+app.use(Quasar, {
+    plugins: { Dark, Notify }, // import Quasar plugins and add here
+    config: {
+        dark: "auto",
+        notify: {},
+        brand: {},
+    },
+    iconSet: quasarIconSet,
+    extras: ["mdi-v7"],
+});
+
+// ---------------------------------------------------------------------------------------------
+// Mount the app
+app.mount("#app");
