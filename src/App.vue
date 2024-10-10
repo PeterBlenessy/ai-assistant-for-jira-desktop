@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { QBtn, QInput, QIcon } from "quasar";
+import { QBtn, QInput, QIcon, QFooter, QToolbar, QToolbarTitle } from "quasar";
 import Greet from "./components/Greet.vue";
 
 const greetMsg = ref("");
@@ -16,7 +16,7 @@ async function greet() {
     <q-toolbar>
       <q-toolbar-title>
         <q-icon name="menu" />
-        Welcome to Tauri!
+        AI Assistant for Jira
       </q-toolbar-title>
     </q-toolbar>
 
@@ -42,6 +42,15 @@ async function greet() {
     <p>{{ greetMsg }}</p>
 
     <Greet />
+
+    <q-footer>
+      <q-toolbar>
+        <q-toolbar-title>
+          <q-icon name="login" />
+          Status: Not logged in
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-footer>
   </q-page>
 </template>
 
