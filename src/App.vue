@@ -3,8 +3,14 @@ import { ref } from "vue";
 import { QBtn, QInput, QIcon, QFooter, QToolbar, QToolbarTitle, QLayout, QPageContainer, QHeader } from "quasar";
 import { useStore } from "./store/index.js";
 import { invoke } from "@tauri-apps/api/core";
+import SettingsDialog from "./components/SettingsDialog.vue";
 
 const store = useStore();
+const showSettingsDialog = ref(false);
+
+function openSettingsDialog() {
+  showSettingsDialog.value = true;
+}
 </script>
 
 <template>
@@ -15,6 +21,7 @@ const store = useStore();
           <q-icon name="menu" />
           AI Assistant for Jira
         </q-toolbar-title>
+        <q-btn icon="mdi-settings" flat @click="openSettingsDialog" />
       </q-toolbar>
     </q-header>
 
@@ -46,6 +53,8 @@ const store = useStore();
         </q-toolbar-title>
       </q-toolbar>
     </q-footer>
+
+    <SettingsDialog v-model="showSettingsDialog" />
   </q-layout>
 </template>
 
