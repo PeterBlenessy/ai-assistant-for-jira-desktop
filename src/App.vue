@@ -1,12 +1,24 @@
 <script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
+import { ref } from "vue";
+import { QBtn, QInput, QIcon } from "quasar";
 import Greet from "./components/Greet.vue";
+
+const greetMsg = ref("");
+const name = ref("");
+
+async function greet() {
+  greetMsg.value = await invoke("greet", { name: name.value });
+}
 </script>
 
 <template>
-  <div class="container">
-    <h1>Welcome to Tauri!</h1>
+  <q-page class="container">
+    <q-toolbar>
+      <q-toolbar-title>
+        <q-icon name="menu" />
+        Welcome to Tauri!
+      </q-toolbar-title>
+    </q-toolbar>
 
     <div class="row">
       <a href="https://vitejs.dev" target="_blank">
@@ -22,8 +34,15 @@ import Greet from "./components/Greet.vue";
 
     <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
 
+    <q-form @submit.prevent="greet">
+      <q-input v-model="name" placeholder="Enter a name..." />
+      <q-btn type="submit" label="Greet" />
+    </q-form>
+
+    <p>{{ greetMsg }}</p>
+
     <Greet />
-  </div>
+  </q-page>
 </template>
 
 <style scoped>
