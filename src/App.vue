@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
 import { usePersistedStore } from "./stores/persisted-store";
 import JiraClient from "./services/jira.js";
+import JqlSearch from "./components/JqlSearch.vue";
 
 const showSettingsDialog = ref(false);
 const persistedStore = usePersistedStore();
@@ -59,7 +60,9 @@ onMounted(() => {
 
         <q-page-container>
             <q-page class="container">
-                <div class="row"></div>
+                <div class="row">
+                    <JqlSearch />
+                </div>
             </q-page>
         </q-page-container>
 
