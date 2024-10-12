@@ -19,8 +19,17 @@
                     label="Personal Access Token"
                     dense
                     filled
-                    type="password"
-                />
+                    :type="hidePAT ? 'password' : 'text'"
+                >
+                    <template v-slot:append>
+                        <q-icon
+                            class="cursor-pointer"
+                            size="xs"
+                            :name="hidePAT ? 'mdi-eye-off' : 'mdi-eye'"
+                            @click="hidePAT = !hidePAT"
+                        />
+                    </template>
+                </q-input>
             </q-card-section>
 
             <q-card-actions align="right">
@@ -46,6 +55,7 @@ const persistedStore = usePersistedStore();
 
 const jiraServerAddress = ref(persistedStore.jiraServerAddress);
 const jiraPersonalAccessToken = ref(persistedStore.jiraPersonalAccessToken);
+const hidePAT = ref(true);
 
 function saveSettings() {
     if (

@@ -1,35 +1,40 @@
-# Tauri + Vue 3
+# AI Assistant for Jira - desktop
 
-This template should help get you started developing with Tauri + Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This is a desktop application that integrates with Jira to provide AI-powered assistance to users.
+It is built using Tauri, Vue 3, Quasar, and Vite.
+
+# For developers
 
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
 
+## Set up local Jira server using Docker with a PostgreSQL database
 
+1. **Create a Docker Network**: Ensure both containers can communicate.
+   ```bash
+   docker network create jira-network
+   ```
 
-## Creating the app
+2. **Run PostgreSQL Container**:
+   ```bash
+   docker run --name postgres --network jira-network -e POSTGRES_USER=jirauser -e POSTGRES_PASSWORD=jirapassword -e POSTGRES_DB=jiradb -d postgres
+   ```
 
-```bash
+3. **Run Jira Container**:
+   ```bash
+   docker run --name jira --network jira-network -p 8080:8080 -d atlassian/jira-software
+   ```
 
-yarn create tauri-app
-yarn install
-yarn run tauri add http
-yarn run tauri add window-state
+4. **Configure Jira**: Access Jira at `http://localhost:8080` and configure the database connection using:
+   - **Database Type**: PostgreSQL
+   - **Hostname**: `postgres`
+   - **Port**: `5432`
+   - **Database**: `jiradb`
+   - **Username**: `jirauser`
+   - **Password**: `jirapassword`[1][2][3].
 
-git init
-git add .
-git commit -m "Initial commit"
-gh repo create ai-assistant-for-jira-desktop --public --source=. --remote=origin
-git push -u origin master
-
-```
-
-## Misc commands
-
-```bash
-
-# List all commits
-git log --pretty=format:"%h - %s"
-
-```
+## Create a Personal Access Token for your Jira account
+1. Go to your profile in Jira
+2. Click on `Personal Access Tokens`
+3. Click on `Create token`

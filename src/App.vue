@@ -2,11 +2,12 @@
 import { ref, onMounted } from "vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
 import { usePersistedStore } from "./stores/persisted-store";
-import { JiraClient } from "@atlassian/jira";
+import JiraClient from "./services/jira.js";
 
 const showSettingsDialog = ref(false);
 const persistedStore = usePersistedStore();
 const isConnected = ref(false);
+const user = ref(null);
 
 function openSettingsDialog() {
     showSettingsDialog.value = true;
@@ -14,29 +15,29 @@ function openSettingsDialog() {
 
 async function checkJiraConnection() {
     const { jiraServerAddress, jiraPersonalAccessToken } = persistedStore;
-    if (!jiraServerAddress || !jiraPersonalAccessToken) {
+
+    if (jiraServerAddress === "" || jiraPersonalAccessToken === "") {
+        console.log("Missing Jira server address or personal access token");
         showSettingsDialog.value = true;
         return;
     }
 
-    try {
-        const jira = new JiraClient({
-            host: jiraServerAddress,
-            authentication: {
-                personalAccessToken: jiraPersonalAccessToken,
-            },
-        });
+    const client = JiraClient({
+        host: jiraServerAddress,
+        personalAccessToken: jiraPersonalAccessToken,
+    });
 
-        const response = await jira.myself.getMyself();
-        if (response) {
+    client
+        .getUser()
+        .then((response) => {
+            user.value = response;
             isConnected.value = true;
-        } else {
+        })
+        .catch((error) => {
+            console.log(error);
             isConnected.value = false;
-        }
-    } catch (error) {
-        isConnected.value = false;
-        showSettingsDialog.value = true;
-    }
+            showSettingsDialog.value = true;
+        });
 }
 
 onMounted(() => {
@@ -45,20 +46,14 @@ onMounted(() => {
 </script>
 
 <template>
-    <q-layout>
-        <q-header>
+    <q-layout view="lHh Lpr lfF">
+        <q-header class="bg-grey-10">
             <q-toolbar>
                 <q-avatar rounded>
                     <img src="./assets/ai-assistant-logo.png" />
                 </q-avatar>
                 <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
-                <q-btn
-                    icon="mdi-cog"
-                    dense
-                    flat
-                    rounded
-                    @click="openSettingsDialog"
-                />
+                <q-btn icon="mdi-cog" dense flat @click="openSettingsDialog" />
             </q-toolbar>
         </q-header>
 
@@ -68,16 +63,23 @@ onMounted(() => {
             </q-page>
         </q-page-container>
 
-        <q-footer>
+        <q-footer class="bg-grey-10">
             <q-toolbar>
                 <q-toolbar-title>
-                    <q-icon
-                        :name="
+                    <q-btn
+                        flat
+                        dense
+                        :icon="
                             isConnected
                                 ? 'mdi-lan-connect'
                                 : 'mdi-lan-disconnect'
                         "
-                        @click="isConnected ? openSettingsDialog : ''"
+                        :color="isConnected ? 'positive' : 'negative'"
+                        @click="
+                            isConnected
+                                ? openSettingsDialog()
+                                : checkJiraConnection()
+                        "
                     />
                 </q-toolbar-title>
             </q-toolbar>

@@ -1,29 +1,29 @@
 {
-  "name": "ai-assistant-for-jira-desktop",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "@tauri-apps/api": ">=2.0.0",
-    "@tauri-apps/plugin-http": "~2",
-    "@tauri-apps/plugin-shell": ">=2.0.0",
-    "@tauri-apps/plugin-window-state": "~2",
-    "vue": "^3.3.4",
-    "@quasar/extras": "^1.0.0",
-    "quasar": "^2.0.0",
-    "pinia": "^2.0.0",
-    "@atlassian/jira": "^2.0.0"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": ">=2.0.0",
-    "@vitejs/plugin-vue": "^5.0.5",
-    "vite": "^5.3.1",
-    "@quasar/vite-plugin": "^1.0.0"
-  }
+    "name": "ai-assistant-for-jira-desktop",
+    "private": true,
+    "version": "0.2.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "tauri": "tauri",
+        "list-commits": "git log --pretty=format:'%h - %s'"
+    },
+    "dependencies": {
+        "@quasar/extras": "^1.0.0",
+        "@tauri-apps/api": ">=2.0.0",
+        "@tauri-apps/plugin-http": "~2",
+        "@tauri-apps/plugin-shell": ">=2.0.0",
+        "@tauri-apps/plugin-window-state": "~2",
+        "pinia": "^2.0.0",
+        "quasar": "^2.0.0",
+        "vue": "^3.3.4"
+    },
+    "devDependencies": {
+        "@quasar/vite-plugin": "^1.0.0",
+        "@tauri-apps/cli": ">=2.0.0",
+        "@vitejs/plugin-vue": "^5.0.5",
+        "vite": "^5.3.1"
+    }
 }
