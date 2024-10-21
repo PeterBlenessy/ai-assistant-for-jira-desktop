@@ -31,7 +31,12 @@ const JiraClient = (options) => {
         return jiraFetch(`/rest/api/latest/myself`);
     };
 
-    const searchIssues = async (jql, startAt = 0, maxResults = 15, fields = ["summary", "status", "assignee"]) => {
+    const searchIssues = async (
+        jql,
+        startAt = 0,
+        maxResults = 50,
+        fields = ["*all"],
+    ) => {
         const url = "http://" + host + "/rest/api/latest/search";
         const response = await fetch(url, {
             method: "POST",
@@ -51,7 +56,7 @@ const JiraClient = (options) => {
             return response.json();
         } else {
             throw new Error(
-                `JiraAPI error! status: ${response.status}, text: ${response.statusText}`,
+                `JiraAPI error! ${response.status} - ${response.statusText}`,
             );
         }
     };

@@ -1,7 +1,7 @@
 # AI Assistant for Jira - desktop
 
 This is a desktop application that integrates with Jira to provide AI-powered assistance to users.
-It is built using Tauri, Vue 3, Quasar, and Vite.
+It is built using Tauri 2, Vue 3, Quasar, and Vite.
 
 # For developers
 
@@ -32,7 +32,7 @@ It is built using Tauri, Vue 3, Quasar, and Vite.
    - **Port**: `5432`
    - **Database**: `jiradb`
    - **Username**: `jirauser`
-   - **Password**: `jirapassword`[1][2][3].
+   - **Password**: `jirapassword`.
 
 ## Create a Personal Access Token for your Jira account
 1. Go to your profile in Jira
