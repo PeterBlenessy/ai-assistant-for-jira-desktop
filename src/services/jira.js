@@ -61,10 +61,30 @@ const JiraClient = (options) => {
         }
     };
 
+    const getIssueDetails = async (issueId) => {
+        const url = `http://${host}/rest/api/latest/issue/${issueId}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${personalAccessToken}`,
+            },
+        });
+
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error(
+                `JiraAPI error! ${response.status} - ${response.statusText}`,
+            );
+        }
+    };
+
     return {
         getIssue,
         getUser,
         searchIssues,
+        getIssueDetails,
     };
 };
 

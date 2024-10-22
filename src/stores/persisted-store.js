@@ -10,6 +10,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
         loadStateFromLocalStorage("jiraPersonalAccessToken") || "",
     );
     const searchHistory = ref(loadStateFromLocalStorage("searchHistory") || []);
+    const selectedIssue = ref(loadStateFromLocalStorage("selectedIssue") || null);
 
     // --- Persisted state management functions ---
     function saveStateToLocalStorage(key, value) {
@@ -42,10 +43,19 @@ export const usePersistedStore = defineStore("persisted-store", () => {
         { deep: true },
     );
 
+    watch(
+        selectedIssue,
+        (newValue) => {
+            saveStateToLocalStorage("selectedIssue", newValue);
+        },
+        { deep: true },
+    );
+
     return {
         apiKey,
         jiraServerAddress,
         jiraPersonalAccessToken,
         searchHistory,
+        selectedIssue,
     };
 });

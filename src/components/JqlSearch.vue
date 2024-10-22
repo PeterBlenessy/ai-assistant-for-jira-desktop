@@ -67,6 +67,7 @@
                 :loading="loading"
                 class="my-sticky-header-table"
                 wrap-cells
+                @row-click="onRowClick"
             />
         </q-card-section>
     </q-card>
@@ -121,7 +122,7 @@ const columns = [
 const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 
 const persistedStore = usePersistedStore();
-const { searchHistory } = storeToRefs(persistedStore);
+const { searchHistory, selectedIssue } = storeToRefs(persistedStore);
 
 const client = JiraClient({
     host: persistedStore.jiraServerAddress,
@@ -195,6 +196,10 @@ function removeFromHistory(query) {
     if (index > -1) {
         searchHistory.value.splice(index, 1);
     }
+}
+
+function onRowClick(row) {
+    selectedIssue.value = row;
 }
 </script>
 <style lang="sass">
