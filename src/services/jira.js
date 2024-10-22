@@ -4,7 +4,7 @@ const JiraClient = (options) => {
     const { host, personalAccessToken } = options;
 
     const jiraFetch = async (path, options) => {
-        const url = "http://" + host + path;
+        const url = host + path;
 
         const response = await fetch(url, {
             method: "GET",
@@ -37,7 +37,7 @@ const JiraClient = (options) => {
         maxResults = 50,
         fields = ["*all"],
     ) => {
-        const url = "http://" + host + "/rest/api/latest/search";
+        const url = host + "/rest/api/latest/search";
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -62,7 +62,7 @@ const JiraClient = (options) => {
     };
 
     const getIssueDetails = async (issueId) => {
-        const url = `http://${host}/rest/api/latest/issue/${issueId}`;
+        const url = `${host}/rest/api/latest/issue/${issueId}`;
         const response = await fetch(url, {
             method: "GET",
             headers: {
