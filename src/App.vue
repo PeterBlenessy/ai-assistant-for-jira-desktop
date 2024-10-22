@@ -4,6 +4,7 @@ import SettingsDialog from "./components/SettingsDialog.vue";
 import { usePersistedStore } from "./stores/persisted-store";
 import JiraClient from "./services/jira.js";
 import JqlSearch from "./components/JqlSearch.vue";
+import IssueDetails from "./components/IssueDetails.vue";
 
 const drawer = ref(false);
 const showSettingsDialog = ref(false);
@@ -54,6 +55,17 @@ watch(
     ],
     checkJiraConnection,
 );
+
+// Watch for changes in selectedIssue and open the drawer when it changes
+watch(
+    () => persistedStore.selectedIssue,
+    (newIssue) => {
+        if (newIssue) {
+            drawer.value = true;
+        }
+    },
+    { deep: true }
+);
 </script>
 
 <template>
@@ -73,7 +85,7 @@ watch(
             </q-toolbar>
         </q-header>
 
-        <q-drawer v-model="drawer" bordered overlay>
+        <q-drawer v-model="drawer" bordered overlay width="30%">
             <q-item v-ripple class="fixed-bottom q-pa-xs">
                 <q-item-section side>
                     <q-icon
@@ -103,6 +115,16 @@ watch(
                     />
                 </q-item-section>
             </q-item>
+            <q-btn
+                flat
+                dense
+                round
+                icon="mdi-close"
+                aria-label="Close"
+                @click="drawer = false"
+                class="absolute-top-right q-mt-md q-mr-md"
+            />
+            <IssueDetails :issue="persistedStore.selectedIssue" />
         </q-drawer>
         <q-page-container>
             <q-page class="container">
