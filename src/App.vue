@@ -137,7 +137,7 @@ watch(
         <SettingsDialog v-model="showSettingsDialog" />
     </q-layout>
 </template>
-<style>
+<style scoped>
 /* Hide scrollbars on Macs (and WebKit based webviews) */
 ::-webkit-scrollbar {
     display: none;

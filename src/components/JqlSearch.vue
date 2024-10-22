@@ -1,5 +1,5 @@
 <template>
-    <q-card class="absolute-top q-pa-md q-ma-none" style="width: 100vw">
+    <q-card class="absolute-top q-pa-md q-ma-none" style="height: 100%; width: 100vw">
         <q-card-section class="q-pt-none">
             <q-input
                 v-model="jqlQuery"
@@ -205,7 +205,7 @@ function onRowClick(row) {
 <style lang="sass">
 .my-sticky-header-table
     /* height or max-height is important */
-    height: calc(100vh - 205px)
+    height: calc(100vh - 155px)
 
     .q-table__top,
     .q-table__bottom,
