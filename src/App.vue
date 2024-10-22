@@ -6,7 +6,8 @@ import JiraClient from "./services/jira.js";
 import JqlSearch from "./components/JqlSearch.vue";
 import IssueDetails from "./components/IssueDetails.vue";
 
-const drawer = ref(false);
+const leftDrawer = ref(false);
+const rightDrawer = ref(false);
 const showSettingsDialog = ref(false);
 const persistedStore = usePersistedStore();
 const isConnected = ref(false);
@@ -61,7 +62,7 @@ watch(
     () => persistedStore.selectedIssue,
     (newIssue) => {
         if (newIssue) {
-            drawer.value = true;
+            rightDrawer.value = true;
         }
     },
     { deep: true }
@@ -73,10 +74,10 @@ watch(
         <q-header class="bg-grey-10">
             <q-toolbar>
                 <q-btn
-                    :icon="drawer ? 'mdi-menu-open' : 'mdi-menu'"
+                    :icon="leftDrawer ? 'mdi-menu-open' : 'mdi-menu'"
                     dense
                     flat
-                    @click="drawer = !drawer"
+                    @click="leftDrawer = !leftDrawer"
                 />
                 <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
                 <q-avatar rounded>
@@ -85,7 +86,7 @@ watch(
             </q-toolbar>
         </q-header>
 
-        <q-drawer v-model="drawer" bordered overlay width="30%">
+        <q-drawer v-model="leftDrawer" bordered overlay width="30%">
             <q-item v-ripple class="fixed-bottom q-pa-xs">
                 <q-item-section side>
                     <q-icon
@@ -121,11 +122,24 @@ watch(
                 round
                 icon="mdi-close"
                 aria-label="Close"
-                @click="drawer = false"
+                @click="leftDrawer = false"
+                class="absolute-top-right q-mt-md q-mr-md"
+            />
+        </q-drawer>
+
+        <q-drawer v-model="rightDrawer" bordered overlay width="30%">
+            <q-btn
+                flat
+                dense
+                round
+                icon="mdi-close"
+                aria-label="Close"
+                @click="rightDrawer = false"
                 class="absolute-top-right q-mt-md q-mr-md"
             />
             <IssueDetails :issue="persistedStore.selectedIssue" />
         </q-drawer>
+
         <q-page-container>
             <q-page class="container">
                 <div class="row">
