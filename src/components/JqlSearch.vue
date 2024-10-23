@@ -1,41 +1,24 @@
 <template>
-    <q-card class="absolute-top q-pa-md q-ma-none" style="height: 100%; width: 100vw">
+    <q-card class="absolute-top q-pt-sm q-ma-none" style="height: 100%; width: 100vw">
         <q-card-section class="q-pt-none">
-            <q-input
+            <q-input label="Enter JQL Query" clearable dense filled style="width: 100%"
                 v-model="jqlQuery"
-                label="Enter JQL Query"
-                clearable
-                dense
-                filled
-                style="width: 100%"
                 @keydown.enter="performSearch"
             >
                 <template v-slot:before>
-                    <q-btn
-                        dense
-                        :disabled="searchHistory.length == 0"
-                        flat
-                        icon="mdi-history"
+                    <q-btn dense flat icon="mdi-history" :disabled="searchHistory.length == 0"
                         @click.stop="history = true"
                     >
                         <q-menu anchor="bottom left" self="top left">
                             <q-list style="min-width: 200px">
                                 <q-item
                                     v-for="(query, index) in searchHistory"
-                                    :key="index"
-                                    clickable
-                                    @click="selectFromHistory(query)"
+                                    :key="index" clickable @click="selectFromHistory(query)"
                                 >
                                     <q-item-section>{{ query }}</q-item-section>
                                     <q-item-section side>
-                                        <q-btn
-                                            dense
-                                            flat
-                                            size="sm"
-                                            icon="mdi-delete-outline"
-                                            @click.stop="
-                                                removeFromHistory(query)
-                                            "
+                                        <q-btn dense flat size="sm" icon="mdi-delete-outline"
+                                            @click.stop="removeFromHistory(query)"
                                         />
                                     </q-item-section>
                                 </q-item>
@@ -44,13 +27,7 @@
                     </q-btn>
                 </template>
                 <template v-slot:after>
-                    <q-btn
-                        @click="performSearch"
-                        dense
-                        flat
-                        icon="mdi-send"
-                        color="primary"
-                    />
+                    <q-btn dense flat icon="mdi-send" color="primary" @click="performSearch" />
                 </template>
             </q-input>
         </q-card-section>
@@ -198,14 +175,14 @@ function removeFromHistory(query) {
     }
 }
 
-function onRowClick(row) {
+function onRowClick(evt, row, index) {
     selectedIssue.value = row;
 }
 </script>
 <style lang="sass">
 .my-sticky-header-table
     /* height or max-height is important */
-    height: calc(100vh - 155px)
+    height: calc(100vh - 130px)
 
     .q-table__top,
     .q-table__bottom,

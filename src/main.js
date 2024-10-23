@@ -15,6 +15,7 @@ app.use(pinia);
 // Import and make Quasar available in the app
 import { Quasar, Dark, Notify } from "quasar";
 import quasarIconSet from "quasar/icon-set/svg-mdi-v7";
+//import quasarIconSet from 'quasar/icon-set/svg-material-icons';
 import "@quasar/extras/mdi-v7/mdi-v7.css";
 import "quasar/dist/quasar.css";
 // Custom styles
@@ -28,7 +29,7 @@ app.use(Quasar, {
         brand: {},
     },
     iconSet: quasarIconSet,
-    extras: ["mdi-v7"],
+    extras: ["material-icons", "mdi-v7"],
 });
 
 // ---------------------------------------------------------------------------------------------

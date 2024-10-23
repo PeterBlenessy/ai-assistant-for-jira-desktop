@@ -70,81 +70,59 @@ watch(
 </script>
 
 <template>
-    <q-layout view="hHh Lpr lfF">
+    <q-layout view="hHh Lpr lff">
         <q-header class="bg-grey-10">
             <q-toolbar>
-                <q-btn
-                    :icon="leftDrawer ? 'mdi-menu-open' : 'mdi-menu'"
-                    dense
-                    flat
-                    @click="leftDrawer = !leftDrawer"
-                />
-                <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
                 <q-avatar rounded>
                     <img src="./assets/ai-assistant-logo.png" />
                 </q-avatar>
+                <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
+                <q-btn dense flat 
+                    :color="leftDrawer ? 'grey-4' : 'grey-6'"
+                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'"
+                    @click="leftDrawer = !leftDrawer"
+                />
+                <q-btn dense flat
+                    :color="rightDrawer ? 'grey-4' : 'grey-6'"
+                    :icon="rightDrawer ? 'mdi-dock-right' : 'mdi-dock-right'"
+                    @click="rightDrawer = !rightDrawer"
+                />
+                <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
+
             </q-toolbar>
         </q-header>
 
-        <q-drawer v-model="leftDrawer" bordered overlay width="30%">
+        <q-drawer side="left" v-model="leftDrawer" bordered overlay :width="250" >
+            <div class="absolute" style="top: 15px; right: -17px">
+                <q-btn dense round icon="mdi-chevron-left-circle" @click="leftDrawer = false" />
+            </div>
+
             <q-item v-ripple class="fixed-bottom q-pa-xs">
                 <q-item-section side>
-                    <q-icon
-                        flat
-                        dense
-                        :name="
-                            isConnected
-                                ? 'mdi-lan-connect'
-                                : 'mdi-lan-disconnect'
-                        "
+                    <q-icon dense flat 
                         :color="isConnected ? 'positive' : 'negative'"
+                        :name=" isConnected ? 'mdi-lan-connect' : 'mdi-lan-disconnect'"
                     />
                 </q-item-section>
                 <q-item-section>
-                    <q-item-label>{{
-                        isConnected ? user.displayName : ""
-                    }}</q-item-label>
+                    <q-item-label>{{ isConnected ? user.displayName : "" }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-btn
-                        flat
-                        dense
-                        round
-                        icon="mdi-cog"
-                        aria-label="Settings"
-                        @click="openSettingsDialog"
-                    />
+                    <q-btn flat dense icon="mdi-cog" @click="openSettingsDialog" />
                 </q-item-section>
             </q-item>
-            <q-btn
-                flat
-                dense
-                round
-                icon="mdi-close"
-                aria-label="Close"
-                @click="leftDrawer = false"
-                class="absolute-top-right q-mt-md q-mr-md"
-            />
         </q-drawer>
 
-        <q-drawer v-model="rightDrawer" bordered overlay width="30%">
-            <q-btn
-                flat
-                dense
-                round
-                icon="mdi-close"
-                aria-label="Close"
+        <q-drawer side="right" v-model="rightDrawer" bordered overlay :width="700" >
+            <q-btn dense flat icon="mdi-close" class="absolute-top-right q-mt-md q-mr-md"
                 @click="rightDrawer = false"
-                class="absolute-top-right q-mt-md q-mr-md"
             />
             <IssueDetails :issue="persistedStore.selectedIssue" />
         </q-drawer>
 
         <q-page-container>
-            <q-page class="container">
-                <div class="row">
-                    <JqlSearch />
-                </div>
+            <q-page>
+                <JqlSearch />
             </q-page>
         </q-page-container>
 
