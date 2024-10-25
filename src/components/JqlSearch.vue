@@ -54,6 +54,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
 import JiraClient from "../services/jira.js";
+import SearchHistory from "./SearchHistory.vue";
 
 const loading = ref(false);
 const jqlQuery = ref("");
@@ -180,6 +181,14 @@ function onRowClick(evt, row) {
     persistedStore.selectedIssue = row;
     emit('issue-click');
 }
+
+function setQuery(query) {
+    jqlQuery.value = query;
+    performSearch();
+}
+
+// Expose the setQuery method to the parent component
+defineExpose({ setQuery });
 </script>
 <style lang="sass">
 .my-sticky-header-table
@@ -190,7 +199,7 @@ function onRowClick(evt, row) {
     .q-table__bottom,
     thead tr:first-child th
         /* bg color is important for th; just specify one */
-        background-color: #1d1d1d
+        background-color: #ffffff
 
     thead tr th
         top: 0
@@ -205,6 +214,13 @@ function onRowClick(evt, row) {
     &.q-table--loading thead tr:last-child th
         /* height of all previous header rows */
         top: 48px
+
+    &.q-table--dark
+        .q-table__top,
+        .q-table__bottom,
+        thead tr:first-child th
+            /* bg color is important for th; just specify one */
+            background-color: #1d1d1d
 
     /* prevent scrolling behind sticky top row on focus */
     tbody
