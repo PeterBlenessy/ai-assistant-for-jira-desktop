@@ -12,6 +12,8 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     const searchHistory = ref(loadStateFromLocalStorage("searchHistory") || []);
     const selectedIssue = ref(loadStateFromLocalStorage("selectedIssue") || null);
 
+    const darkMode = ref(loadStateFromLocalStorage("darkMode") || false);
+
     // --- Persisted state management functions ---
     function saveStateToLocalStorage(key, value) {
         localStorage.setItem(key, JSON.stringify(value));
@@ -51,11 +53,16 @@ export const usePersistedStore = defineStore("persisted-store", () => {
         { deep: true },
     );
 
+    watch(darkMode, (newValue) => {
+        saveStateToLocalStorage("darkMode", newValue);
+    });
+
     return {
         apiKey,
         jiraServerAddress,
         jiraPersonalAccessToken,
         searchHistory,
         selectedIssue,
+        darkMode,
     };
 });

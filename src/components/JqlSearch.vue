@@ -1,5 +1,5 @@
 <template>
-    <q-card class="absolute-top q-pt-sm q-ma-none" style="height: 100%; width: 100vw">
+    <q-card class="absolute-top q-pt-sm q-ma-none" style="height: 100%; width: 100%">
         <q-card-section class="q-pt-none">
             <q-input label="Enter JQL Query" clearable dense filled style="width: 100%"
                 v-model="jqlQuery"
@@ -11,9 +11,8 @@
                     >
                         <q-menu anchor="bottom left" self="top left">
                             <q-list style="min-width: 200px">
-                                <q-item
-                                    v-for="(query, index) in searchHistory"
-                                    :key="index" clickable @click="selectFromHistory(query)"
+                                <q-item v-for="(query, index) in searchHistory"
+                                    :key="index" v-close-popup clickable @click="selectFromHistory(query)"
                                 >
                                     <q-item-section>{{ query }}</q-item-section>
                                     <q-item-section side>
@@ -106,6 +105,8 @@ const client = JiraClient({
     personalAccessToken: persistedStore.jiraPersonalAccessToken,
 });
 
+const emit = defineEmits(['issue-click']);
+
 function onRequest(props) {
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
@@ -175,8 +176,9 @@ function removeFromHistory(query) {
     }
 }
 
-function onRowClick(evt, row, index) {
-    selectedIssue.value = row;
+function onRowClick(evt, row) {
+    persistedStore.selectedIssue = row;
+    emit('issue-click');
 }
 </script>
 <style lang="sass">

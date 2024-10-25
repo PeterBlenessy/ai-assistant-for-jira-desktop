@@ -51,8 +51,7 @@
                 <template v-slot:after>
                     <q-scroll-area style="height: 100%;">
                         <div class="q-pa-md">
-                            <q-expansion-item default-opened header-class="text-subtitle1" label="Details"
-                                style="border: 1px solid #808080; border-radius: 4px;">
+                            <q-expansion-item default-opened header-class="text-subtitle1" label="Details">
                                 <q-card>
                                     <q-card-section>
                                         <div class="details-list q-gutter-y-sm">
