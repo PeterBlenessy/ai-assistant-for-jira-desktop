@@ -6,6 +6,7 @@ import JiraClient from "./helpers/jira.js";
 import JqlSearch from "./components/JqlSearch.vue";
 import IssueDetails from "./components/IssueDetails.vue";
 import SearchHistory from './components/SearchHistory.vue';
+import MarkdownViewer from './components/MarkdownViewer.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 
@@ -14,6 +15,9 @@ const persistedStore = usePersistedStore();
 const { darkMode, leftDrawer } = storeToRefs(persistedStore);
 
 const showSettingsDialog = ref(false);
+const showAboutDialog = ref(false);
+const showChangelogDialog = ref(false);
+const showMenu = ref(false);
 const isConnected = ref(false);
 const user = ref(null);
 const jqlSearch = ref(null);
@@ -71,6 +75,7 @@ watch(darkMode, (newValue) => {
 onMounted(() => {
     $q.dark.set(darkMode.value);
 });
+
 function handleHistorySelect(query) {
     jqlSearch.value.setQuery(query);
 }
@@ -90,12 +95,30 @@ function handleHistorySelect(query) {
                 <q-btn dense flat icon="mdi-compare" :color="darkMode ? 'grey-4' : 'grey-6'"
                     @click="darkMode = !darkMode" />
                 <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
+                <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
+                    <q-menu anchor="bottom right" self="top right">
+                        <q-list dense style="min-width: 150px">
+                            <q-item clickable dense v-ripple v-close-popup @click="showAboutDialog = true">
+                                <q-item-section avatar>
+                                    <q-icon name="mdi-information-box-outline" />
+                                </q-item-section>
+                                <q-item-section>About</q-item-section>
+                            </q-item>
+
+                            <q-item clickable v-ripple v-close-popup @click="showChangelogDialog = true">
+                                <q-item-section avatar>
+                                    <q-icon name="mdi-timeline-text-outline" />
+                                </q-item-section>
+                                <q-item-section>Changelog</q-item-section>
+                            </q-item> </q-list>
+                    </q-menu>
+                </q-btn>
             </q-toolbar>
         </q-header>
 
         <q-drawer side="left" v-model="leftDrawer" bordered :width="250">
-                <SearchHistory @select="handleHistorySelect" />
-                <q-separator inset/>
+            <SearchHistory @select="handleHistorySelect" />
+            <q-separator inset />
 
             <q-item v-ripple class="fixed-bottom q-pa-xs">
                 <q-item-section side>
@@ -106,18 +129,21 @@ function handleHistorySelect(query) {
                     <q-item-label>{{ isConnected ? user.displayName : "" }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-btn flat dense icon="mdi-cog" @click="openSettingsDialog" />
+                    <q-btn flat dense icon="mdi-cog" @click="showMenu = true" />
                 </q-item-section>
             </q-item>
         </q-drawer>
 
         <q-page-container>
             <q-page>
-                <JqlSearch ref="jqlSearch"/>
+                <JqlSearch ref="jqlSearch" />
             </q-page>
         </q-page-container>
 
         <SettingsDialog v-model="showSettingsDialog" />
+        <MarkdownViewer v-model="showAboutDialog" type="about" />
+        <MarkdownViewer v-model="showChangelogDialog" type="changelog" />
+
     </q-layout>
 </template>
 <style scoped>

@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { defineProps, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import JiraClient from '../helpers/jira.js';
 import { usePersistedStore } from '../stores/persisted-store.js';
 

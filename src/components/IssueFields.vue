@@ -31,7 +31,7 @@
         <div class="col-12 col-md-5">
             <div class="text-subtitle1 q-mb-sm">AI Generated Improvement Proposals</div>
             <div class="description-text">
-                <q-list v-if="improvementProposal" separator bordered padding class="rounded-borders">
+                <q-list v-if="improvementProposal && hasImprovements" separator bordered padding class="rounded-borders">
                     <template v-for="field in improvementDisplayFields" :key="field">
                         <q-item v-if="shouldDisplayField(field)"  style="cursor: default">
                             <q-item-section>
@@ -68,7 +68,12 @@
                         </q-item>
                     </template>
                 </q-list>
-                <div v-else>Click the improve button to generate improvement proposals</div>
+                <div v-else-if="improvementProposal && !hasImprovements && !loading" class="text-grey-5 q-pt-lg">
+                    <div>All fields look great! No improvements needed.</div>
+                    <div class="text-h2 q-ma-xl">👍</div>
+                </div>
+                <div v-else-if="loading" class="q-pa-md">Generating improvements...</div>
+                <div v-else class="q-pa-md">Click the improve button to generate improvement proposals</div>
             </div>
         </div>
     </div>
@@ -78,7 +83,7 @@
 </template>
 
 <script setup>
-import { defineProps, ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import JiraClient from '../helpers/jira.js';
 import { usePersistedStore } from '../stores/persisted-store.js';
 import OpenAIClient from "../helpers/openai.js";
@@ -113,7 +118,8 @@ const improvementDisplayFields = ['summary', 'description', 'mvp', 'acceptanceCr
 
 const shouldDisplayField = (field) => {
     if (field === 'acceptanceCriteria') {
-        return improvementProposal.value[field]?.text?.length > 0;
+        return improvementProposal.value[field]?.text?.length > 0 
+            && improvementProposal.value[field]?.updated;
     }
     return improvementProposal.value[field]?.updated;
 };
@@ -224,8 +230,6 @@ const acceptImprovement = async (type, improvement) => {
             // Extract existing sections with flexible line break pattern
             const mvpMatch = currentDescription.match(/h2\.\s*Minimum Viable Product\s*\n+([^]*?)(?=\n+h2\.|$)/);
             const acMatch = currentDescription.match(/h2\.\s*Acceptance Criteria\s*\n+([^]*?)(?=\n+h2\.|$)/);
-
-            // Get main description (everything before first h2)
             const mainDescMatch = currentDescription.match(/^([^]*?)(?=\n+h2\.|$)/);
 
             // Populate sections with existing content
@@ -238,12 +242,12 @@ const acceptImprovement = async (type, improvement) => {
                     .map(line => ({ summary: line.replace(/^\d+\.\s*/, '').trim() }));
             }
 
-            // Update the relevant section based on what was accepted
+            // Only update the section that was actually accepted
             if (type === 'description') {
                 descriptionSections.description = improvement.text;
             } else if (type === 'mvp') {
                 descriptionSections.mvp = improvement.text;
-            } else if (type === 'acceptanceCriteria') {
+            } else if (type === 'acceptanceCriteria' && improvement.updated) {
                 descriptionSections.acceptanceCriteria = improvement.text;
             }
 
@@ -284,6 +288,7 @@ const acceptImprovement = async (type, improvement) => {
     }
 };
 
+// Format Jira markup for display as regular HTML
 const formatJiraMarkup = (text) => {
     if (!text) return '';
     
@@ -297,6 +302,11 @@ const formatJiraMarkup = (text) => {
         // Convert lists (basic support)
         .replace(/^(\d+)\.\s(.*)$/gm, '<li>$2</li>');
 };
+
+const hasImprovements = computed(() => {
+    if (!improvementProposal.value) return false;
+    return improvementDisplayFields.some(field => shouldDisplayField(field));
+});
 </script>
 
 <style>

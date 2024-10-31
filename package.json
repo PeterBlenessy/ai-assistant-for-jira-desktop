@@ -1,14 +1,18 @@
 {
     "name": "ai-assistant-for-jira-desktop",
     "private": true,
-    "version": "0.2.0",
+    "version": "0.3.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
         "preview": "vite preview",
         "tauri": "tauri",
-        "list-commits": "git log --pretty=format:'%h - %s'"
+        "list-commits": "git log --pretty=format:'%h - %s'",
+        "release:draft": "CHANGELOG=$(sed -n \"/^### v$npm_package_version/,/^### /p\" ./docs/CHANGELOG.md | sed '1d;$d') && gh release create v$npm_package_version --draft --title v$npm_package_version --notes \"$CHANGELOG\"",
+        "release:publish": "gh release edit v$npm_package_version --draft=false --latest",
+        "git:push:all:reversed": "CHANGELOG=$(sed -n \"/^### v$npm_package_version/,/^### /p\" ./docs/CHANGELOG.md | sed '1d;$d' | tac) && git add . && git commit -m \"$CHANGELOG\" && git push -u origin main",
+        "cicd": "yarn git:push:all:reversed && yarn release:draft && yarn release:publish"
     },
     "dependencies": {
         "@quasar/extras": "^1.0.0",
@@ -16,6 +20,7 @@
         "@tauri-apps/plugin-http": "~2",
         "@tauri-apps/plugin-shell": ">=2.0.0",
         "@tauri-apps/plugin-window-state": "~2",
+        "markdown-it": "^14.1.0",
         "openai": "^4.63.0",
         "pinia": "^2.0.0",
         "quasar": "^2.0.0",

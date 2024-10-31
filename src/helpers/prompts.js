@@ -38,6 +38,7 @@ You will receive the Jira information in the following JSON format:
 }
 
 The description may be a string, an object, or ''.
+When it is a string, it may or may not contain sections for Minimum Viable Product and Acceptance Criteria.
 When it is an object, it is formated as an Atlassian Document Format object (ADF).
 
 Your job is to suggest improvements to the Jira information.
