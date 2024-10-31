@@ -129,7 +129,7 @@
 
 <script setup>
 import { defineProps, ref, watch } from 'vue';
-import JiraClient from '../services/jira.js';
+import JiraClient from '../helpers/jira.js';
 import { usePersistedStore } from '../stores/persisted-store.js';
 
 const persistedStore = usePersistedStore();
@@ -218,7 +218,6 @@ watch(() => props.issue, async (newIssue) => {
     if (newIssue) {
         issueDetails.value = await client.getIssueDetails(newIssue.id);
         issueFields.value = issueDetails.value.fields;
-        console.log(issueFields.value);
     }
 }, { immediate: true });
 

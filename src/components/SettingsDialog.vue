@@ -32,6 +32,37 @@
                 </q-input>
             </q-card-section>
 
+            <q-card-section>
+                <div class="text-h6">AI Provider Settings</div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
+                <q-input
+                    v-model="aiProviderUrl"
+                    label="AI Provider URL"
+                    dense
+                    filled
+                />
+            </q-card-section>
+            <q-card-section class="q-pt-none">
+                <q-input
+                    v-model="aiProviderApiKey"
+                    label="API Key"
+                    dense
+                    filled
+                    :type="hideApiKey ? 'password' : 'text'"
+                >
+                    <template v-slot:append>
+                        <q-icon
+                            class="cursor-pointer"
+                            size="xs"
+                            :name="hideApiKey ? 'mdi-eye-off' : 'mdi-eye'"
+                            @click="hideApiKey = !hideApiKey"
+                        />
+                    </template>
+                </q-input>
+            </q-card-section>
+
             <q-card-actions align="right">
                 <q-btn flat label="Cancel" v-close-popup />
                 <q-btn
@@ -56,16 +87,23 @@ const persistedStore = usePersistedStore();
 const jiraServerAddress = ref(persistedStore.jiraServerAddress);
 const jiraPersonalAccessToken = ref(persistedStore.jiraPersonalAccessToken);
 const hidePAT = ref(true);
+const aiProviderUrl = ref(persistedStore.aiProviderUrl);
+const aiProviderApiKey = ref(persistedStore.aiProviderApiKey);
+const hideApiKey = ref(true);
 
 function saveSettings() {
     if (
         jiraServerAddress.value === "" ||
-        jiraPersonalAccessToken.value === ""
+        jiraPersonalAccessToken.value === "" ||
+        aiProviderUrl.value === "" ||
+        aiProviderApiKey.value === ""
     ) {
         return;
     }
     persistedStore.jiraServerAddress = jiraServerAddress.value;
     persistedStore.jiraPersonalAccessToken = jiraPersonalAccessToken.value;
+    persistedStore.aiProviderUrl = aiProviderUrl.value;
+    persistedStore.aiProviderApiKey = aiProviderApiKey.value;
     model.value = false;
 }
 </script>

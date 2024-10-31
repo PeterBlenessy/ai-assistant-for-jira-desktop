@@ -20,7 +20,21 @@ You will receive the Jira information in the following JSON format:
     issueType: String,
     summary, String,
     description: String || Object || '',
-    childIssues: [ { summary: String, description: String }, { summary: String, description: String }, ...]
+    childIssues: [
+        { 
+            issueKey: String,
+            issueType: String,
+            summary: String,
+            description: String
+        },
+        {
+            issueKey: String,
+            issueType: String,
+            summary: String,
+            description: String
+        },
+        ...
+    ]
 }
 
 The description may be a string, an object, or ''.
@@ -45,10 +59,10 @@ Return only a valid JSON object in the response, using the following schema:
 {
     issueKey: String,
     issueType: String,
-    summary: { text: String, updated: Boolean, feedback: String },
-    description: { text: String, updated: Boolean, feedback: String },
-    mvp: { title: String, updated: Boolean, description: String },
-    acceptanceCriteria: [ { summary: String }, { summary: String }, ... ],
+    summary: { title: String, text: String, updated: Boolean, comment: String },
+    description: { title: String, text: String, updated: Boolean, comment: String },
+    mvp: { title: String, text: String, updated: Boolean, comment: String },
+    acceptanceCriteria: { title: String, text: [ { summary: String }, { summary: String }, ... ], updated: Boolean, comment: String },
     adf: Object
 }
 
@@ -83,13 +97,13 @@ Return only a valid JSON object in the response, using the following schema:
     childIssues: [
         {
             issueKey: String,
-            summary: { text: String, updated: Boolean, feedback: String },
-            description: { text: String, updated: Boolean, feedback: String }
+            summary: { title: String, text: String, updated: Boolean, comment: String },
+            description: { title: String, text: String, updated: Boolean, comment: String }
         },
         {
             issueKey: String,
-            summary: { text: String, updated: Boolean, feedback: String },
-            description: { text: String, updated: Boolean, feedback: String }
+            summary: { title: String, text: String, updated: Boolean, comment: String },
+            description: { title: String, text: String, updated: Boolean, comment: String }
         },
         ...
     ]

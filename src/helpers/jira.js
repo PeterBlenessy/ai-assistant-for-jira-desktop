@@ -80,11 +80,29 @@ const JiraClient = (options) => {
         }
     };
 
+    const updateIssue = async (issueKey, data) => {
+        const response = await fetch(`${host}/rest/api/2/issue/${issueKey}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${personalAccessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to update issue: ${response.statusText}`);
+        }
+
+        return response;
+    };
+
     return {
         getIssue,
         getUser,
         searchIssues,
         getIssueDetails,
+        updateIssue,
     };
 };
 

@@ -2,21 +2,20 @@
 import { ref, onMounted, watch } from "vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
 import { usePersistedStore } from "./stores/persisted-store";
-import JiraClient from "./services/jira.js";
+import JiraClient from "./helpers/jira.js";
 import JqlSearch from "./components/JqlSearch.vue";
 import IssueDetails from "./components/IssueDetails.vue";
 import SearchHistory from './components/SearchHistory.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 
-const leftDrawer = ref(false);
-const rightDrawer = ref(false);
-const showSettingsDialog = ref(false);
+const $q = useQuasar();
 const persistedStore = usePersistedStore();
+const { darkMode, leftDrawer } = storeToRefs(persistedStore);
+
+const showSettingsDialog = ref(false);
 const isConnected = ref(false);
 const user = ref(null);
-const $q = useQuasar();
-const { darkMode } = storeToRefs(persistedStore);
 const jqlSearch = ref(null);
 
 function openSettingsDialog() {
@@ -63,21 +62,6 @@ watch(
     checkJiraConnection,
 );
 
-// Watch for changes in selectedIssue and open the drawer when it changes
-watch(
-    () => persistedStore.selectedIssue,
-    (newIssue) => {
-        if (newIssue) {
-            rightDrawer.value = true;
-        }
-    },
-    { deep: true }
-);
-
-function handleIssueClick() {
-    rightDrawer.value = true;
-}
-
 // Watch for changes in darkMode and update Quasar's dark mode
 watch(darkMode, (newValue) => {
     $q.dark.set(newValue);
@@ -103,17 +87,15 @@ function handleHistorySelect(query) {
                 <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
                 <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
                     :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" />
-                <q-btn dense flat :color="rightDrawer ? 'grey-4' : 'grey-6'"
-                    :icon="rightDrawer ? 'mdi-dock-right' : 'mdi-dock-right'" @click="rightDrawer = !rightDrawer" />
                 <q-btn dense flat icon="mdi-compare" :color="darkMode ? 'grey-4' : 'grey-6'"
                     @click="darkMode = !darkMode" />
                 <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
-
             </q-toolbar>
         </q-header>
 
         <q-drawer side="left" v-model="leftDrawer" bordered :width="250">
                 <SearchHistory @select="handleHistorySelect" />
+                <q-separator inset/>
 
             <q-item v-ripple class="fixed-bottom q-pa-xs">
                 <q-item-section side>
@@ -129,13 +111,9 @@ function handleHistorySelect(query) {
             </q-item>
         </q-drawer>
 
-        <q-drawer side="right" v-model="rightDrawer" bordered overlay width="750">
-            <IssueDetails :issue="persistedStore.selectedIssue" />
-        </q-drawer>
-
         <q-page-container>
             <q-page>
-                <JqlSearch @issue-click="handleIssueClick" ref="jqlSearch"/>
+                <JqlSearch ref="jqlSearch"/>
             </q-page>
         </q-page-container>
 

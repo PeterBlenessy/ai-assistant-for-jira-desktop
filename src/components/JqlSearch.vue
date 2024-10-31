@@ -1,24 +1,19 @@
 <template>
     <q-card class="absolute-top q-pt-sm q-ma-none" style="height: 100%; width: 100%">
         <q-card-section class="q-pt-none">
-            <q-input label="Enter JQL Query" clearable dense filled style="width: 100%"
-                v-model="jqlQuery"
-                @keydown.enter="performSearch"
-            >
+            <q-input label="Enter JQL Query" clearable dense filled style="width: 100%" v-model="jqlQuery"
+                @keydown.enter="performSearch">
                 <template v-slot:before>
                     <q-btn dense flat icon="mdi-history" :disabled="searchHistory.length == 0"
-                        @click.stop="history = true"
-                    >
+                        @click.stop="history = true">
                         <q-menu anchor="bottom left" self="top left">
                             <q-list style="min-width: 200px">
-                                <q-item v-for="(query, index) in searchHistory"
-                                    :key="index" v-close-popup clickable @click="selectFromHistory(query)"
-                                >
+                                <q-item v-for="(query, index) in searchHistory" :key="index" v-close-popup clickable
+                                    @click="selectQueryFromHistory(query)">
                                     <q-item-section>{{ query }}</q-item-section>
                                     <q-item-section side>
                                         <q-btn dense flat size="sm" icon="mdi-delete-outline"
-                                            @click.stop="removeFromHistory(query)"
-                                        />
+                                            @click.stop="removeQueryFromHistory(query)" />
                                     </q-item-section>
                                 </q-item>
                             </q-list>
@@ -32,19 +27,41 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none" v-if="searchResults.length != 0">
-            <q-table
-                row-key="id"
-                :columns="columns"
-                :rows="searchResults"
-                :visible-columns="visibleColumns"
-                v-model:pagination="pagination"
-                :rows-per-page-options="[10, 20, 50]"
-                @request="onRequest"
-                :loading="loading"
-                class="my-sticky-header-table"
-                wrap-cells
-                @row-click="onRowClick"
-            />
+            <q-table row-key="id" :columns="columns" :rows="searchResults" :visible-columns="visibleColumns"
+                v-model:pagination="pagination" :rows-per-page-options="[10, 20, 50]" @request="onRequest"
+                :loading="loading" class="my-sticky-header-table" wrap-cells>
+
+                <!-- Header columns -->
+                <template v-slot:header="props">
+                    <q-tr :props="props">
+                        <q-th auto-width />
+                        <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                            {{ col.label }}
+                        </q-th>
+                    </q-tr>
+                </template>
+
+                <!-- Body rows -->
+                <template v-slot:body="props">
+                    <!-- Expand/Collapse Row -->
+                    <q-tr :props="props" @click.stop="props.expand = !props.expand">
+                        <q-td auto-width>
+                            <q-btn size="sm" flat dense @click.stop="props.expand = !props.expand"
+                                :icon="props.expand ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
+                        </q-td>
+                        <!-- Body columns -->
+                        <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                            {{ col.value }}
+                        </q-td>
+                    </q-tr>
+                    <!-- Expanded Row -->
+                    <q-tr v-show="props.expand" :props="props">
+                        <q-td colspan="100%">
+                            <IssueFields :issueKey="props.row.key" />
+                        </q-td>
+                    </q-tr>
+                </template>
+            </q-table>
         </q-card-section>
     </q-card>
 </template>
@@ -53,8 +70,9 @@
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
-import JiraClient from "../services/jira.js";
+import JiraClient from "../helpers/jira.js";
 import SearchHistory from "./SearchHistory.vue";
+import IssueFields from "./IssueFields.vue";
 
 const loading = ref(false);
 const jqlQuery = ref("");
@@ -99,7 +117,7 @@ const columns = [
 const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 
 const persistedStore = usePersistedStore();
-const { searchHistory, selectedIssue } = storeToRefs(persistedStore);
+const { searchHistory } = storeToRefs(persistedStore);
 
 const client = JiraClient({
     host: persistedStore.jiraServerAddress,
@@ -108,6 +126,7 @@ const client = JiraClient({
 
 const emit = defineEmits(['issue-click']);
 
+// Handle pagination requests
 function onRequest(props) {
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
@@ -126,6 +145,7 @@ function onRequest(props) {
         });
 }
 
+// Perform the JQL search
 async function performSearch() {
     if (jqlQuery.value == "") return;
 
@@ -164,22 +184,17 @@ async function performSearch() {
     }
 }
 
-function selectFromHistory(query) {
+function selectQueryFromHistory(query) {
     jqlQuery.value = query;
     showHistory.value = false;
     performSearch();
 }
 
-function removeFromHistory(query) {
+function removeQueryFromHistory(query) {
     const index = searchHistory.value.indexOf(query);
     if (index > -1) {
         searchHistory.value.splice(index, 1);
     }
-}
-
-function onRowClick(evt, row) {
-    persistedStore.selectedIssue = row;
-    emit('issue-click');
 }
 
 function setQuery(query) {
@@ -189,6 +204,16 @@ function setQuery(query) {
 
 // Expose the setQuery method to the parent component
 defineExpose({ setQuery });
+
+const improvedDescriptions = ref({});
+
+function generateImprovement(issueKey) {
+    const issue = issues.value.find(i => i.key === issueKey);
+    if (issue) {
+        improvedDescriptions.value[issueKey] = issue.fields.description;
+    }
+}
+
 </script>
 <style lang="sass">
 .my-sticky-header-table

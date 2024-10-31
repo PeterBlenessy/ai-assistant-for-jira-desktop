@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .env
+search.json
+jira.v3.json
