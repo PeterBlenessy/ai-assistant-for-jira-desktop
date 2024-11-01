@@ -1,7 +1,7 @@
 {
     "name": "ai-assistant-for-jira-desktop",
     "private": true,
-    "version": "0.3.0",
+    "version": "0.4.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -11,7 +11,7 @@
         "list-commits": "git log --pretty=format:'%h - %s'",
         "release:draft": "CHANGELOG=$(sed -n \"/^### v$npm_package_version/,/^### /p\" ./docs/CHANGELOG.md | sed '1d;$d') && gh release create v$npm_package_version --draft --title v$npm_package_version --notes \"$CHANGELOG\"",
         "release:publish": "gh release edit v$npm_package_version --draft=false --latest",
-        "git:push:all:reversed": "CHANGELOG=$(sed -n \"/^### v$npm_package_version/,/^### /p\" ./docs/CHANGELOG.md | sed '1d;$d' | tac) && git add . && git commit -m \"$CHANGELOG\" && git push -u origin main",
+        "git:push:all:reversed": "CHANGELOG=$(sed -n \"/^### v$npm_package_version/,/^### /p\" ./docs/CHANGELOG.md | sed '1d;$d' | tac) && git add . && git commit -m \"$CHANGELOG\" && git push -u origin master",
         "cicd": "yarn git:push:all:reversed && yarn release:draft && yarn release:publish"
     },
     "dependencies": {

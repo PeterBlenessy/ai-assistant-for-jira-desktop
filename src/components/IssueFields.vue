@@ -108,9 +108,11 @@ const client = JiraClient({
     personalAccessToken: persistedStore.jiraPersonalAccessToken,
 });
 
+const provider = persistedStore.aiProviders.find(p => p.id === persistedStore.selectedProvider.providerId);
 const openAI = OpenAIClient({
-    url: persistedStore.aiProviderUrl,
-    apiKey: persistedStore.aiProviderApiKey
+    baseURL: provider.baseURL,
+    apiKey: provider.apiKey,
+    model: persistedStore.selectedProvider.model
 });
 
 const issueDisplayFields = ['summary', 'description'];

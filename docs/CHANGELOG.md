@@ -2,6 +2,9 @@
 
 All notable changes to AI Assistant for Jira Desktop are documented below.
 
+### v0.4.0 - 2024-11-01
+- Added support for custom AI providers with configurable models
+
 ### v0.3.0 - 2024-10-31
 - Added support for About dialog and Changelog dialog
 - Added OpenAI-compatible API support with configurable LLM provider settings

@@ -2,16 +2,16 @@ import { fetch } from "@tauri-apps/plugin-http";
 import OpenAI from "openai";
 
 const OpenAIClient = (options) => {
-    const { url, apiKey } = options;
+    const { baseURL, apiKey, model } = options;
     // Model configuration
-    const model = "gpt-4o-mini";
     const maxTokens = 4096;
     const temperature = 0.2;
-    const baseUrl = url;//"https://api.openai.com/v1";
 
     const client = new OpenAI({
         apiKey: apiKey,
+        baseURL: baseURL,
         dangerouslyAllowBrowser: true,
+        fetch: fetch,
     });
 
     const createChatCompletion = async (messages) => {
