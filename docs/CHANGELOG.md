@@ -2,6 +2,13 @@
 
 All notable changes to AI Assistant for Jira Desktop are documented below.
 
+### v0.4.1 - 2024-11-02
+- Fixed size of the improvement accepted chip.
+- Improved error handling for Jira and OpenAI API calls by adding try-catch block to the async functions and providing more detailed error messages.
+- Added a Vue composable for JiraClient to encapsulate the Jira configurations and have more clean component code.
+- Added a Vue composable for OpenAIClient to encapsulate the OpenAI configurations and have more clean component code.
+- Updated some variable names to avoid confusion and improve readability.
+
 ### v0.4.0 - 2024-11-01
 - Added support for custom AI providers with configurable models
 
