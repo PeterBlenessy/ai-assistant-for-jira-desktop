@@ -131,7 +131,7 @@
 import { ref, watch } from 'vue';
 import { useJiraClient } from '../composables/JiraClient.js';
 
-const { client } = useJiraClient();
+const { jiraClient } = useJiraClient();
 
 const props = defineProps({
     issue: {
@@ -212,7 +212,7 @@ const splitterModel = ref(50); // Initial split at 50%
 
 watch(() => props.issue, async (newIssue) => {
     if (newIssue) {
-        const issueDetails = await client.value.getIssueDetails(newIssue.id);
+        const issueDetails = await jiraClient.value.getIssueDetails(newIssue.id);
         issueFields.value = issueDetails.fields;
     }
 }, { immediate: true });

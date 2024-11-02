@@ -4,10 +4,10 @@ import { usePersistedStore } from '../stores/persisted-store.js';
 
 export function useJiraClient() {
     const persistedStore = usePersistedStore();
-    const client = ref(null);
+    const jiraClient = ref(null);
 
     const initializeClient = () => {
-        client.value = JiraClient({
+        jiraClient.value = JiraClient({
             host: persistedStore.jiraServerAddress,
             personalAccessToken: persistedStore.jiraPersonalAccessToken,
         });
@@ -20,6 +20,6 @@ export function useJiraClient() {
     );
 
     return {
-        client,
+        jiraClient,
     };
 }

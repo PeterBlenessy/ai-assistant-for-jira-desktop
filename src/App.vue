@@ -21,7 +21,7 @@ const isConnected = ref(false);
 const user = ref(null);
 const jqlSearch = ref(null);
 
-const { client } = useJiraClient();
+const { jiraClient } = useJiraClient();
 
 function openSettingsDialog() {
     showSettingsDialog.value = true;
@@ -36,7 +36,7 @@ async function checkJiraConnection() {
         return;
     }
 
-    client.value
+    jiraClient.value
         .getUser()
         .then((response) => {
             user.value = response;

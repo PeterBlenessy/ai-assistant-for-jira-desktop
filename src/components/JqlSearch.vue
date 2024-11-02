@@ -118,7 +118,7 @@ const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 const persistedStore = usePersistedStore();
 const { searchHistory } = storeToRefs(persistedStore);
 
-const { client } = useJiraClient();
+const { jiraClient } = useJiraClient();
 
 const emit = defineEmits(['issue-click']);
 
@@ -149,7 +149,7 @@ async function performSearch() {
     const maxRows = pagination.value.rowsPerPage;
 
     try {
-        const response = await client.value.searchIssues(
+        const response = await jiraClient.value.searchIssues(
             jqlQuery.value,
             startAt,
             maxRows,
