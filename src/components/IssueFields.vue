@@ -63,7 +63,7 @@
                                     size="xs" 
                                     @click="acceptImprovement(field, improvementProposal[field])" 
                                 />
-                                <q-badge v-else color="positive" label="Accepted" />
+                                <q-chip v-else square size="sm" color="positive" label="Accepted" icon="mdi-check"  class="text-caption text-uppercase q-ma-none"/>
                             </q-item-section>
                         </q-item>
                     </template>
