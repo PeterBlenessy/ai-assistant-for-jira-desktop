@@ -3,32 +3,65 @@ import { fetch } from "@tauri-apps/plugin-http";
 const JiraClient = (options) => {
     const { host, personalAccessToken } = options;
 
-    const jiraFetch = async (path, options) => {
+    const handleError = async (response) => {
+        const errorText = await response.text();
+        let errorMessage = `JiraAPI error! status: ${response.status}, text: ${response.statusText}`;
+
+        try {
+            const errorJson = JSON.parse(errorText);
+            if (errorJson.errorMessages) {
+                errorMessage += `, errorMessages: ${errorJson.errorMessages.join(", ")}`;
+            }
+            if (errorJson.errors) {
+                errorMessage += `, errors: ${JSON.stringify(errorJson.errors)}`;
+            }
+        } catch (e) {
+            errorMessage += `, response: ${errorText}`;
+        }
+
+        throw new Error(errorMessage);
+    };
+
+    const jiraFetch = async (path, options = {}) => {
         const url = host + path;
 
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${personalAccessToken}`,
-            },
-        });
+        try {
+            const response = await fetch(url, {
+                method: options.method || "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${personalAccessToken}`,
+                },
+                body: options.body ? JSON.stringify(options.body) : undefined,
+            });
 
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(
-                `JiraAPI error! status: ${response.status}, text: ${response.statusText}`,
-            );
+            if (response.ok) {
+                return response.json();
+            } else {
+                await handleError(response);
+            }
+        } catch (error) {
+            console.error(`Error in jiraFetch: ${error.message}`);
+            throw error;
         }
     };
 
-    const getIssue = (issue) => {
-        return jiraFetch(`/rest/api/latest/issue/${issue}`);
+    const getIssue = async (issue) => {
+        try {
+            return await jiraFetch(`/rest/api/latest/issue/${issue}`);
+        } catch (error) {
+            console.error(`Error in getIssue: ${error.message}`);
+            throw error;
+        }
     };
 
-    const getUser = () => {
-        return jiraFetch(`/rest/api/latest/myself`);
+    const getUser = async () => {
+        try {
+            return await jiraFetch(`/rest/api/latest/myself`);
+        } catch (error) {
+            console.error(`Error in getUser: ${error.message}`);
+            throw error;
+        }
     };
 
     const searchIssues = async (
@@ -37,64 +70,51 @@ const JiraClient = (options) => {
         maxResults = 50,
         fields = ["*all"],
     ) => {
-        const url = host + "/rest/api/latest/search";
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${personalAccessToken}`,
-            },
-            body: JSON.stringify({
-                jql,
-                startAt,
-                maxResults,
-                fields,
-            }),
-        });
-
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(
-                `JiraAPI error! ${response.status} - ${response.statusText}`,
-            );
+        try {
+            return await jiraFetch("/rest/api/latest/search", {
+                method: "POST",
+                body: {
+                    jql,
+                    startAt,
+                    maxResults,
+                    fields,
+                },
+            });
+        } catch (error) {
+            console.error(`Error in searchIssues: ${error.message}`);
+            throw error;
         }
     };
 
     const getIssueDetails = async (issueId) => {
-        const url = `${host}/rest/api/latest/issue/${issueId}`;
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${personalAccessToken}`,
-            },
-        });
-
-        if (response.ok) {
-            return response.json();
-        } else {
-            throw new Error(
-                `JiraAPI error! ${response.status} - ${response.statusText}`,
-            );
+        try {
+            return await jiraFetch(`/rest/api/latest/issue/${issueId}`);
+        } catch (error) {
+            console.error(`Error in getIssueDetails: ${error.message}`);
+            throw error;
         }
     };
 
     const updateIssue = async (issueKey, data) => {
-        const response = await fetch(`${host}/rest/api/2/issue/${issueKey}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${personalAccessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
+        try {
+            const response = await fetch(`${host}/rest/api/2/issue/${issueKey}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${personalAccessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
 
-        if (!response.ok) {
-            throw new Error(`Failed to update issue: ${response.statusText}`);
+            if (!response.ok) {
+                await handleError(response);
+            }
+
+            return response;
+        } catch (error) {
+            console.error(`Error in updateIssue: ${error.message}`);
+            throw error;
         }
-
-        return response;
     };
 
     return {
