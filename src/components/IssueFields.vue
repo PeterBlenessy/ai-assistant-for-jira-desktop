@@ -84,7 +84,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import JiraClient from '../helpers/jira.js';
+import { useJiraClient } from '../composables/JiraClient.js';
 import { usePersistedStore } from '../stores/persisted-store.js';
 import OpenAIClient from "../helpers/openai.js";
 import { PROMPT_GENERATE_DESCRIPTION } from "../helpers/prompts.js";
@@ -101,13 +101,9 @@ const loading = ref(false);
 const issueFields = ref(null);
 const improvementProposal = ref(null);
 
+const { client } = useJiraClient();
+
 const persistedStore = usePersistedStore();
-
-const client = JiraClient({
-    host: persistedStore.jiraServerAddress,
-    personalAccessToken: persistedStore.jiraPersonalAccessToken,
-});
-
 const provider = persistedStore.aiProviders.find(p => p.id === persistedStore.selectedProvider.providerId);
 const openAI = OpenAIClient({
     baseURL: provider.baseURL,
@@ -208,7 +204,7 @@ const generateImprovement = async () => {
 // Watch for changes in the issue key and fetch the issue details
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
-        const issueDetails = await client.getIssueDetails(newIssueKey);
+        const issueDetails = await client.value.getIssueDetails(newIssueKey);
         issueFields.value = issueDetails.fields;
     }
 }, { immediate: true });
@@ -271,7 +267,7 @@ const acceptImprovement = async (type, improvement) => {
         }
 
         // Update the Jira issue
-        await client.updateIssue(props.issueKey, {
+        await client.value.updateIssue(props.issueKey, {
             fields: updateFields
         });
 
@@ -281,7 +277,7 @@ const acceptImprovement = async (type, improvement) => {
         }
 
         // Refresh the issue fields to show updated content
-        const issueDetails = await client.getIssueDetails(props.issueKey);
+        const issueDetails = await client.value.getIssueDetails(props.issueKey);
         issueFields.value = issueDetails.fields;
 
     } catch (error) {

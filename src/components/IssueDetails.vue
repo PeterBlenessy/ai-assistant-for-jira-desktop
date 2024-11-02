@@ -129,14 +129,10 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import JiraClient from '../helpers/jira.js';
-import { usePersistedStore } from '../stores/persisted-store.js';
+import { useJiraClient } from '../composables/JiraClient.js';
 
-const persistedStore = usePersistedStore();
-const client = JiraClient({
-    host: persistedStore.jiraServerAddress,
-    personalAccessToken: persistedStore.jiraPersonalAccessToken,
-});
+const { client } = useJiraClient();
+
 const props = defineProps({
     issue: {
         type: Object,
@@ -216,8 +212,8 @@ const splitterModel = ref(50); // Initial split at 50%
 
 watch(() => props.issue, async (newIssue) => {
     if (newIssue) {
-        issueDetails.value = await client.getIssueDetails(newIssue.id);
-        issueFields.value = issueDetails.value.fields;
+        const issueDetails = await client.value.getIssueDetails(newIssue.id);
+        issueFields.value = issueDetails.fields;
     }
 }, { immediate: true });
 

@@ -2,9 +2,8 @@
 import { ref, onMounted, watch } from "vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
 import { usePersistedStore } from "./stores/persisted-store";
-import JiraClient from "./helpers/jira.js";
+import { useJiraClient } from "./composables/JiraClient.js";
 import JqlSearch from "./components/JqlSearch.vue";
-import IssueDetails from "./components/IssueDetails.vue";
 import SearchHistory from './components/SearchHistory.vue';
 import MarkdownViewer from './components/MarkdownViewer.vue';
 import { useQuasar } from 'quasar';
@@ -22,6 +21,8 @@ const isConnected = ref(false);
 const user = ref(null);
 const jqlSearch = ref(null);
 
+const { client } = useJiraClient();
+
 function openSettingsDialog() {
     showSettingsDialog.value = true;
 }
@@ -35,12 +36,7 @@ async function checkJiraConnection() {
         return;
     }
 
-    const client = JiraClient({
-        host: jiraServerAddress,
-        personalAccessToken: jiraPersonalAccessToken,
-    });
-
-    client
+    client.value
         .getUser()
         .then((response) => {
             user.value = response;

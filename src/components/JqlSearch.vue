@@ -70,8 +70,7 @@
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
-import JiraClient from "../helpers/jira.js";
-import SearchHistory from "./SearchHistory.vue";
+import { useJiraClient } from "../composables/JiraClient.js";
 import IssueFields from "./IssueFields.vue";
 
 const loading = ref(false);
@@ -119,10 +118,7 @@ const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 const persistedStore = usePersistedStore();
 const { searchHistory } = storeToRefs(persistedStore);
 
-const client = JiraClient({
-    host: persistedStore.jiraServerAddress,
-    personalAccessToken: persistedStore.jiraPersonalAccessToken,
-});
+const { client } = useJiraClient();
 
 const emit = defineEmits(['issue-click']);
 
@@ -153,7 +149,7 @@ async function performSearch() {
     const maxRows = pagination.value.rowsPerPage;
 
     try {
-        const response = await client.searchIssues(
+        const response = await client.value.searchIssues(
             jqlQuery.value,
             startAt,
             maxRows,
