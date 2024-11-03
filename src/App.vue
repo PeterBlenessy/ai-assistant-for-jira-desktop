@@ -8,6 +8,7 @@ import SearchHistory from './components/SearchHistory.vue';
 import MarkdownViewer from './components/MarkdownViewer.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
+import PromptManagement from './components/PromptManagement.vue';
 
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
@@ -20,6 +21,7 @@ const showMenu = ref(false);
 const isConnected = ref(false);
 const user = ref(null);
 const jqlSearch = ref(null);
+const showRightDrawer = ref(false);
 
 const { jiraClient } = useJiraClient();
 
@@ -109,6 +111,7 @@ function handleHistorySelect(query) {
                             </q-item> </q-list>
                     </q-menu>
                 </q-btn>
+                <q-btn flat dense color="grey-6" icon="mdi-format-list-bulleted" @click="showRightDrawer = !showRightDrawer" />
             </q-toolbar>
         </q-header>
 
@@ -128,6 +131,10 @@ function handleHistorySelect(query) {
                     <q-btn flat dense icon="mdi-cog" @click="showMenu = true" />
                 </q-item-section>
             </q-item>
+        </q-drawer>
+
+        <q-drawer side="right" v-model="showRightDrawer" bordered width="35vw">
+            <PromptManagement />
         </q-drawer>
 
         <q-page-container>

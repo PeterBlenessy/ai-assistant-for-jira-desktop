@@ -88,6 +88,7 @@ import { useJiraClient } from '../composables/JiraClient.js';
 import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import { PROMPT_GENERATE_DESCRIPTION } from "../helpers/prompts.js";
 import { descriptionSchema } from '../helpers/schemas.js';
+import { useTemplateStore } from '../stores/template-store';
 
 const props = defineProps({
     issueKey: {
@@ -102,7 +103,9 @@ const improvementProposal = ref(null);
 
 const { jiraClient } = useJiraClient();
 const { openAIClient } = useOpenAIClient();
-
+const templateStore = useTemplateStore();
+const templates = templateStore.templates;
+const templateMappings = templateStore.templateMappings;
 
 const issueDisplayFields = ['summary', 'description'];
 const improvementDisplayFields = ['summary', 'description', 'mvp', 'acceptanceCriteria'];
@@ -136,6 +139,14 @@ const generateStructuredFormatImprovement = async () => {
         "issueType": getIssueField('issuetype.name'),
         "summary": getIssueField('summary'),
         "description": getIssueField('description')
+    }
+
+    // Retrieve the selected template for the issue type
+    const selectedTemplateId = templateMappings.value[getIssueField('issuetype.name')];
+    const selectedTemplate = templates.value.find(template => template.id === selectedTemplateId);
+
+    if (selectedTemplate) {
+        systemMessage.content = selectedTemplate.content;
     }
 
     let userMessage = { role: "user", content: JSON.stringify(content) };
