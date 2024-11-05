@@ -26,7 +26,19 @@ app.use(Quasar, {
     config: {
         dark: true,
         notify: {},
-        brand: {},
+        brand: {
+            primary: '#0080ff',
+            secondary: '#ff8000',
+            accent: '#9C27B0',
+    
+            dark: '#333333',
+            'dark-page': '#191919',
+    
+            positive: '#21BA45',
+            negative: '#ff9999',
+            info: '#cce6ff',
+            warning: '#ffff99'
+          },
     },
     iconSet: quasarIconSet,
     extras: ["material-icons", "mdi-v7"],

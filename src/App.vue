@@ -6,12 +6,13 @@ import { useJiraClient } from "./composables/JiraClient.js";
 import JqlSearch from "./components/JqlSearch.vue";
 import SearchHistory from './components/SearchHistory.vue';
 import MarkdownViewer from './components/MarkdownViewer.vue';
+import PromptManagement from './components/PromptManagement.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
-const { darkMode, leftDrawer } = storeToRefs(persistedStore);
+const { darkMode, leftDrawer, splitterRatio, showRightPane } = storeToRefs(persistedStore);
 
 const showSettingsDialog = ref(false);
 const showAboutDialog = ref(false);
@@ -22,6 +23,9 @@ const user = ref(null);
 const jqlSearch = ref(null);
 
 const { jiraClient } = useJiraClient();
+
+// Update the splitter limits ref
+const splitterLimits = ref([20, 80]);
 
 function openSettingsDialog() {
     showSettingsDialog.value = true;
@@ -76,20 +80,35 @@ function handleHistorySelect(query) {
     jqlSearch.value.setQuery(query);
 }
 
+function toggleRightPane() {
+    if (showRightPane.value) {
+        persistedStore.lastSplitterRatio = splitterRatio.value;
+        splitterLimits.value = [100, 100];  // Force full width for left pane
+        splitterRatio.value = 100;
+        showRightPane.value = false;
+    } else {
+        showRightPane.value = true;
+        splitterLimits.value = [20, 80];    // Restore normal limits
+        splitterRatio.value = persistedStore.lastSplitterRatio;
+    }
+}
+
 </script>
 
 <template>
-    <q-layout view="hHh Lpr lff">
+    <q-layout view="hHh LpR lff">
         <q-header class="bg-grey-10">
             <q-toolbar>
                 <q-avatar rounded>
                     <img src="./assets/ai-assistant-logo.png" />
                 </q-avatar>
                 <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
-                <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
-                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" />
                 <q-btn dense flat icon="mdi-compare" :color="darkMode ? 'grey-4' : 'grey-6'"
                     @click="darkMode = !darkMode" />
+                <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
+                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" />
+                <q-btn dense flat :color="showRightPane ? 'grey-4' : 'grey-6'"
+                    :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" />
                 <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
                     <q-menu anchor="bottom right" self="top right">
@@ -106,7 +125,8 @@ function handleHistorySelect(query) {
                                     <q-icon name="mdi-timeline-text-outline" />
                                 </q-item-section>
                                 <q-item-section>Changelog</q-item-section>
-                            </q-item> </q-list>
+                            </q-item>
+                        </q-list>
                     </q-menu>
                 </q-btn>
             </q-toolbar>
@@ -131,8 +151,32 @@ function handleHistorySelect(query) {
         </q-drawer>
 
         <q-page-container>
-            <q-page>
-                <JqlSearch ref="jqlSearch" />
+            <q-page style="height: calc(100vh - 50px)">
+                <template v-if="showRightPane">
+                    <q-splitter
+                        v-model="splitterRatio"
+                        :limits="splitterLimits"
+                        style="height: 100%"
+                    >
+                        <template v-slot:before>
+                            <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                                <JqlSearch ref="jqlSearch" />
+                            </div>
+                        </template>
+
+                        <template v-slot:after>
+                            <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                                <PromptManagement />
+                            </div>
+                        </template>
+                    </q-splitter>
+                </template>
+                
+                <template v-else>
+                    <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                        <JqlSearch ref="jqlSearch" />
+                    </div>
+                </template>
             </q-page>
         </q-page-container>
 
@@ -148,11 +192,12 @@ function handleHistorySelect(query) {
     display: none;
 }
 
-/* Hide scrollbars on Windows (in IE and Edge)
+/* Hide scrollbars on Windows (in IE and Edge) */
 body {
     overflow: auto;
     -ms-overflow-style: none;
 }
+
 /* Hide scrollbars in Firefox */
 html {
     scrollbar-width: none;

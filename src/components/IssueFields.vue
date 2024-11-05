@@ -87,7 +87,7 @@ import { ref, watch, computed } from 'vue';
 import { useJiraClient } from '../composables/JiraClient.js';
 import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import { PROMPT_GENERATE_DESCRIPTION } from "../helpers/prompts.js";
-import { descriptionSchema } from '../helpers/schemas.js';
+import { issueSchema } from '../helpers/schemas.js';
 
 const props = defineProps({
     issueKey: {
@@ -142,7 +142,7 @@ const generateStructuredFormatImprovement = async () => {
     let fullResponse = '';
 
     try {
-        const stream = await openAIClient.value.createStructuredChatCompletion([systemMessage, userMessage], descriptionSchema);
+        const stream = await openAIClient.value.createStructuredChatCompletion([systemMessage, userMessage], issueSchema);
         
         // Initialize an empty improvement proposal
         improvementProposal.value = {

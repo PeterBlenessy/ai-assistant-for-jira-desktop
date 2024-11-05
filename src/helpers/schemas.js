@@ -1,4 +1,4 @@
-export const descriptionSchema = {
+export const issueSchema = {
     name: "issue_fields",
     schema: {
         type: "object",
