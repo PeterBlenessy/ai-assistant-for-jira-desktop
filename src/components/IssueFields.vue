@@ -19,12 +19,7 @@
 
         <!-- Generate Button Column -->
         <div class="col-12 col-md text-center q-my-auto">
-            <q-btn color="primary" @click="generateImprovement(props.issueKey)" :loading="loading">
-                <q-avatar size="24px" class="q-mr-sm" rounded>
-                    <img src="../assets/ai-assistant-logo.png" />
-                </q-avatar>
-                Improve
-            </q-btn>
+            <q-btn color="primary" label="IMPROVE" @click="generateImprovement(props.issueKey)" :loading="loading" />
         </div>
 
         <!-- Improvements Column -->
@@ -54,16 +49,14 @@
                                 </q-item-label>
                             </q-item-section>
                             <q-item-section side top>
-                                <q-btn 
-                                    v-if="!improvementProposal[field].accepted"
-                                    color="positive" 
-                                    flat 
-                                    icon="mdi-check"
-                                    label="Accept"
-                                    size="xs" 
+                                <q-chip square size="sm" class="text-caption text-uppercase q-ma-none"
+                                    color="primary"
+                                    :clickable="improvementProposal[field].accepted ? false : true"
+                                    :outline="improvementProposal[field].accepted ? true : false"
+                                    :label="improvementProposal[field].accepted ? 'Accepted' : 'Accept'" 
+                                    :icon="improvementProposal[field].accepted ? 'mdi-check' : 'mdi-plus'"
                                     @click="acceptImprovement(field, improvementProposal[field])" 
                                 />
-                                <q-chip v-else square size="sm" color="positive" label="Accepted" icon="mdi-check"  class="text-caption text-uppercase q-ma-none"/>
                             </q-item-section>
                         </q-item>
                     </template>

@@ -27,7 +27,7 @@ app.use(Quasar, {
         dark: true,
         notify: {},
         brand: {
-            primary: '#0080ff',
+            primary: '#21BA45',
             secondary: '#ff8000',
             accent: '#9C27B0',
     
@@ -35,9 +35,9 @@ app.use(Quasar, {
             'dark-page': '#191919',
     
             positive: '#21BA45',
-            negative: '#ff9999',
-            info: '#cce6ff',
-            warning: '#ffff99'
+            negative: '#ff0000',
+            info: '#ebebeb',
+            warning: '#ffff00'
           },
     },
     iconSet: quasarIconSet,

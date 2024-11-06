@@ -1,9 +1,9 @@
 <template>
-    <q-card class="absolute-top q-pt-sm q-ma-none" style="height: 100%; width: 100%">
+    <q-card class="absolute-top q-pt-sm q-ma-none" flat style="height: 100%; width: 100%">
         <q-card-section class="q-pt-none">
             <q-input label="Enter JQL Query" clearable dense filled style="width: 100%" v-model="jqlQuery"
                 @keydown.enter="performSearch">
-                <template v-slot:before>
+                <template v-slot:prepend>
                     <q-btn dense flat icon="mdi-history" :disabled="searchHistory.length == 0"
                         @click.stop="history = true">
                         <q-menu anchor="bottom left" self="top left">
@@ -20,16 +20,13 @@
                         </q-menu>
                     </q-btn>
                 </template>
-                <template v-slot:after>
-                    <q-btn dense flat icon="mdi-send" color="primary" @click="performSearch" />
-                </template>
             </q-input>
         </q-card-section>
 
-        <q-card-section class="q-pt-none" v-if="searchResults.length != 0">
-            <q-table row-key="id" :columns="columns" :rows="searchResults" :visible-columns="visibleColumns"
+        <q-card-section  flat v-if="searchResults.length != 0">
+            <q-table bordered flat row-key="id" :columns="columns" :rows="searchResults" :visible-columns="visibleColumns"
                 v-model:pagination="pagination" :rows-per-page-options="[10, 20, 50]" @request="onRequest"
-                :loading="loading" class="my-sticky-header-table" wrap-cells>
+                :loading="loading" class="my-sticky-header-table q-pt-none q-ma-none" wrap-cells>
 
                 <!-- Header columns -->
                 <template v-slot:header="props">
@@ -55,7 +52,7 @@
                         </q-td>
                     </q-tr>
                     <!-- Expanded Row -->
-                    <q-tr v-show="props.expand" :props="props">
+                    <q-tr v-show="props.expand" :props="props" no-hover>
                         <q-td colspan="100%">
                             <IssueFields :issueKey="props.row.key" />
                         </q-td>

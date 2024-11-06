@@ -98,6 +98,7 @@ function toggleRightPane() {
 <template>
     <q-layout view="hHh LpR lff">
         <q-header class="bg-grey-10">
+
             <q-toolbar>
                 <q-avatar rounded>
                     <img src="./assets/ai-assistant-logo.png" />
@@ -132,6 +133,7 @@ function toggleRightPane() {
             </q-toolbar>
         </q-header>
 
+        <!-- Left drawer -->
         <q-drawer side="left" v-model="leftDrawer" bordered :width="250">
             <SearchHistory @select="handleHistorySelect" />
             <q-separator inset />
@@ -152,31 +154,27 @@ function toggleRightPane() {
 
         <q-page-container>
             <q-page style="height: calc(100vh - 50px)">
-                <template v-if="showRightPane">
-                    <q-splitter
-                        v-model="splitterRatio"
-                        :limits="splitterLimits"
-                        style="height: 100%"
-                    >
-                        <template v-slot:before>
-                            <div class="q-pa-md" style="height: 100%; overflow: auto;">
-                                <JqlSearch ref="jqlSearch" />
-                            </div>
-                        </template>
+                <q-splitter v-model="splitterRatio" :limits="splitterLimits" style="height: 100%;">
+                    <!-- Left side of the page -->
+                    <template v-slot:before>
+                        <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                            <JqlSearch ref="jqlSearch" />
+                        </div>
+                    </template>
 
-                        <template v-slot:after>
-                            <div class="q-pa-md" style="height: 100%; overflow: auto;">
-                                <PromptManagement />
-                            </div>
-                        </template>
-                    </q-splitter>
-                </template>
-                
-                <template v-else>
-                    <div class="q-pa-md" style="height: 100%; overflow: auto;">
-                        <JqlSearch ref="jqlSearch" />
-                    </div>
-                </template>
+                    <!-- -->
+                    <template v-slot:separator>
+                        <q-avatar text-color="grey-6" size="60px" icon="mdi-drag-vertical" />
+                    </template>
+
+                    <!-- Right side of the page - Right pane -->
+                    <template v-slot:after>
+                        <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                            <PromptManagement />
+                        </div>
+                    </template>
+                </q-splitter>
+
             </q-page>
         </q-page-container>
 

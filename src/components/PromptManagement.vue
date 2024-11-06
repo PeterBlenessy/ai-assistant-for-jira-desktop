@@ -1,46 +1,7 @@
 <template>
     <div>
-        <!-- Info box section -->
-        <q-card v-if="isInfoBoxVisible" class="bg-info">
-            <q-card-section>
-                <q-item>
-                    <q-item-section avatar top>
-                        <q-icon name="mdi-information" color="grey-7" />
-                    </q-item-section>
-
-                    <q-item-section>
-                        <q-item-label caption>
-                            The below information is provided to the AI as guidance when generating improvements.
-                            You can edit any of the fields to guide the AI in the direction of your specific needs.
-                            <br /><br />
-                            Each issue type has a description, a persona, and a list of fields.
-                        </q-item-label>
-                    </q-item-section>
-                </q-item>
-                <q-item>
-                    <q-item-label caption>
-                        <ul>
-                            <li>
-                                The <b>description</b> is a brief description of the issue type that
-                                captures the essence of the desired outcomes.
-                            </li>
-                            <li>The <b>responsibility</b> is a description of the person or role that
-                                the AI has to adopt to when generating improvements.
-                            </li>
-                            <li>
-                                The <b>fields</b> are the specific details that will guide the AI when
-                                reviewing the original issue details and when generating improvements.
-                            </li>
-                        </ul>
-                    </q-item-label>
-                </q-item>
-            </q-card-section>
-
-            <q-card-actions align="right">
-                <q-btn flat color="primary" label="Dismiss" @click="dismissInfoBox" />
-            </q-card-actions>
-        </q-card>
-
+        <!-- Info Box Section -->
+        <InfoBox v-if="isInfoBoxVisible" :markdownContent="infoBoxMarkdown" @dismiss="dismissInfoBox" />
 
         <!-- Template Selection -->
         <div class="text-subtitle2 q-pt-md q-pb-sm">Jira issue type</div>
@@ -56,7 +17,8 @@
                         <template v-if="editingSection === 'description'">
                             <q-input v-model="editingContent.description" type="textarea" label="Description" filled
                                 dense autogrow @paste="handlePaste"
-                                :rules="[val => !!val || 'Description is required']" />
+                                :rules="[val => !!val || 'Description is required']" lazy-rules="ondemand"
+                            />
                         </template>
                         <template v-else>
                             <q-item-label>Description of the issue type</q-item-label>
@@ -67,11 +29,11 @@
                     <q-item-section side>
                         <div class="row q-gutter-sm">
                             <template v-if="editingSection === 'description'">
-                                <q-btn flat icon="mdi-check" size="sm" class="q-pa-none" @click="handleSaveContent" />
-                                <q-btn flat icon="mdi-close" size="sm" class="q-pa-none" @click="cancelEdit" />
+                                <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
+                                <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                             </template>
                             <template v-else>
-                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-none"
+                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
                                     @click="handleEditContent('description')" />
                             </template>
                         </div>
@@ -88,12 +50,14 @@
                                     <div class="col-12">
                                         <q-input v-model="editingContent.persona.name" label="Persona Name" filled dense
                                             @paste="handlePaste"
-                                            :rules="[val => !!val || 'Persona name is required']" />
+                                            :rules="[val => !!val || 'Persona name is required']" lazy-rules="ondemand"
+                                        />
                                     </div>
                                     <div class="col-12">
                                         <q-input v-model="editingContent.persona.description" type="textarea"
                                             label="Persona Description" filled dense autogrow @paste="handlePaste"
-                                            :rules="[val => !!val || 'Persona description is required']" />
+                                            :rules="[val => !!val || 'Persona description is required']" lazy-rules="ondemand"
+                                        />
                                     </div>
                                 </div>
                             </template>
@@ -106,12 +70,11 @@
                         <q-item-section side>
                             <div class="row q-gutter-sm">
                                 <template v-if="editingSection === 'persona'">
-                                    <q-btn flat icon="mdi-check" size="sm" class="q-pa-none"
-                                        @click="handleSaveContent" />
-                                    <q-btn flat icon="mdi-close" size="sm" class="q-pa-none" @click="cancelEdit" />
+                                    <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
+                                    <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                                 </template>
                                 <template v-else>
-                                    <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-none"
+                                    <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
                                         @click="handleEditContent('persona')" />
                                 </template>
                             </div>
@@ -133,12 +96,14 @@
                                 <div class="col-12">
                                     <q-input v-model="editingField.title" label="Field Title" filled dense autofocus
                                         @update:model-value="updateFieldName" @paste="handlePaste"
-                                        :rules="[val => !!val || 'Field title is required']" />
+                                        :rules="[val => !!val || 'Field title is required']" lazy-rules="ondemand"
+                                    />
                                 </div>
                                 <div class="col-12">
                                     <q-input v-model="editingField.description" type="textarea"
                                         label="Field Description" filled dense autogrow @paste="handlePaste"
-                                        :rules="[val => !!val || 'Field description is required']" />
+                                        :rules="[val => !!val || 'Field description is required']" lazy-rules="ondemand"
+                                    />
                                 </div>
                             </div>
                         </template>
@@ -151,13 +116,13 @@
                     <q-item-section side>
                         <div class="row q-gutter-sm">
                             <template v-if="editingIndex === index">
-                                <q-btn flat icon="mdi-check" size="sm" class="q-pa-none" @click="handleSaveField" />
-                                <q-btn flat icon="mdi-close" size="sm" class="q-pa-none" @click="cancelEdit" />
+                                <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveField" />
+                                <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                             </template>
                             <template v-else>
-                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-none"
+                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
                                     @click="handleEditField(index)" />
-                                <q-btn flat icon="mdi-delete" size="sm" class="q-pa-none"
+                                <q-btn flat icon="mdi-delete" size="sm" class="q-pa-xs q-ma-none"
                                     @click="handleDeleteField(index)" />
                             </template>
                         </div>
@@ -172,27 +137,29 @@
                     <div class="row q-col-gutter-sm">
                         <div class="col-12">
                             <q-input v-model="editingField.title" label="Field Title" filled dense autofocus
-                                @update:model-value="updateFieldName" @paste="handlePaste"
-                                :rules="[val => !!val || 'Field title is required']" />
+                                @update:model-value="updateFieldName" @paste="handlePaste" 
+                                :rules="[val => !!val || 'Field title is required']" lazy-rules="ondemand"
+                            />
                         </div>
                         <div class="col-12">
                             <q-input v-model="editingField.description" type="textarea" label="Field Description" filled
                                 dense autogrow @paste="handlePaste"
-                                :rules="[val => !!val || 'Field description is required']" />
+                                :rules="[val => !!val || 'Field description is required']" lazy-rules="ondemand"
+                            />
                         </div>
                     </div>
                 </q-item-section>
 
                 <q-item-section side>
                     <div class="row q-gutter-sm">
-                        <q-btn flat icon="mdi-check" size="sm" class="q-pa-none" @click="handleSaveField" />
+                        <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs" color="primary" @click="handleSaveField" />
                         <q-btn flat icon="mdi-close" size="sm" class="q-pa-none" @click="cancelEdit" />
                     </div>
                 </q-item-section>
             </q-item>
 
             <!-- Add Field Button -->
-            <q-btn v-if="!isNewField" flat icon="mdi-plus" label="Add Field" class="q-mt-md" @click="handleAddField" />
+            <q-btn v-if="!isNewField" color="primary" icon="mdi-plus" label="Add Field" class="q-mt-md" @click="handleAddField" />
         </template>
     </div>
 </template>
@@ -202,6 +169,7 @@ import { ref, computed } from 'vue';
 import { useTemplateStore } from '../stores/template-store';
 import { storeToRefs } from 'pinia';
 import { usePersistedStore } from '../stores/persisted-store';
+import InfoBox from './InfoBox.vue'; // Import the new InfoBox component
 
 const templateStore = useTemplateStore();
 const { templates, selectedTemplateType } = storeToRefs(templateStore);
@@ -253,6 +221,20 @@ const editingContent = ref({
         description: ''
     }
 });
+
+// Markdown content for the InfoBox
+const infoBoxMarkdown = `
+The below information is provided to the AI as guidance when generating improvements.
+You can edit any of the fields to guide the AI in the direction of your specific needs.
+
+Each issue type has a description, a responsible role, and a list of fields.
+
+**Description**: A brief description of the issue type that captures the essence of the desired outcomes.
+
+**Responsibility**: A description of the person or role that the AI has to adopt when generating improvements.
+
+**Fields**: The specific details that will guide the AI when reviewing the original issue details and when generating improvements. Fields can be existing Jira fields or sections of the issue description.
+`;
 
 // Check if the info box should be visible
 const isInfoBoxVisible = computed(() => {
