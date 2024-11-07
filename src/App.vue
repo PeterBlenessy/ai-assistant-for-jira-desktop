@@ -5,10 +5,11 @@ import { usePersistedStore } from "./stores/persisted-store";
 import { useJiraClient } from "./composables/JiraClient.js";
 import JqlSearch from "./components/JqlSearch.vue";
 import SearchHistory from './components/SearchHistory.vue';
-import MarkdownViewer from './components/MarkdownViewer.vue';
 import PromptManagement from './components/PromptManagement.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
+import AboutDialog from './components/AboutDialog.vue';
+import ChangelogDialog from './components/ChangelogDialog.vue';
 
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
@@ -179,8 +180,8 @@ function toggleRightPane() {
         </q-page-container>
 
         <SettingsDialog v-model="showSettingsDialog" />
-        <MarkdownViewer v-model="showAboutDialog" type="about" />
-        <MarkdownViewer v-model="showChangelogDialog" type="changelog" />
+        <AboutDialog v-model="showAboutDialog" />
+        <ChangelogDialog v-model="showChangelogDialog" />
 
     </q-layout>
 </template>

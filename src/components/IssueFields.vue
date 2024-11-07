@@ -1,7 +1,7 @@
 <template>
     <div v-if="issueFields" class="row q-col-gutter-md items-start" :class="{ 'column': $q.screen.lt.md }">
         <!-- Original Issue Column -->
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-6">
             <div class="text-subtitle1 q-mb-sm">Original Issue Fields</div>
             <q-list separator bordered padding class="rounded-borders">
                 <template v-for="field in issueDisplayFields" :key="field">
@@ -9,54 +9,54 @@
                         <q-item-section>
                             <q-item-label class="text-capitalize text-subtitle2">{{ field }}</q-item-label>
                             <q-item-label>
-                                <div v-html="formatJiraMarkup(getIssueField(field))"></div>
+                                <div v-if="field === 'description'">
+                                    <MarkdownViewer :content="getIssueField(field)" />
+                                </div>
+                                <div v-else>
+                                    {{ getIssueField(field) }}
+                                </div>
                             </q-item-label>
                         </q-item-section>
                     </q-item>
                 </template>
             </q-list>
-        </div>
-
-        <!-- Generate Button Column -->
-        <div class="col-12 col-md text-center q-my-auto">
-            <q-btn color="primary" label="IMPROVE" @click="generateImprovement(props.issueKey)" :loading="loading" />
+            <div class="float-right q-ma-sm">
+                <q-btn color="primary" label="IMPROVE" @click="generateImprovement(props.issueKey)" :loading="loading" />
+            </div>
         </div>
 
         <!-- Improvements Column -->
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-6">
             <div class="text-subtitle1 q-mb-sm">AI Generated Improvement Proposals</div>
             <div class="description-text">
-                <q-list v-if="improvementProposal && hasImprovements" separator bordered padding class="rounded-borders">
+                <q-list v-if="improvementProposal && hasImprovements" separator bordered padding
+                    class="rounded-borders">
                     <template v-for="field in improvementDisplayFields" :key="field">
-                        <q-item v-if="shouldDisplayField(field)"  style="cursor: default">
+                        <q-item v-if="shouldDisplayField(field)" style="cursor: default">
                             <q-item-section>
                                 <q-item-label class="text-capitalize text-subtitle2">
                                     {{ improvementProposal[field].title || field }}
                                 </q-item-label>
-                                <template v-if="field === 'acceptanceCriteria'">
-                                    <q-item-label v-for="(criteria, index) in improvementProposal[field].text" 
-                                        :key="index">
-                                        {{ index + 1 }}. {{ criteria.summary }}
-                                    </q-item-label>
-                                </template>
-                                <template v-else>
-                                    <q-item-label>{{ improvementProposal[field].text }}</q-item-label>
-                                </template>
-                                <q-item-label v-if="improvementProposal[field].comment" 
-                                    caption 
+                                <q-item-label>
+                                    <template v-if="field === 'acceptanceCriteria'">
+                                        <MarkdownViewer :content="improvementProposal[field].text" />
+                                    </template>
+                                    <template v-else>
+                                        <MarkdownViewer :content="improvementProposal[field].text" />
+                                    </template>
+                                </q-item-label>
+                                <q-item-label v-if="improvementProposal[field].comment" caption
                                     class="text-italic q-mt-xs">
                                     Comment: {{ improvementProposal[field].comment }}
                                 </q-item-label>
                             </q-item-section>
                             <q-item-section side top>
-                                <q-chip square size="sm" class="text-caption text-uppercase q-ma-none"
-                                    color="primary"
+                                <q-chip square size="sm" class="text-caption text-uppercase q-ma-none" color="primary"
                                     :clickable="improvementProposal[field].accepted ? false : true"
                                     :outline="improvementProposal[field].accepted ? true : false"
-                                    :label="improvementProposal[field].accepted ? 'Accepted' : 'Accept'" 
+                                    :label="improvementProposal[field].accepted ? 'Accepted' : 'Accept'"
                                     :icon="improvementProposal[field].accepted ? 'mdi-check' : 'mdi-plus'"
-                                    @click="acceptImprovement(field, improvementProposal[field])" 
-                                />
+                                    @click="acceptImprovement(field, improvementProposal[field])" />
                             </q-item-section>
                         </q-item>
                     </template>
@@ -79,8 +79,8 @@
 import { ref, watch, computed } from 'vue';
 import { useJiraClient } from '../composables/JiraClient.js';
 import { useOpenAIClient } from '../composables/OpenAIClient.js';
-import { PROMPT_GENERATE_DESCRIPTION } from "../helpers/prompts.js";
-import { issueSchema } from '../helpers/schemas.js';
+import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../helpers/prompts.js";
+import MarkdownViewer from './MarkdownViewer.vue';
 
 const props = defineProps({
     issueKey: {
@@ -102,7 +102,7 @@ const improvementDisplayFields = ['summary', 'description', 'mvp', 'acceptanceCr
 
 const shouldDisplayField = (field) => {
     if (field === 'acceptanceCriteria') {
-        return improvementProposal.value[field]?.text?.length > 0 
+        return improvementProposal.value[field]?.text?.length > 0
             && improvementProposal.value[field]?.updated;
     }
     return improvementProposal.value[field]?.updated;
@@ -116,12 +116,63 @@ const getIssueField = (field, defaultValue = null) => {
     );
 }
 
-// Generate improved description for the issue
-const generateStructuredFormatImprovement = async () => {
+// Add these helper functions
+const parseFrontMatter = (frontMatter) => {
+    const lines = frontMatter.split('\n').filter(line => line.trim());
+    let currentField = null;
+    const result = {
+        summary: { text: '', updated: false },
+        description: { text: '', updated: false },
+        mvp: { text: '', updated: false },
+        acceptanceCriteria: { text: [], updated: false }
+    };
+
+    lines.forEach(line => {
+        if (line.includes(':')) {
+            const [key, value] = line.split(':').map(s => s.trim());
+            if (['summary', 'description', 'mvp', 'acceptanceCriteria'].includes(key)) {
+                currentField = key;
+            } else if (currentField && line.includes('updated:')) {
+                result[currentField].updated = value === 'true';
+            } else if (currentField && line.includes('comment:')) {
+                result[currentField].comment = value.replace(/^"(.*)"$/, '$1');
+            }
+        }
+    });
+    return result;
+};
+
+const parseContent = (content, proposal) => {
+    const sections = content.split('###').filter(s => s.trim());
+    sections.forEach(section => {
+        const lines = section.trim().split('\n');
+        const title = lines[0].trim();
+        const contentBody = lines.slice(1).join('\n').trim();
+
+        switch (title) {
+            case 'Summary':
+                proposal.summary.text = contentBody;
+                break;
+            case 'Description':
+                proposal.description.text = contentBody;
+                break;
+            case 'MVP':
+                proposal.mvp.text = contentBody;
+                break;
+            case 'Acceptance Criteria':
+                proposal.acceptanceCriteria.text = contentBody;
+                break;
+        }
+    });
+    return proposal;
+};
+
+// Replace the generateMarkdownImprovement function
+const generateMarkdownImprovement = async () => {
     loading.value = true;
     let systemMessage = {
         role: "system",
-        content: PROMPT_GENERATE_DESCRIPTION
+        content: PROMPT_GENERATE_IMPROVEMENT_MARKDOWN
     };
 
     const content = {
@@ -129,54 +180,54 @@ const generateStructuredFormatImprovement = async () => {
         "issueType": getIssueField('issuetype.name'),
         "summary": getIssueField('summary'),
         "description": getIssueField('description')
-    }
+    };
 
     let userMessage = { role: "user", content: JSON.stringify(content) };
     let fullResponse = '';
 
+    // Initialize an empty improvement proposal
+    improvementProposal.value = {
+        summary: { text: '', updated: false },
+        description: { text: '', updated: false },
+        mvp: { text: '', updated: false },
+        acceptanceCriteria: { text: [], updated: false }
+    };
+
     try {
-        const stream = await openAIClient.value.createStructuredChatCompletion([systemMessage, userMessage], issueSchema);
-        
-        // Initialize an empty improvement proposal
-        improvementProposal.value = {
-            summary: { text: '', updated: false },
-            description: { text: '', updated: false },
-            mvp: { text: '', updated: false },
-            acceptanceCriteria: []
-        };
+        const stream = await openAIClient.value.createChatCompletion([systemMessage, userMessage]);
 
         for await (const chunk of stream) {
             if (chunk.choices[0]?.delta?.content) {
+
                 fullResponse += chunk.choices[0].delta.content;
-                
-                // Try to parse the partial response
+
                 try {
-                    // Find the last complete JSON object
-                    const lastBrace = fullResponse.lastIndexOf('}');
-                    if (lastBrace !== -1) {
-                        const partialResponse = fullResponse.substring(0, lastBrace + 1);
-                        const parsed = JSON.parse(partialResponse);
-                        
-                        // Update the UI with whatever fields are available
-                        Object.keys(parsed).forEach(key => {
-                            if (improvementProposal.value.hasOwnProperty(key)) {
-                                improvementProposal.value[key] = parsed[key];
+                    const parts = fullResponse.split('---');
+                    if (parts.length >= 2) {
+                        // Parse front matter even if incomplete
+                        const frontMatterResult = parseFrontMatter(parts[1]);
+                        Object.keys(frontMatterResult).forEach(key => {
+                            if (!improvementProposal.value[key].updated) {
+                                improvementProposal.value[key].updated = frontMatterResult[key].updated;
+                            }
+                            if (frontMatterResult[key].comment) {
+                                improvementProposal.value[key].comment = frontMatterResult[key].comment;
                             }
                         });
                     }
+
+                    if (parts.length >= 3) {
+                        // Parse content sections as they arrive
+                        parseContent(parts[2], improvementProposal.value);
+                    }
                 } catch (parseError) {
-                    // Ignore parse errors for partial JSON
+                    // Continue on parse errors for partial content
                     continue;
                 }
             }
         }
-
-        // Final parse of the complete response
-        const finalParsed = JSON.parse(fullResponse);
-        improvementProposal.value = finalParsed;
     } catch (error) {
-        console.error('Error generating structured improvement:', error);
-        // TODO: Add error handling UI feedback
+        console.error('Error generating markdown improvement:', error);
     } finally {
         loading.value = false;
     }
@@ -184,7 +235,7 @@ const generateStructuredFormatImprovement = async () => {
 
 // Update the click handler to use the new function
 const generateImprovement = async () => {
-    await generateStructuredFormatImprovement();
+    await generateMarkdownImprovement();
 };
 
 // Watch for changes in the issue key and fetch the issue details
@@ -203,50 +254,41 @@ const acceptImprovement = async (type, improvement) => {
         if (type === 'summary') {
             updateFields.summary = improvement.text;
         } else if (type === 'description' || type === 'mvp' || type === 'acceptanceCriteria') {
-            // Parse existing description to maintain all sections
             const currentDescription = getIssueField('description') || '';
             let descriptionSections = {
                 description: '',
                 mvp: '',
-                acceptanceCriteria: []
+                acceptanceCriteria: ''
             };
 
-            // Extract existing sections with flexible line break pattern
-            const mvpMatch = currentDescription.match(/h2\.\s*Minimum Viable Product\s*\n+([^]*?)(?=\n+h2\.|$)/);
-            const acMatch = currentDescription.match(/h2\.\s*Acceptance Criteria\s*\n+([^]*?)(?=\n+h2\.|$)/);
-            const mainDescMatch = currentDescription.match(/^([^]*?)(?=\n+h2\.|$)/);
+            // Extract existing sections
+            const mvpMatch = currentDescription.match(/###\s*Minimum Viable Product\s*\n+([\s\S]*?)(?=\n+###|$)/);
+            const acMatch = currentDescription.match(/###\s*Acceptance Criteria\s*\n+([\s\S]*?)(?=\n+###|$)/);
+            const mainDescMatch = currentDescription.match(/^([\s\S]*?)(?=\n+###|$)/);
 
             // Populate sections with existing content
             descriptionSections.description = mainDescMatch ? mainDescMatch[1].trim() : '';
             descriptionSections.mvp = mvpMatch ? mvpMatch[1].trim() : '';
-            if (acMatch) {
-                descriptionSections.acceptanceCriteria = acMatch[1]
-                    .split('\n')
-                    .filter(line => line.trim())
-                    .map(line => ({ summary: line.replace(/^\d+\.\s*/, '').trim() }));
-            }
+            descriptionSections.acceptanceCriteria = acMatch ? acMatch[1].trim() : '';
 
-            // Only update the section that was actually accepted
+            // Update the accepted section
             if (type === 'description') {
                 descriptionSections.description = improvement.text;
             } else if (type === 'mvp') {
                 descriptionSections.mvp = improvement.text;
-            } else if (type === 'acceptanceCriteria' && improvement.updated) {
+            } else if (type === 'acceptanceCriteria') {
                 descriptionSections.acceptanceCriteria = improvement.text;
             }
 
-            // Format with single line breaks
+            // Reconstruct the formatted description
             let formattedDescription = descriptionSections.description.trim();
 
             if (descriptionSections.mvp) {
-                formattedDescription += '\n\nh2. Minimum Viable Product\n' + descriptionSections.mvp.trim();
+                formattedDescription += '\n\n### Minimum Viable Product\n' + descriptionSections.mvp.trim();
             }
 
-            if (descriptionSections.acceptanceCriteria?.length > 0) {
-                formattedDescription += '\n\nh2. Acceptance Criteria\n';
-                descriptionSections.acceptanceCriteria.forEach((criteria, index) => {
-                    formattedDescription += `${index + 1}. ${criteria.summary.trim()}\n`;
-                });
+            if (descriptionSections.acceptanceCriteria) {
+                formattedDescription += '\n\n### Acceptance Criteria\n' + descriptionSections.acceptanceCriteria.trim();
             }
 
             updateFields.description = formattedDescription;
@@ -275,7 +317,7 @@ const acceptImprovement = async (type, improvement) => {
 // Format Jira markup for display as regular HTML
 const formatJiraMarkup = (text) => {
     if (!text) return '';
-    
+
     return text
         // Convert headings
         .replace(/h1\.(.*?)$/gm, '<span class="text-subtitle1 q-mb-sm">$1</span>')
@@ -291,14 +333,18 @@ const hasImprovements = computed(() => {
     if (!improvementProposal.value) return false;
     return improvementDisplayFields.some(field => shouldDisplayField(field));
 });
+
 </script>
 
 <style>
 /* Add some spacing for the formatted content */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     margin-top: 1rem;
     margin-bottom: 0.5rem;
 }
+
 li {
     margin-left: 1.5rem;
 }
