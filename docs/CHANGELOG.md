@@ -2,6 +2,30 @@
 
 All notable changes to AI Assistant for Jira Desktop are documented below.
 
+## Backlog
+- Add support for signing, notarizing, and automatic updates.
+- Add support for in-app notifications.
+- Add notification when an issue type without template is encountered.
+- Add support for renaming user defined issue type if not aligned with Jira names.
+- Bug: some expansion rows throw error.
+
+## Releases
+
+### v0.5.0 - 2024-11-10
+- Added Prompt Management component for Jira issue types with editable and extendable values.
+- Added resizable right pane holding the Prompt Management component.
+- Added InfoBox component to display dismissible information.
+- Fixed some input field validation issues.
+- Updated brand colors and aligned button styles.
+- Change response format to markdown to get a better user experience, i.e. faster responses.
+- Refactored MarkdownViewer component so any component can use it to display markdown formatted text.
+- Added issue type definitions to system message.
+- Refactored code to support user defined fields dynamically.
+- Renamed the 'description' key to 'definition' in template and code.
+- Fixed occastional bug where the summary and description in the section title is replaced with the actual text.
+- Fixed bug where pagination and search results were not reset on consecutive JQL searches, listing wrong results.
+- Updated dependencies.
+
 ### v0.4.1 - 2024-11-02
 - Fixed size of the improvement accepted chip.
 - Improved error handling for Jira and OpenAI API calls by adding try-catch block to the async functions and providing more detailed error messages.
