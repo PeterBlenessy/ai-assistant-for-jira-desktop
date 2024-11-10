@@ -65,10 +65,7 @@ const OpenAIClient = (options) => {
                 model: model,
                 temperature: temperature,
                 max_tokens: maxTokens,
-                stream: true,
-                stream_options: {
-                    "include_usage": true
-                },
+                stream: true
             });
         } catch (error) {
             handleError(error);

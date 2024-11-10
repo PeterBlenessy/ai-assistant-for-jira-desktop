@@ -52,7 +52,7 @@
                         </q-td>
                     </q-tr>
                     <!-- Expanded Row -->
-                    <q-tr v-show="props.expand" :props="props" no-hover>
+                    <q-tr v-if="props.expand" :props="props" no-hover>
                         <q-td colspan="100%">
                             <IssueFields :issueKey="props.row.key" />
                         </q-td>
@@ -119,6 +119,14 @@ const { jiraClient } = useJiraClient();
 
 const emit = defineEmits(['issue-click']);
 
+// Function to reset search state
+function resetSearch() {
+    pagination.value.page = 1; // Reset to the first page
+    pagination.value.rowsNumber = 0; // Reset the total number of rows
+    searchResults.value = []; // Clear previous search results
+    showHistory.value = false;
+}
+
 // Handle pagination requests
 function onRequest(props) {
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
@@ -161,9 +169,7 @@ async function performSearch() {
             key: issue.key,
             summary: issue.fields.summary,
             status: issue.fields.status.name,
-            assignee: issue.fields.assignee
-                ? issue.fields.assignee.displayName
-                : "Unassigned",
+            assignee: issue.fields.assignee?.displayName || "Unassigned",
         }));
 
         if (
@@ -179,7 +185,7 @@ async function performSearch() {
 
 function selectQueryFromHistory(query) {
     jqlQuery.value = query;
-    showHistory.value = false;
+    resetSearch(); 
     performSearch();
 }
 
@@ -192,6 +198,7 @@ function removeQueryFromHistory(query) {
 
 function setQuery(query) {
     jqlQuery.value = query;
+    resetSearch(); // Reset search state when setting a new query
     performSearch();
 }
 

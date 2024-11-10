@@ -8,62 +8,62 @@
         <q-select v-model="selectedTemplate" :options="templateOptions" label="Select Issue Type" option-label="label"
             option-value="value" class="q-mb-md" />
 
-        <!-- Template Description and Persona -->
+        <!-- Issue type definition and responsible person -->
         <template v-if="selectedTemplate && currentTemplateInfo">
             <q-list>
-                <!-- Description -->
+                <!-- Definition -->
                 <q-item>
                     <q-item-section>
-                        <template v-if="editingSection === 'description'">
-                            <q-input v-model="editingContent.description" type="textarea" label="Description" filled
+                        <template v-if="editingSection === 'definition'">
+                            <q-input v-model="editingContent.definition" type="textarea" label="Definition" filled
                                 dense autogrow @paste="handlePaste"
-                                :rules="[val => !!val || 'Description is required']" lazy-rules="ondemand"
+                                :rules="[val => !!val || 'Definition is required']" lazy-rules="ondemand"
                             />
                         </template>
                         <template v-else>
-                            <q-item-label>Description of the issue type</q-item-label>
-                            <q-item-label caption>{{ currentTemplateInfo.description }}</q-item-label>
+                            <q-item-label>Definition of the issue type</q-item-label>
+                            <q-item-label caption>{{ currentTemplateInfo.definition }}</q-item-label>
                         </template>
                     </q-item-section>
 
                     <q-item-section side>
                         <div class="row q-gutter-sm">
-                            <template v-if="editingSection === 'description'">
+                            <template v-if="editingSection === 'definition'">
                                 <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
                                 <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                             </template>
                             <template v-else>
                                 <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
-                                    @click="handleEditContent('description')" />
+                                    @click="handleEditContent('definition')" />
                             </template>
                         </div>
                     </q-item-section>
                 </q-item>
                 <q-separator spaced inset />
 
-                <!-- Persona -->
+                <!-- Responsible person -->
                 <template v-if="currentTemplateInfo.persona">
                     <q-item>
                         <q-item-section>
                             <template v-if="editingSection === 'persona'">
                                 <div class="row q-col-gutter-sm">
                                     <div class="col-12">
-                                        <q-input v-model="editingContent.persona.name" label="Persona Name" filled dense
+                                        <q-input v-model="editingContent.persona.name" label="Responsible person role" filled dense
                                             @paste="handlePaste"
-                                            :rules="[val => !!val || 'Persona name is required']" lazy-rules="ondemand"
+                                            :rules="[val => !!val || 'Responsible person role is required']" lazy-rules="ondemand"
                                         />
                                     </div>
                                     <div class="col-12">
-                                        <q-input v-model="editingContent.persona.description" type="textarea"
-                                            label="Persona Description" filled dense autogrow @paste="handlePaste"
-                                            :rules="[val => !!val || 'Persona description is required']" lazy-rules="ondemand"
+                                        <q-input v-model="editingContent.persona.definition" type="textarea"
+                                            label="Responsible person definition" filled dense autogrow @paste="handlePaste"
+                                            :rules="[val => !!val || 'Responsible person definition is required']" lazy-rules="ondemand"
                                         />
                                     </div>
                                 </div>
                             </template>
                             <template v-else>
-                                <q-item-label>Responsibility: {{ currentTemplateInfo.persona.name }}</q-item-label>
-                                <q-item-label caption>{{ currentTemplateInfo.persona.description }}</q-item-label>
+                                <q-item-label>Responsible: {{ currentTemplateInfo.persona.name }}</q-item-label>
+                                <q-item-label caption>{{ currentTemplateInfo.persona.definition }}</q-item-label>
                             </template>
                         </q-item-section>
 
@@ -100,16 +100,16 @@
                                     />
                                 </div>
                                 <div class="col-12">
-                                    <q-input v-model="editingField.description" type="textarea"
-                                        label="Field Description" filled dense autogrow @paste="handlePaste"
-                                        :rules="[val => !!val || 'Field description is required']" lazy-rules="ondemand"
+                                    <q-input v-model="editingField.definition" type="textarea"
+                                        label="Field definition" filled dense autogrow @paste="handlePaste"
+                                        :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand"
                                     />
                                 </div>
                             </div>
                         </template>
                         <template v-else>
                             <q-item-label>{{ field.title }}</q-item-label>
-                            <q-item-label caption>{{ field.description }}</q-item-label>
+                            <q-item-label caption>{{ field.definition }}</q-item-label>
                         </template>
                     </q-item-section>
 
@@ -122,7 +122,7 @@
                             <template v-else>
                                 <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
                                     @click="handleEditField(index)" />
-                                <q-btn flat icon="mdi-delete" size="sm" class="q-pa-xs q-ma-none"
+                                <q-btn v-if="field.name != 'summary' && field.name != 'description'" flat icon="mdi-delete" size="sm" class="q-pa-xs q-ma-none"
                                     @click="handleDeleteField(index)" />
                             </template>
                         </div>
@@ -142,9 +142,9 @@
                             />
                         </div>
                         <div class="col-12">
-                            <q-input v-model="editingField.description" type="textarea" label="Field Description" filled
+                            <q-input v-model="editingField.definition" type="textarea" label="Field definition" filled
                                 dense autogrow @paste="handlePaste"
-                                :rules="[val => !!val || 'Field description is required']" lazy-rules="ondemand"
+                                :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand"
                             />
                         </div>
                     </div>
@@ -203,7 +203,7 @@ const editingIndex = ref(-1);
 const isNewField = ref(false);
 const editingField = ref({
     title: '',
-    description: '',
+    definition: '',
     name: ''
 });
 
@@ -213,12 +213,12 @@ const currentTemplateInfo = computed(() => {
 });
 
 // Add new refs for template info editing
-const editingSection = ref(null); // 'description' or 'persona'
+const editingSection = ref(null); // 'definition' or 'persona'
 const editingContent = ref({
     description: '',
     persona: {
         name: '',
-        description: ''
+        definition: ''
     }
 });
 
@@ -231,7 +231,7 @@ Each issue type has a description, a responsible role, and a list of fields.
 
 **Description**: A brief description of the issue type that captures the essence of the desired outcomes.
 
-**Responsibility**: A description of the person or role that the AI has to adopt when generating improvements.
+**Responsibility**: A definition of the person or role that the AI has to adopt when generating improvements.
 
 **Fields**: The specific details that will guide the AI when reviewing the original issue details and when generating improvements. Fields can be existing Jira fields or sections of the issue description.
 `;
@@ -287,8 +287,8 @@ function handlePaste(event) {
     if (targetName?.includes('title')) {
         editingField.value.title = cleanedText;
         updateFieldName(cleanedText);
-    } else if (targetName?.includes('description')) {
-        editingField.value.description = cleanedText;
+    } else if (targetName?.includes('definition')) {
+        editingField.value.definition = cleanedText;
     }
 }
 
@@ -304,7 +304,7 @@ function handleEditField(index) {
 }
 
 function handleAddField() {
-    editingField.value = { title: '', description: '', name: '' };
+    editingField.value = { title: '', definition: '', name: '' };
     isNewField.value = true;
     editingIndex.value = -1;
 }
@@ -313,7 +313,7 @@ function cancelEdit() {
     // Reset field editing state
     editingIndex.value = -1;
     isNewField.value = false;
-    editingField.value = { title: '', description: '', name: '' };
+    editingField.value = { title: '', definition: '', name: '' };
 
     // Reset content editing state
     editingSection.value = null;
@@ -321,19 +321,19 @@ function cancelEdit() {
         description: '',
         persona: {
             name: '',
-            description: ''
+            definition: ''
         }
     };
 }
 
 function handleSaveField() {
-    if (!editingField.value.title || !editingField.value.description) {
+    if (!editingField.value.title || !editingField.value.definition) {
         return;
     }
 
     // Clean up the text and ensure title is capitalized before saving
     editingField.value.title = capitalizeFirstLetter(cleanText(editingField.value.title));
-    editingField.value.description = cleanText(editingField.value.description);
+    editingField.value.definition = cleanText(editingField.value.definition);
 
     const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
     const updatedTemplate = { ...templates.value[templateIndex] };
@@ -359,8 +359,8 @@ function handleDeleteField(index) {
 
 function handleEditContent(section) {
     editingSection.value = section;
-    if (section === 'description') {
-        editingContent.value.description = currentTemplateInfo.value.description;
+    if (section === 'definition') {
+        editingContent.value.definition = currentTemplateInfo.value.definition;
     } else if (section === 'persona') {
         editingContent.value.persona = { ...currentTemplateInfo.value.persona };
     }
@@ -371,7 +371,7 @@ function handleSaveContent() {
         return;
     }
     if (editingSection.value === 'persona' &&
-        (!editingContent.value.persona.name || !editingContent.value.persona.description)) {
+        (!editingContent.value.persona.name || !editingContent.value.persona.definition)) {
         return;
     }
 
@@ -383,7 +383,7 @@ function handleSaveContent() {
     } else if (editingSection.value === 'persona') {
         updatedTemplate.persona = {
             name: cleanText(editingContent.value.persona.name),
-            description: cleanText(editingContent.value.persona.description)
+            definition: cleanText(editingContent.value.persona.definition)
         };
     }
 
