@@ -24,7 +24,6 @@
                 <q-btn color="primary" label="IMPROVE" @click="generateImprovement(props.issueKey)"
                     :loading="loading" />
             </div>
-
         </div>
 
         <!-- Improvements Column -->
@@ -33,28 +32,27 @@
             <div class="description-text">
                 <q-list v-if="improvementProposal && hasImprovements" separator bordered padding
                     class="rounded-borders">
-                    <template v-for="(field, index) in improvementDisplayFields" :key="index">
-                        <q-item v-if="shouldDisplayField(field)" style="cursor: default">
+                    <template v-for="(field, key) in improvementProposal" :key="key">
+                        <q-item v-if="field?.updated == true" style="cursor: default">
                             <q-item-section>
                                 <q-item-label class="text-capitalize text-subtitle2">
-                                    {{ improvementProposal[field]?.title || field }}
+                                    {{ field?.title || field }}
                                 </q-item-label>
-                                <q-item-label v-if="improvementProposal[field]?.text">
-                                    <!-- {{ improvementProposal[field].text }} -->
-                                    <MarkdownViewer :content="improvementProposal[field].text" />
+                                <q-item-label v-if="field?.text">
+                                    <MarkdownViewer :content="field?.text" />
                                 </q-item-label>
-                                <q-item-label v-if="improvementProposal[field]?.comment" caption
+                                <q-item-label v-if="field?.comment" caption
                                     class="text-italic q-mt-xs">
-                                    Comment: {{ improvementProposal[field].comment }}
+                                    Comment: {{ field?.comment }}
                                 </q-item-label>
                             </q-item-section>
                             <q-item-section side top>
                                 <q-chip square size="sm" class="text-caption text-uppercase q-ma-none" color="primary"
-                                    :clickable="!improvementProposal[field].accepted"
-                                    :outline="improvementProposal[field].accepted"
-                                    :label="improvementProposal[field].accepted ? 'Accepted' : 'Accept'"
-                                    :icon="improvementProposal[field].accepted ? 'mdi-check' : 'mdi-plus'"
-                                    @click="acceptImprovement(field, improvementProposal[field])" />
+                                    :clickable="!field.accepted"
+                                    :outline="field.accepted"
+                                    :label="field.accepted ? 'Accepted' : 'Accept'"
+                                    :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
+                                    @click="acceptImprovement(key, field)" />
                             </q-item-section>
                         </q-item>
                     </template>
@@ -68,7 +66,7 @@
             </div>
         </div>
     </div>
-    <div v-else class="q-pa-md">
+    <div v-else class="row q-col-gutter-md">
         <p>Loading description...</p>
     </div>
 </template>
@@ -112,6 +110,10 @@ const shouldDisplayField = (field) => {
     return fieldData?.updated && (field !== 'acceptanceCriteria' || fieldData.text?.length > 0);
 };
 
+const hasImprovements = computed(() => {
+    return improvementDisplayFields.value.some(field => shouldDisplayField(field));
+});
+
 // Get the value of a field from the issue fields object
 const getIssueField = (field, defaultValue = null) => {
     return field.split('.').reduce((obj, key) => obj?.[key] ?? defaultValue, issueFields.value);
@@ -142,13 +144,9 @@ const getIssueTypeInstructions = (issueType) => {
             });
         }
     }
-    // console.log('Issue Type:', issueType);
-    // console.log('currentTemplate:', currentTemplate);
-    // console.log(issueTypeInstructions);
 
     return issueTypeInstructions;
 }
-const improvements = {};
 const generateImprovement = async (issueKey) => {
     loading.value = true;
     const issueType = getIssueField('issuetype.name');
@@ -182,13 +180,13 @@ const generateImprovement = async (issueKey) => {
                 if (parts.length === 3) { // All front matter received
                     frontMatter = parseFrontMatter(parts[1]);
                     // We've parsed and stored frontMatter. Keep only the markdown.
-                    fullResponse = parts[2];                    
+                    fullResponse = parts[2];
                     // the improvementProposal object will build on frontMatter object
                     improvementProposal.value = frontMatter;
                     frontMatterParsed = true;
                 }
             } else {
-                parseMarkdown(fullResponse, improvementProposal.value);
+                improvementProposal.value = parseMarkdown(fullResponse, improvementProposal.value);
             }
         }
     } catch (error) {
@@ -228,9 +226,6 @@ const acceptImprovement = async (type, improvement) => {
     }
 };
 
-const hasImprovements = computed(() => {
-    return improvementDisplayFields.value.some(field => shouldDisplayField(field));
-});
 </script>
 
 <style scoped>

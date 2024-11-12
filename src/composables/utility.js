@@ -5,7 +5,6 @@ export const parseFrontMatter = (yamlStr) => {
     try {
         // Parse YAML string into JavaScript object
         const parsedData = yaml.load(yamlStr);
-        console.log(parsedData);
 
         // Handle object data transformation or validation as needed
         for (const key in parsedData) {

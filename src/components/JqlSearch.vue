@@ -23,10 +23,10 @@
             </q-input>
         </q-card-section>
 
-        <q-card-section  flat v-if="searchResults.length != 0">
-            <q-table bordered flat row-key="id" :columns="columns" :rows="searchResults" :visible-columns="visibleColumns"
-                v-model:pagination="pagination" :rows-per-page-options="[10, 20, 50]" @request="onRequest"
-                :loading="loading" class="my-sticky-header-table q-pt-none q-ma-none" wrap-cells>
+        <q-card-section flat v-if="searchResults.length != 0">
+            <q-table bordered flat row-key="id" :columns="columns" :rows="searchResults"
+                :visible-columns="visibleColumns" v-model:pagination="pagination" :rows-per-page-options="[10, 20, 50]"
+                @request="onRequest" :loading="loading" class="my-sticky-header-table q-pt-none q-ma-none" wrap-cells>
 
                 <!-- Header columns -->
                 <template v-slot:header="props">
@@ -48,7 +48,14 @@
                         </q-td>
                         <!-- Body columns -->
                         <q-td v-for="col in props.cols" :key="col.name" :props="props">
-                            {{ col.value }}
+                            <div v-if="col.name == 'key'" class="row items-center justify-between">
+                                <q-img :src="props.row.issueTypeIconURL" spinner-color="primary"
+                                    style="width: 18px; height: 18px;" class="q-mr-xs" />
+                                <div>{{ col.value }}</div>
+                            </div>
+                            <div v-else>
+                                {{ col.value }}
+                            </div>
                         </q-td>
                     </q-tr>
                     <!-- Expanded Row -->
@@ -57,6 +64,19 @@
                             <IssueFields :issueKey="props.row.key" />
                         </q-td>
                     </q-tr>
+                </template>
+                <template v-slot:body-cell-key="props">
+                    <q-td :props="props">
+                        <div>
+                            <q-badge color="purple" :label="props.value">
+                                <q-img :src="getIssueField('issuetype.iconUrl')" spinner-color="primary"
+                                    style="width: 18px; height: 18px;" class="q-mr-xs" />
+                            </q-badge>
+                        </div>
+                        <div class="my-table-details">
+                            {{ props.row.details }}
+                        </div>
+                    </q-td>
                 </template>
             </q-table>
         </q-card-section>
@@ -89,8 +109,8 @@ const columns = [
         name: "key",
         label: "Key",
         field: "key",
-        align: "left",
-        style: "width: 75px",
+        align: "center",
+        style: "width: 100px",
         required: true,
     },
     {
@@ -125,6 +145,10 @@ function resetSearch() {
     pagination.value.rowsNumber = 0; // Reset the total number of rows
     searchResults.value = []; // Clear previous search results
     showHistory.value = false;
+}
+
+const getIssueField = (field, defaultValue = null) => {
+    return field.split('.').reduce((obj, key) => obj && obj[key] !== undefined ? obj[key] : defaultValue, issueFields.value);
 }
 
 // Handle pagination requests
@@ -170,6 +194,8 @@ async function performSearch() {
             summary: issue.fields.summary,
             status: issue.fields.status.name,
             assignee: issue.fields.assignee?.displayName || "Unassigned",
+            issueType: issue.fields.issuetype.name,
+            issueTypeIconURL: issue.fields.issuetype.iconUrl
         }));
 
         if (
@@ -185,7 +211,7 @@ async function performSearch() {
 
 function selectQueryFromHistory(query) {
     jqlQuery.value = query;
-    resetSearch(); 
+    resetSearch();
     performSearch();
 }
 

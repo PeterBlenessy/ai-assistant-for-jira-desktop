@@ -81,38 +81,41 @@ Descriptions may be strings or Atlassian Document Format objects.
 They may include sections for Minimum Viable Product (MVP) and Acceptance Criteria, or other user defined sections.
 
 Your task is to suggest improvements only when necessary.
-If no changes are needed, return the original “issueKey” value.
 
-Your response will include the updated summary and description, 
-plus the additional sections defined in the second system message.
+Your response will include only the improved fields, 
+plus any additional sections defined in the second system message.
+Do not return any unchanged fields.
 
 Use the “updated” key to indicate changes and provide brief feedback for each field.
 
-Format your response in markdown as follows:
+Format your response in markdown as defined below, including the frontmatter too.
 
 ---
 issueKey: "ISSUE-123"
 issueType: "Story"
 
 summary:
-    title: "Summary"
+    title: "Summary" // Do not change this value in your response
     updated: true
+    text: "Improved summary of the issue."
     comment: "The summary is too vague."
 
 description:
-    title: "Description"
-    updated: false
+    title: "Description" // Do not change this value in your response
+    updated: true
+    text: "Improved description of the issue."
     comment: "The description was not clear enough."
 
 mvp:
-    title: "Minimal Viable Product"
-    updated:
-    title: true
+    title: "Minimal Viable Product" // Do not change this value in your response
+    updated: true
+    text: "MVP description."
     comment: "The MVP is missing."
 
 acceptanceCriteria:
-    title: "Acceptance Criteria"
+    title: "Acceptance Criteria" // Do not change this value in your response
     updated: true
+    text: "List of acceptance criterias.
     comment: "The acceptance criteria were not specific enough."
 ---
 
