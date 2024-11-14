@@ -21,7 +21,6 @@
                     <div class="q-gutter-sm">
                         <q-btn label="Add New" @click="addProvider" size="sm"/>
                         <q-btn label="Edit" @click="editProvider" size="sm"/>
-                        <q-btn label="Cancel" @click="cancel" size="sm"/>
                     </div>
                 </q-item-section>
             </q-item>
@@ -104,7 +103,6 @@ import {
 } from '../stores/persisted-store';
 
 const persistedStore = usePersistedStore();
-const emit = defineEmits(['cancel']);
 
 const selectedProviderId = ref(persistedStore.selectedProvider.providerId);
 const providerOptions = computed(() =>
@@ -166,9 +164,6 @@ function saveProvider() {
         }
     }
     mode.value = 'view';
-}
-function cancel() {
-    emit('cancel');
 }
 
 function cancelEdit() {

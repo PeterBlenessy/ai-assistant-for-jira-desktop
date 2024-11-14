@@ -8,13 +8,13 @@ export function useJiraClient() {
 
     const initializeClient = () => {
         jiraClient.value = JiraClient({
-            host: persistedStore.jiraServerAddress,
-            personalAccessToken: persistedStore.jiraPersonalAccessToken,
+            host: persistedStore.selectedJiraConfig.serverAddress,
+            personalAccessToken: persistedStore.selectedJiraConfig.personalAccessToken,
         });
     };
 
     watch(
-        () => [persistedStore.jiraServerAddress, persistedStore.jiraPersonalAccessToken],
+        () => [persistedStore.selectedJiraConfig.serverAddress, persistedStore.selectedJiraConfig.personalAccessToken],
         initializeClient,
         { immediate: true }
     );

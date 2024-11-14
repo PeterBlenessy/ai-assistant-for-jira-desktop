@@ -11,11 +11,11 @@
 
                 <q-tab-panels v-model="activeTab">
                     <q-tab-panel name="jira">
-                        <JiraSettings @cancel="closeDialog" />
+                        <JiraSettings />
                     </q-tab-panel>
 
                     <q-tab-panel name="provider">
-                        <ProviderSettings @cancel="closeDialog" />
+                        <ProviderSettings />
                     </q-tab-panel>
                 </q-tab-panels>
             </q-card-section>
@@ -32,8 +32,4 @@ const model = defineModel({ default: false });
 
 const activeTab = ref('jira');
 
-function closeDialog() {
-    // Close the dialog
-    model.value = false;
-}
 </script>

@@ -33,9 +33,7 @@ function openSettingsDialog() {
 }
 
 async function checkJiraConnection() {
-    const { jiraServerAddress, jiraPersonalAccessToken } = persistedStore;
-
-    if (jiraServerAddress === "" || jiraPersonalAccessToken === "") {
+    if (persistedStore.selectedJiraConfig.serverAddress === "" || persistedStore.selectedJiraConfig.personalAccessToken === "") {
         console.log("Missing Jira server address or personal access token");
         showSettingsDialog.value = true;
         return;
@@ -58,11 +56,12 @@ onMounted(() => {
     checkJiraConnection();
 });
 
-// Watch for changes in both jiraServerAddress and jiraPersonalAccessToken
+// Watch for changes in selectedJiraConfig
 watch(
     () => [
-        persistedStore.jiraServerAddress,
-        persistedStore.jiraPersonalAccessToken,
+        persistedStore.selectedJiraConfig.name,
+        persistedStore.selectedJiraConfig.serverAddress,
+        persistedStore.selectedJiraConfig.personalAccessToken
     ],
     checkJiraConnection,
 );
