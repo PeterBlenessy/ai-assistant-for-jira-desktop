@@ -139,7 +139,7 @@ function toggleRightPane() {
             <SearchHistory @select="handleHistorySelect" />
             <q-separator inset />
 
-            <q-item v-ripple class="fixed-bottom q-pa-xs">
+            <q-item class="fixed-bottom q-pa-xs" :clickable=false>
                 <q-item-section side>
                     <q-icon dense flat :color="isConnected ? 'positive' : 'negative'"
                         :name="isConnected ? 'mdi-lan-connect' : 'mdi-lan-disconnect'" />
@@ -148,7 +148,7 @@ function toggleRightPane() {
                     <q-item-label>{{ isConnected ? user.displayName : "" }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                    <q-btn flat dense icon="mdi-cog" @click="showMenu = true" />
+                    <q-btn flat dense icon="mdi-cog" @click="openSettingsDialog" />
                 </q-item-section>
             </q-item>
         </q-drawer>
