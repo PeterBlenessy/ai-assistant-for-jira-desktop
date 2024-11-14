@@ -15,8 +15,16 @@ export const useTemplateStore = defineStore("template-store", () => {
         templates.value = defaultTemplate;
     }
 
+    function addTemplate(newTemplate) {
+        templates.value.push(newTemplate);
+    }
+
+    function deleteTemplate(index) {
+        templates.value.splice(index, 1);
+    }
+
     function editTemplate(index, updatedTemplate) {
-        templates.value[index] = updatedTemplate;
+        templates.value[index] = { ...templates.value[index], ...updatedTemplate };
     }
 
     watch(
@@ -38,6 +46,8 @@ export const useTemplateStore = defineStore("template-store", () => {
         templates,
         selectedTemplateType,
         editTemplate,
-        resetToDefaults
+        resetToDefaults,
+        addTemplate,
+        deleteTemplate
     };
 });

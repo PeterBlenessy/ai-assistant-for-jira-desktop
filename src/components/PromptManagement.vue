@@ -8,6 +8,43 @@
         <q-select v-model="selectedTemplate" :options="templateOptions" label="Select Issue Type" option-label="label"
             option-value="value" class="q-mb-md" />
 
+        <!-- Template Action Buttons -->
+        <div class="q-gutter-sm">
+            <q-btn icon="mdi-plus" label="Add new" class="q-mb-md q-pl-xs" size="sm" @click="handleAddTemplate" />
+            <q-btn v-if="selectedTemplate" icon="mdi-delete" label="Delete" class="q-mb-md q-pl-xs" size="sm" @click="handleDeleteTemplate" />
+        </div>
+
+        <!-- Template Name Editing -->
+        <template v-if="selectedTemplate && currentTemplateInfo">
+            <q-item>
+                <q-item-section>
+                    <template v-if="editingSection === 'name'">
+                        <q-input v-model="editingContent.name" label="Template Name" filled dense
+                            :rules="[val => !!val || 'Template name is required']" lazy-rules="ondemand"
+                        />
+                    </template>
+                    <template v-else>
+                        <q-item-label>Template Name</q-item-label>
+                        <q-item-label caption>{{ currentTemplateInfo.name }}</q-item-label>
+                    </template>
+                </q-item-section>
+
+                <q-item-section side>
+                    <div class="row q-gutter-sm">
+                        <template v-if="editingSection === 'name'">
+                            <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
+                            <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
+                        </template>
+                        <template v-else>
+                            <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
+                                @click="handleEditContent('name')" />
+                        </template>
+                    </div>
+                </q-item-section>
+            </q-item>
+            <q-separator spaced inset />
+        </template>
+
         <!-- Issue type definition and responsible person -->
         <template v-if="selectedTemplate && currentTemplateInfo">
             <q-list>
@@ -159,7 +196,7 @@
             </q-item>
 
             <!-- Add Field Button -->
-            <q-btn v-if="!isNewField" color="primary" icon="mdi-plus" label="Add Field" class="q-mt-md" @click="handleAddField" />
+            <q-btn v-if="!isNewField" color="primary" icon="mdi-plus" label="Add Field" class="q-mt-md q-pl-xs" size="sm"  @click="handleAddField" />
         </template>
     </div>
 </template>
@@ -215,6 +252,7 @@ const currentTemplateInfo = computed(() => {
 // Add new refs for template info editing
 const editingSection = ref(null); // 'definition' or 'persona'
 const editingContent = ref({
+    name: '',
     description: '',
     persona: {
         name: '',
@@ -318,6 +356,7 @@ function cancelEdit() {
     // Reset content editing state
     editingSection.value = null;
     editingContent.value = {
+        name: '',
         description: '',
         persona: {
             name: '',
@@ -359,7 +398,9 @@ function handleDeleteField(index) {
 
 function handleEditContent(section) {
     editingSection.value = section;
-    if (section === 'definition') {
+    if (section === 'name') {
+        editingContent.value.name = currentTemplateInfo.value.name;
+    } else if (section === 'definition') {
         editingContent.value.definition = currentTemplateInfo.value.definition;
     } else if (section === 'persona') {
         editingContent.value.persona = { ...currentTemplateInfo.value.persona };
@@ -367,6 +408,9 @@ function handleEditContent(section) {
 }
 
 function handleSaveContent() {
+    if (editingSection.value === 'name' && !editingContent.value.name) {
+        return;
+    }
     if (editingSection.value === 'description' && !editingContent.value.description) {
         return;
     }
@@ -378,7 +422,9 @@ function handleSaveContent() {
     const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
     const updatedTemplate = { ...templates.value[templateIndex] };
 
-    if (editingSection.value === 'description') {
+    if (editingSection.value === 'name') {
+        updatedTemplate.name = cleanText(editingContent.value.name);
+    } else if (editingSection.value === 'description') {
         updatedTemplate.description = cleanText(editingContent.value.description);
     } else if (editingSection.value === 'persona') {
         updatedTemplate.persona = {
@@ -389,6 +435,29 @@ function handleSaveContent() {
 
     templateStore.editTemplate(templateIndex, updatedTemplate);
     cancelEdit();
+}
+
+function handleAddTemplate() {
+    const newTemplate = {
+        issueType: 'newType',
+        name: 'New Issue Type',
+        definition: '',
+        persona: {
+            name: '',
+            definition: ''
+        },
+        fields: []
+    };
+    templateStore.addTemplate(newTemplate);
+    selectedTemplateType.value = 'newType';
+}
+
+function handleDeleteTemplate() {
+    const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
+    if (templateIndex !== -1) {
+        templateStore.deleteTemplate(templateIndex);
+        selectedTemplateType.value = templates.value[0]?.issueType || '';
+    }
 }
 </script>
 
