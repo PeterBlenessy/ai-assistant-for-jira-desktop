@@ -12,7 +12,22 @@
                         filled
                         emit-value
                         map-options
-                    />
+                    >
+                        <template v-slot:selected-item="scope">
+                            <q-item v-bind="scope.itemProps">
+                                <q-item-section>{{ scope.opt.label }}</q-item-section>
+                            </q-item>
+                        </template>
+                        <template v-slot:option="scope">
+                            <q-item v-bind="scope.itemProps" @click.stop="selectProvider(scope.opt.value)">
+                                <q-item-section>{{ scope.opt.label }}</q-item-section>
+                                <q-item-section side v-if="!PROTECTED_PROVIDER_IDS.includes(scope.opt.value)">
+                                    <q-btn flat round dense size="sm" icon="mdi-close"
+                                        @click.stop="confirmDeleteProvider(scope.opt.value)" />
+                                </q-item-section>
+                            </q-item>
+                        </template>
+                    </q-select>
                 </q-item-section>
             </q-item>
             <!-- Model Selection Dropdown -->
@@ -26,7 +41,17 @@
                         filled
                         emit-value
                         map-options
-                    />
+                    >
+                        <template v-slot:option="scope">
+                            <q-item v-bind="scope.itemProps">
+                                <q-item-section>{{ scope.opt.label }}</q-item-section>
+                                <q-item-section side v-if="!isProtectedModel(scope.opt.value)">
+                                    <q-btn flat round dense size="sm" icon="mdi-close"
+                                        @click.stop="confirmDeleteModel(scope.opt.value)" />
+                                </q-item-section>
+                            </q-item>
+                        </template>
+                    </q-select>
                 </q-item-section>
             </q-item>
             <!-- Edit and Add New Buttons -->
@@ -106,6 +131,34 @@
             </q-item>
         </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <q-dialog v-model="showDeleteConfirm">
+        <q-card>
+            <q-card-section class="row items-center">
+                <span class="q-ml-sm">Are you sure you want to delete this provider?</span>
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn flat label="Cancel" color="primary" v-close-popup />
+                <q-btn flat label="Delete" color="negative" @click="deleteProvider" v-close-popup />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
+
+    <!-- Delete Model Confirmation Dialog -->
+    <q-dialog v-model="showDeleteModelConfirm">
+        <q-card>
+            <q-card-section class="row items-center">
+                <span class="q-ml-sm">Are you sure you want to delete this model?</span>
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn flat label="Cancel" color="primary" v-close-popup />
+                <q-btn flat label="Delete" color="negative" @click="deleteModel" v-close-popup />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
 </template>
 
 <script setup>
@@ -215,5 +268,62 @@ watch(selectedModel, (newValue) => {
         };
     }
 });
+
+const showDeleteConfirm = ref(false);
+const providerToDelete = ref(null);
+
+function confirmDeleteProvider(providerId) {
+    providerToDelete.value = providerId;
+    showDeleteConfirm.value = true;
+}
+
+function deleteProvider() {
+    if (providerToDelete.value) {
+        const index = persistedStore.aiProviders.findIndex(p => p.id === providerToDelete.value);
+        if (index !== -1) {
+            persistedStore.aiProviders.splice(index, 1);
+            if (selectedProviderId.value === providerToDelete.value) {
+                // Switch to first available provider
+                selectedProviderId.value = persistedStore.aiProviders[0].id;
+            }
+        }
+    }
+    showDeleteConfirm.value = false;
+    providerToDelete.value = null;
+}
+
+function selectProvider(providerId) {
+    selectedProviderId.value = providerId;
+}
+
+const showDeleteModelConfirm = ref(false);
+const modelToDelete = ref(null);
+
+function confirmDeleteModel(model) {
+    modelToDelete.value = model;
+    showDeleteModelConfirm.value = true;
+}
+
+function deleteModel() {
+    if (modelToDelete.value) {
+        const provider = persistedStore.aiProviders.find(p => p.id === selectedProviderId.value);
+        if (provider) {
+            const modelIndex = provider.models.findIndex(m => m === modelToDelete.value);
+            if (modelIndex !== -1) {
+                provider.models.splice(modelIndex, 1);
+                if (selectedModel.value === modelToDelete.value) {
+                    selectedModel.value = provider.models[0] || '';
+                }
+            }
+        }
+    }
+    showDeleteModelConfirm.value = false;
+    modelToDelete.value = null;
+}
+
+// Helper function to check if a model is protected
+function isProtectedModel(model) {
+    return PROTECTED_MODELS[selectedProviderId.value]?.includes(model);
+}
 
 </script>

@@ -12,7 +12,22 @@
                         filled
                         emit-value
                         map-options
-                    />
+                    >
+                        <template v-slot:selected-item="scope">
+                            <q-item v-bind="scope.itemProps">
+                                <q-item-section>{{ scope.opt.label }}</q-item-section>
+                            </q-item>
+                        </template>
+                        <template v-slot:option="scope">
+                            <q-item v-bind="scope.itemProps" @click.stop="selectConfig(scope.opt.value)">
+                                <q-item-section>{{ scope.opt.label }}</q-item-section>
+                                <q-item-section side>
+                                    <q-btn flat round dense size="sm" icon="mdi-close"
+                                        @click.stop="confirmDeleteConfig(scope.opt.value)" />
+                                </q-item-section>
+                            </q-item>
+                        </template>
+                    </q-select>
                 </q-item-section>
             </q-item>
             <!-- Edit and Add New Buttons -->
@@ -81,6 +96,20 @@
             </q-item>
         </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <q-dialog v-model="showDeleteConfirm">
+        <q-card>
+            <q-card-section class="row items-center">
+                <span class="q-ml-sm">Are you sure you want to delete this Jira configuration?</span>
+            </q-card-section>
+
+            <q-card-actions align="right">
+                <q-btn flat label="Cancel" color="primary" v-close-popup />
+                <q-btn flat label="Delete" color="negative" @click="deleteConfig" v-close-popup />
+            </q-card-actions>
+        </q-card>
+    </q-dialog>
 </template>
 
 <script setup>
@@ -106,6 +135,33 @@ const editJiraConfigData = ref({
 });
 
 const hidePAT = ref(true);
+
+const showDeleteConfirm = ref(false);
+const configToDelete = ref(null);
+
+function confirmDeleteConfig(configName) {
+    if (persistedStore.jiraConfigs.length <= 1) {
+        // Don't allow deleting the last config
+        return;
+    }
+    configToDelete.value = configName;
+    showDeleteConfirm.value = true;
+}
+
+function deleteConfig() {
+    if (configToDelete.value) {
+        const index = persistedStore.jiraConfigs.findIndex(c => c.name === configToDelete.value);
+        if (index !== -1) {
+            persistedStore.jiraConfigs.splice(index, 1);
+            if (selectedJiraConfigName.value === configToDelete.value) {
+                // Switch to first available config
+                selectedJiraConfigName.value = persistedStore.jiraConfigs[0].name;
+            }
+        }
+    }
+    showDeleteConfirm.value = false;
+    configToDelete.value = null;
+}
 
 function editJiraConfig() {
     mode.value = 'edit';
@@ -147,6 +203,10 @@ function saveJiraConfig() {
 
 function cancelEdit() {
     mode.value = 'view';
+}
+
+function selectConfig(configName) {
+    selectedJiraConfigName.value = configName;
 }
 
 watch(selectedJiraConfigName, (newValue) => {
