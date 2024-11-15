@@ -4,12 +4,24 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Backlog
 - Add support for signing, notarizing, and automatic updates.
+- Add support for logging using Sentry.
 - Add support for in-app notifications.
-- Add notification when an issue type without template is encountered.
-- Add support for renaming user defined issue type if not aligned with Jira names.
-- Bug: some expansion rows throw error.
+- Add support for notifying the user when an issue type without template is encountered.
+- Fix bug where some expansion rows throw error.
+- Add option to delete jira and provider configs from within the dropdown.
+- Add support for transformer.js
 
 ## Releases
+
+### v0.5.1 - 2024-11-15
+- Updated system prompt with instruction to not change field titles.
+- Added issue type icon to JQL query table.
+- Refactored Settings dialog; created JiraSettings and ProviderSettings components. 
+- Added support for editing issue type names, adding new issue types, and deleting issue types.
+- Fixed bug where clicking the settings button in the left drawer was opening the menu instead of the settings dialog.
+- Added support for multiple Jira configurations, with options to add and edit.
+- Fixed issue where selected provider stores the entire provider object, not url and model.
+- Added support for deleting Jira and AI Provider configurations, inlcuding provider models.
 
 ### v0.5.0 - 2024-11-10
 - Added Prompt Management component for Jira issue types with editable and extendable values.
