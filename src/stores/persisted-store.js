@@ -62,7 +62,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     const aiProviders = ref(loadStateFromLocalStorage("aiProviders") || DEFAULT_PROVIDERS);
     const selectedProvider = ref(loadStateFromLocalStorage("selectedProvider") || {
         providerId: 'openai',
-        model: 'gpt-4o'
+        model: DEFAULT_PROVIDERS[0].models[0]  // Use first model of first provider as default
     });
 
     // Add info box state

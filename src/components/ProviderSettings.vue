@@ -15,6 +15,20 @@
                     />
                 </q-item-section>
             </q-item>
+            <!-- Model Selection Dropdown -->
+            <q-item>
+                <q-item-section>
+                    <q-select
+                        v-model="selectedModel"
+                        :options="modelOptions"
+                        label="AI Model"
+                        dense
+                        filled
+                        emit-value
+                        map-options
+                    />
+                </q-item-section>
+            </q-item>
             <!-- Edit and Add New Buttons -->
             <q-item>
                 <q-item-section  align="right">
@@ -95,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineEmits } from 'vue';
+import { ref, computed, watch } from 'vue';
 import {
     usePersistedStore,
     PROTECTED_PROVIDER_IDS,
@@ -105,12 +119,22 @@ import {
 const persistedStore = usePersistedStore();
 
 const selectedProviderId = ref(persistedStore.selectedProvider.providerId);
+const selectedModel = ref(persistedStore.selectedProvider.model);
+
 const providerOptions = computed(() =>
     persistedStore.aiProviders.map(p => ({
         label: p.name,
         value: p.id
     }))
 );
+
+const modelOptions = computed(() => {
+    const provider = persistedStore.aiProviders.find(p => p.id === selectedProviderId.value);
+    return provider ? provider.models.map(model => ({
+        label: model,
+        value: model
+    })) : [];
+});
 
 const mode = ref('view'); // 'view', 'edit', or 'add'
 
@@ -169,4 +193,27 @@ function saveProvider() {
 function cancelEdit() {
     mode.value = 'view';
 }
+
+// Update provider selection watcher to include model
+watch(selectedProviderId, (newValue) => {
+    const provider = persistedStore.aiProviders.find(p => p.id === newValue);
+    if (provider) {
+        persistedStore.selectedProvider = {
+            providerId: provider.id,
+            model: provider.models[0] // Select first model by default
+        };
+        selectedModel.value = provider.models[0];
+    }
+});
+
+// Add model selection watcher
+watch(selectedModel, (newValue) => {
+    if (newValue) {
+        persistedStore.selectedProvider = {
+            providerId: selectedProviderId.value,
+            model: newValue
+        };
+    }
+});
+
 </script>
