@@ -1,6 +1,6 @@
 [package]
 name = "ai-assistant-for-jira-desktop"
-version = "0.3.0"
+version = "0.3.1"
 description = "AI Assistant powered Jira application"
 authors = ["Péter Blénessy"]
 edition = "2021"

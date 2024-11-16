@@ -8,10 +8,19 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for in-app notifications.
 - Add support for notifying the user when an issue type without template is encountered.
 - Fix bug where some expansion rows throw error.
-- Add option to delete jira and provider configs from within the dropdown.
 - Add support for transformer.js
 
 ## Releases
+
+### v0.5.2 - 2024-11-16
+- Fixed bug in Jira and Provider settings where the selected item looked indented and not dense.
+- Changed delete icon highlight in jira and provider settings to rounded.
+- Changed some labels in PromptManagement component to be more concise.
+- Fixed issue in JqlQuery table where issue icon and key were displayed on different lines.
+- Fixed flickering issue when expanding row in JqlQuery table.
+- Remove unnecessary white space below the action buttons in settings dialog.
+- Updated button icons and classes to be more consistent.
+- Updated package dependencies.
 
 ### v0.5.1 - 2024-11-15
 - Updated system prompt with instruction to not change field titles.
@@ -29,7 +38,7 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Added InfoBox component to display dismissible information.
 - Fixed some input field validation issues.
 - Updated brand colors and aligned button styles.
-- Change response format to markdown to get a better user experience, i.e. faster responses.
+- Changed response format to markdown to get a better user experience, i.e. faster responses.
 - Refactored MarkdownViewer component so any component can use it to display markdown formatted text.
 - Added issue type definitions to system message.
 - Refactored code to support user defined fields dynamically.
