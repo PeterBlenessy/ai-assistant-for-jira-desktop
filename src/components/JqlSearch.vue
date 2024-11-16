@@ -5,7 +5,8 @@
                 @keydown.enter="performSearch">
                 <template v-slot:prepend>
                     <q-btn dense flat icon="mdi-history" :disabled="searchHistory.length == 0"
-                        @click.stop="history = true">
+                        @click.stop="history = true"
+                    >
                         <q-menu anchor="bottom left" self="top left">
                             <q-list style="min-width: 200px">
                                 <q-item v-for="(query, index) in searchHistory" :key="index" v-close-popup clickable
@@ -13,7 +14,8 @@
                                     <q-item-section>{{ query }}</q-item-section>
                                     <q-item-section side>
                                         <q-btn dense flat size="sm" icon="mdi-delete-outline"
-                                            @click.stop="removeQueryFromHistory(query)" />
+                                            @click.stop="removeQueryFromHistory(query)" 
+                                        />
                                     </q-item-section>
                                 </q-item>
                             </q-list>
@@ -24,9 +26,16 @@
         </q-card-section>
 
         <q-card-section flat v-if="searchResults.length != 0">
-            <q-table bordered flat row-key="id" :columns="columns" :rows="searchResults"
-                :visible-columns="visibleColumns" v-model:pagination="pagination" :rows-per-page-options="[10, 20, 50]"
-                @request="onRequest" :loading="loading" class="my-sticky-header-table q-pt-none q-ma-none" wrap-cells>
+            <q-table bordered flat row-key="id" class="my-sticky-header-table q-pt-none q-ma-none" 
+                :columns="columns" 
+                :rows="searchResults"
+                :rows-per-page-options="[10, 20, 50]"
+                :visible-columns="visibleColumns"
+                v-model:pagination="pagination" 
+                @request="onRequest" 
+                :loading="loading" 
+                wrap-cells
+            >
 
                 <!-- Header columns -->
                 <template v-slot:header="props">
@@ -44,14 +53,18 @@
                     <q-tr :props="props" @click.stop="props.expand = !props.expand">
                         <q-td auto-width>
                             <q-btn size="sm" flat dense @click.stop="props.expand = !props.expand"
-                                :icon="props.expand ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
+                                :icon="props.expand ? 'mdi-chevron-up' : 'mdi-chevron-down'" 
+                            />
                         </q-td>
                         <!-- Body columns -->
                         <q-td v-for="col in props.cols" :key="col.name" :props="props">
                             <div v-if="col.name == 'key'" class="row items-center justify-between">
-                                <q-img :src="props.row.issueTypeIconURL" spinner-color="primary"
-                                    style="width: 18px; height: 18px;" class="q-mr-xs" />
-                                <div>{{ col.value }}</div>
+                                <q-chip dense square color="transparent" :clickable="false" :ripple="false" class="q-pa-none" >
+                                    <q-img :src="props.row.issueTypeIconURL" spinner-color="primary"
+                                        style="width: 16px; height: 16px;" class="q-mr-xs q-pa-none" 
+                                    />
+                                    {{ col.value }}
+                            </q-chip>
                             </div>
                             <div v-else>
                                 {{ col.value }}
@@ -64,19 +77,6 @@
                             <IssueFields :issueKey="props.row.key" />
                         </q-td>
                     </q-tr>
-                </template>
-                <template v-slot:body-cell-key="props">
-                    <q-td :props="props">
-                        <div>
-                            <q-badge color="purple" :label="props.value">
-                                <q-img :src="getIssueField('issuetype.iconUrl')" spinner-color="primary"
-                                    style="width: 18px; height: 18px;" class="q-mr-xs" />
-                            </q-badge>
-                        </div>
-                        <div class="my-table-details">
-                            {{ props.row.details }}
-                        </div>
-                    </q-td>
                 </template>
             </q-table>
         </q-card-section>
@@ -110,7 +110,6 @@ const columns = [
         label: "Key",
         field: "key",
         align: "center",
-        style: "width: 100px",
         required: true,
     },
     {
