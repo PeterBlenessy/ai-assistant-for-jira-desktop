@@ -24,7 +24,7 @@
                         />
                     </template>
                     <template v-else>
-                        <q-item-label>Template Name</q-item-label>
+                        <q-item-label>Name</q-item-label>
                         <q-item-label caption>{{ currentTemplateInfo.name }}</q-item-label>
                     </template>
                 </q-item-section>
@@ -58,7 +58,7 @@
                             />
                         </template>
                         <template v-else>
-                            <q-item-label>Definition of the issue type</q-item-label>
+                            <q-item-label>Definition</q-item-label>
                             <q-item-label caption>{{ currentTemplateInfo.definition }}</q-item-label>
                         </template>
                     </q-item-section>
