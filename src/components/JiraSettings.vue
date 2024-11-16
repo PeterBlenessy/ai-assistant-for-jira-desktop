@@ -2,13 +2,14 @@
     <div>
         <div v-if="mode === 'view'">
             <!-- Jira Config Dropdown -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-select
                         v-model="selectedJiraConfigName"
                         :options="jiraConfigOptions"
                         label="JIRA Config"
                         dense
+                        options-dense
                         filled
                         emit-value
                         map-options
@@ -26,11 +27,11 @@
                 </q-item-section>
             </q-item>
             <!-- Edit and Add New Buttons -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section align="right">
-                    <div class="q-gutter-sm">
-                        <q-btn label="Add New" @click="addJiraConfig" size="sm"/>
-                        <q-btn label="Edit" @click="editJiraConfig" size="sm"/>
+                    <div class="q-gutter-sm q-ma-none">
+                        <q-btn icon="mdi-plus" label="Add New" @click="addJiraConfig" size="sm" class="q-pl-xs" />
+                        <q-btn icon="mdi-pencil-outline" label="Edit" @click="editJiraConfig" size="sm" class="q-pl-xs" />
                     </div>
                 </q-item-section>
             </q-item>
@@ -38,7 +39,7 @@
 
         <div v-else>
             <!-- Config Name -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editJiraConfigData.name"
@@ -49,7 +50,7 @@
                 </q-item-section>
             </q-item>
             <!-- Jira Server Address -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editJiraConfigData.serverAddress"
@@ -60,7 +61,7 @@
                 </q-item-section>
             </q-item>
             <!-- Personal Access Token -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editJiraConfigData.personalAccessToken"
@@ -81,9 +82,9 @@
                 </q-item-section>
             </q-item>
             <!-- Save and Cancel Buttons -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section align="right">
-                    <div class="q-gutter-sm">
+                    <div class="q-gutter-sm q-ma-none">
                         <q-btn label="Save" color="primary" size="sm" @click="saveJiraConfig" />
                         <q-btn label="Cancel" size="sm" @click="cancelEdit" />
                     </div>
@@ -100,8 +101,8 @@
             </q-card-section>
 
             <q-card-actions align="right">
-                <q-btn flat label="Cancel" color="primary" v-close-popup />
-                <q-btn flat label="Delete" color="negative" @click="deleteConfig" v-close-popup />
+                <q-btn dense label="Cancel" size="sm" v-close-popup />
+                <q-btn dense label="Delete" color="negative" size="sm" @click="deleteConfig" v-close-popup />
             </q-card-actions>
         </q-card>
     </q-dialog>

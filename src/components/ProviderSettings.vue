@@ -2,13 +2,14 @@
     <div>
         <div v-if="mode === 'view'">
             <!-- AI Provider Dropdown -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-select
                         v-model="selectedProviderId"
                         :options="providerOptions"
                         label="AI Provider"
                         dense
+                        options-dense
                         filled
                         emit-value
                         map-options
@@ -26,13 +27,14 @@
                 </q-item-section>
             </q-item>
             <!-- Model Selection Dropdown -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-select
                         v-model="selectedModel"
                         :options="modelOptions"
                         label="AI Model"
                         dense
+                        options-dense
                         filled
                         emit-value
                         map-options
@@ -50,11 +52,11 @@
                 </q-item-section>
             </q-item>
             <!-- Edit and Add New Buttons -->
-            <q-item>
-                <q-item-section  align="right">
-                    <div class="q-gutter-sm">
-                        <q-btn label="Add New" @click="addProvider" size="sm"/>
-                        <q-btn label="Edit" @click="editProvider" size="sm"/>
+            <q-item class="q-pa-none">
+                <q-item-section align="right">
+                    <div class="q-gutter-sm q-ma-none">
+                        <q-btn icon="mdi-plus" label="Add New" @click="addProvider" size="sm" class="q-pl-xs" />
+                        <q-btn icon="mdi-pencil-outline" label="Edit" @click="editProvider" size="sm" class="q-pl-xs" />
                     </div>
                 </q-item-section>
             </q-item>
@@ -62,7 +64,7 @@
 
         <div v-else>
             <!-- Provider Name -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editProviderData.name"
@@ -73,7 +75,7 @@
                 </q-item-section>
             </q-item>
             <!-- AI Model -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editProviderData.model"
@@ -84,7 +86,7 @@
                 </q-item-section>
             </q-item>
             <!-- API Endpoint -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editProviderData.baseURL"
@@ -95,7 +97,7 @@
                 </q-item-section>
             </q-item>
             <!-- API Key -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section>
                     <q-input
                         v-model="editProviderData.apiKey"
@@ -116,9 +118,9 @@
                 </q-item-section>
             </q-item>
             <!-- Save and Cancel Buttons -->
-            <q-item>
+            <q-item class="q-pa-none">
                 <q-item-section align="right">
-                    <div class="q-gutter-sm">
+                    <div class="q-gutter-sm q-ma-none">
                         <q-btn label="Save" color="primary" size="sm" @click="saveProvider" />
                         <q-btn label="Cancel" size="sm" @click="cancelEdit" />
                     </div>
@@ -135,8 +137,8 @@
             </q-card-section>
 
             <q-card-actions align="right">
-                <q-btn flat label="Cancel" color="primary" v-close-popup />
-                <q-btn flat label="Delete" color="negative" @click="deleteProvider" v-close-popup />
+                <q-btn dense label="Cancel" size="sm" v-close-popup />
+                <q-btn dense label="Delete" color="negative" size="sm" @click="deleteProvider" v-close-popup />
             </q-card-actions>
         </q-card>
     </q-dialog>
@@ -149,8 +151,8 @@
             </q-card-section>
 
             <q-card-actions align="right">
-                <q-btn flat label="Cancel" color="primary" v-close-popup />
-                <q-btn flat label="Delete" color="negative" @click="deleteModel" v-close-popup />
+                <q-btn dense label="Cancel" size="sm" v-close-popup />
+                <q-btn dense label="Delete" color="negative" size="sm" @click="deleteModel" v-close-popup />
             </q-card-actions>
         </q-card>
     </q-dialog>

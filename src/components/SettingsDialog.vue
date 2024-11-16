@@ -10,11 +10,11 @@
                 <q-separator />
 
                 <q-tab-panels v-model="activeTab">
-                    <q-tab-panel name="jira">
+                    <q-tab-panel name="jira" class="q-pa-none q-pt-sm">
                         <JiraSettings />
                     </q-tab-panel>
 
-                    <q-tab-panel name="provider">
+                    <q-tab-panel name="provider" class="q-pa-none q-pt-sm">
                         <ProviderSettings />
                     </q-tab-panel>
                 </q-tab-panels>
