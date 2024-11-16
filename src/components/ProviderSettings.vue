@@ -17,7 +17,7 @@
                             <q-item v-bind="scope.itemProps" @click.stop="selectProvider(scope.opt.value)">
                                 <q-item-section>{{ scope.opt.label }}</q-item-section>
                                 <q-item-section side v-if="!PROTECTED_PROVIDER_IDS.includes(scope.opt.value)">
-                                    <q-btn flat round dense size="sm" icon="mdi-close"
+                                    <q-btn flat dense size="sm" icon="mdi-close"
                                         @click.stop="confirmDeleteProvider(scope.opt.value)" />
                                 </q-item-section>
                             </q-item>
@@ -41,7 +41,7 @@
                             <q-item v-bind="scope.itemProps">
                                 <q-item-section>{{ scope.opt.label }}</q-item-section>
                                 <q-item-section side v-if="!isProtectedModel(scope.opt.value)">
-                                    <q-btn flat round dense size="sm" icon="mdi-close"
+                                    <q-btn flat dense size="sm" icon="mdi-close"
                                         @click.stop="confirmDeleteModel(scope.opt.value)" />
                                 </q-item-section>
                             </q-item>

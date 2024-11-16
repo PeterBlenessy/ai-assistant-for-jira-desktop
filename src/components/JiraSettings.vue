@@ -17,7 +17,7 @@
                             <q-item v-bind="scope.itemProps" @click.stop="selectConfig(scope.opt.value)">
                                 <q-item-section>{{ scope.opt.label }}</q-item-section>
                                 <q-item-section side>
-                                    <q-btn flat round dense size="sm" icon="mdi-close"
+                                    <q-btn flat dense size="sm" icon="mdi-close"
                                         @click.stop="confirmDeleteConfig(scope.opt.value)" />
                                 </q-item-section>
                             </q-item>
