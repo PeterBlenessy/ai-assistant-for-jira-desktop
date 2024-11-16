@@ -66,9 +66,6 @@
             </div>
         </div>
     </div>
-    <div v-else class="row q-col-gutter-md">
-        <p>Loading description...</p>
-    </div>
 </template>
 
 <script setup>
