@@ -13,11 +13,6 @@
                         emit-value
                         map-options
                     >
-                        <template v-slot:selected-item="scope">
-                            <q-item v-bind="scope.itemProps">
-                                <q-item-section>{{ scope.opt.label }}</q-item-section>
-                            </q-item>
-                        </template>
                         <template v-slot:option="scope">
                             <q-item v-bind="scope.itemProps" @click.stop="selectConfig(scope.opt.value)">
                                 <q-item-section>{{ scope.opt.label }}</q-item-section>
