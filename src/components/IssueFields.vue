@@ -33,10 +33,10 @@
                 <q-list v-if="improvementProposal && hasImprovements" separator bordered padding
                     class="rounded-borders">
                     <template v-for="(field, key) in improvementProposal" :key="key">
-                        <q-item v-if="field?.updated == true" style="cursor: default">
+                        <q-item v-if="field?.updated == 'true' || field?.updated == true" style="cursor: default">
                             <q-item-section>
                                 <q-item-label class="text-capitalize text-subtitle2">
-                                    {{ field?.title || field }}
+                                    {{ field?.label || field }}
                                 </q-item-label>
                                 <q-item-label v-if="field?.text">
                                     <MarkdownViewer :content="field?.text" />
@@ -75,10 +75,10 @@ import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import MarkdownViewer from './MarkdownViewer.vue';
 import { useTemplateStore } from '../stores/template-store';
 import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../helpers/prompts.js";
+import yaml from 'js-yaml';
 
 import {
-    parseFrontMatter,
-    parseMarkdown,
+    parseYAML,
     formatJiraMarkup,
     extractDescriptionSections,
     formatDescription
@@ -94,6 +94,7 @@ const props = defineProps({
 const loading = ref(false);
 const issueFields = ref(null);
 const improvementProposal = ref(null);
+const chunks = ref(0);
 
 const { jiraClient } = useJiraClient();
 const { openAIClient } = useOpenAIClient();
@@ -146,6 +147,7 @@ const getIssueTypeInstructions = (issueType) => {
 }
 const generateImprovement = async (issueKey) => {
     loading.value = true;
+    chunks.value = 0;
     const issueType = getIssueField('issuetype.name');
 
     const userMessage = {
@@ -154,7 +156,7 @@ const generateImprovement = async (issueKey) => {
         "summary": getIssueField('summary'),
         "description": getIssueField('description')
     };
-
+    let fullResponse = "";
     try {
         const stream = await openAIClient.value.createChatCompletion([
             { role: "system", content: PROMPT_GENERATE_IMPROVEMENT_MARKDOWN },
@@ -162,34 +164,18 @@ const generateImprovement = async (issueKey) => {
             { role: "user", content: JSON.stringify(userMessage) }
         ]);
 
-        let fullResponse = "";
-        let frontMatter = {};
-        let frontMatterParsed = false;
-
         for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || "";
-            fullResponse += content;
+            fullResponse += chunk.choices[0]?.delta?.content || "";;
+            improvementProposal.value = parseYAML(fullResponse);
 
-            // Parse frontMatter only if needed
-            if (!frontMatterParsed) {
-                const parts = fullResponse.split('---');
-
-                if (parts.length === 3) { // All front matter received
-                    frontMatter = parseFrontMatter(parts[1]);
-                    // We've parsed and stored frontMatter. Keep only the markdown.
-                    fullResponse = parts[2];
-                    // the improvementProposal object will build on frontMatter object
-                    improvementProposal.value = frontMatter;
-                    frontMatterParsed = true;
-                }
-            } else {
-                improvementProposal.value = parseMarkdown(fullResponse, improvementProposal.value);
-            }
+            // Wait to improve streamed response UX
+            await new Promise(resolve => setTimeout(resolve, 5));
         }
     } catch (error) {
         console.error("Error fetching improvements:", error);
     } finally {
         loading.value = false;
+        console.log(fullResponse);
     }
 };
 

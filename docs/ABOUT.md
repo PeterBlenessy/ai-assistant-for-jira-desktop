@@ -5,12 +5,6 @@ A powerful desktop application that brings artificial intelligence to your Jira 
 ## Overview
 AI Assistant for Jira Desktop seamlessly integrates with your Jira workspace, providing intelligent automation and assistance for your daily tasks. Whether you're a project manager, developer, or team member, this tool helps streamline your Jira workflow with AI-powered features.
 
-## Key Features
-- **AI-Powered Task Management**: Let AI help you create, update, and organize your Jira tasks more efficiently
-- **Smart Automation**: Automate repetitive tasks and get intelligent suggestions for your workflow
-- **Desktop Integration**: Native desktop application that works seamlessly with your existing Jira setup
-- **Enhanced Productivity**: Save time and reduce manual work with AI-assisted operations
-
 ## Benefits
 - 🚀 Boost your productivity with AI-powered assistance
 - 💡 Get intelligent suggestions for task management
@@ -27,9 +21,7 @@ AI Assistant for Jira Desktop seamlessly integrates with your Jira workspace, pr
 
 ### Core Functionality
 - **Advanced JQL Search**: Powerful Jira query interface with persistent search history
-- **Detailed Issue Views**: Comprehensive display of Jira issue information
 - **Custom Jira Integration**: Direct REST API implementation for reliable connectivity
-- **Dark Mode Support**: Customizable UI experience
 
 ### AI-Powered Features
 - **Improvement Proposals**: AI-generated suggestions for issues
@@ -45,7 +37,6 @@ AI Assistant for Jira Desktop seamlessly integrates with your Jira workspace, pr
 ## Technical Highlights
 - Custom Jira REST API implementation
 - Robust server connection validation
-- Docker support for local Jira server testing
 - Flexible LLM provider configuration
 
 ## Roadmap

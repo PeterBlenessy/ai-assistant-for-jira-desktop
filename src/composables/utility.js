@@ -1,49 +1,96 @@
-import yaml from 'js-yaml';
+export function parseYAML(yamlStr) {
+    // Remove delimiters
+    const content = yamlStr.trim().replace(/^---\n?/, '').replace(/\n?---$/, '');
 
-// Parse YAML in front matter to an object
-export const parseFrontMatter = (yamlStr) => {
-    try {
-        // Parse YAML string into JavaScript object
-        const parsedData = yaml.load(yamlStr);
+    const lines = content.split('\n');
 
-        // Handle object data transformation or validation as needed
-        for (const key in parsedData) {
-            if (parsedData[key] && typeof parsedData[key] === 'object') {
-                // Check for any missing fields or conflicts (like the "title" conflict in mvp)
-                if (parsedData[key].title && parsedData[key].updated === null) {
-                    parsedData[key].updated = 'undefined';
-                }
+    let result = {};
+    let currentKey = null;
+    let currentObject = null;
+    let currentArray = null;
+    let isMultiLine = false;
+    let multiLineValue = '';
+
+    lines.forEach((rawLine, index) => {
+        // Check for indentation before trimming
+        const isIndented = rawLine.startsWith(' ');
+        const line = rawLine.trim();
+
+        if (isMultiLine) {
+            if ((isIndented || line === '') && !line.includes(':')) {
+                // Continue collecting lines for the multi-line string
+                multiLineValue += (multiLineValue ? '\n' : '') + rawLine.trim();
+                return;
+            } else {
+                // End of multi-line string
+                currentObject[currentKey] = multiLineValue;
+                isMultiLine = false;
+                multiLineValue = '';
             }
         }
 
-        return parsedData;
-    } catch (e) {
-        console.error("Error parsing YAML:", e);
-    }
-}
+        if (line.includes(':') && !isIndented) {
+            // Handle top-level key-value pairs
+            const [key, ...rest] = line.split(':');
+            currentKey = key.trim();
+            let value = rest.join(':').trim();
 
-// Parse content as markdown to object with known properties
-export const parseMarkdown = (mdContent, objContent) => {
-    const sections = mdContent.split('###').filter(s => s.trim());
-    sections.forEach(section => {
-        const lines = section.trim().split('\n');
-        const title = lines[0].trim();
-        const content = lines.slice(1).join('\n').trim();
+            if (value === '|') {
+                // Start of a multi-line string
+                isMultiLine = true;
+                multiLineValue = '';
+            } else if (value) {
+                result[currentKey] = value.replace(/"/g, ''); // Remove quotes from value
+                currentObject = null; // Reset current object
+                currentArray = null; // Reset current array
+            } else {
+                // Initialize an object for nested fields
+                currentObject = {};
+                result[currentKey] = currentObject; // Link the object to result
+                currentArray = null; // Reset current array
+            }
+        } else if (currentObject && isIndented) {
+            // Handle nested key-value pairs (indented lines)
+            if (line.startsWith('-')) {
+                // Handle list items
+                const value = line.slice(1).trim().replace(/"/g, '') || null;
+                if (!currentArray) {
+                    currentArray = [];
+                    currentObject[currentKey] = currentArray;
+                }
+                currentArray.push(value);
+            } else {
+                const [key, ...rest] = line.split(':');
+                const fieldKey = key.trim();
+                let value = rest.join(':').trim() || null;
 
-        // Find a matching property in the objContent based on the title
-        const matchingKey = Object.keys(objContent).find(key => 
-            objContent[key].title === title
-        );
+                if (value === '|') {
+                    // Start of a multi-line string
+                    isMultiLine = true;
+                    multiLineValue = '';
+                    currentKey = fieldKey;
+                } else {
+                    if (value) {
+                        value = value.replace(/"/g, ''); // Remove quotes from value
+                    }
 
-        // If a matching key is found, assign content to the text property
-        if (matchingKey) {
-            objContent[matchingKey].text = content; // Assign content to the text property
+                    currentObject[fieldKey] = value;
+                    currentArray = null; // Reset current array
+
+                    // Set currentKey to fieldKey for potential list items
+                    currentKey = fieldKey;
+                }
+            }
         }
     });
-    
-    return objContent;
-};
 
+    // Handle any remaining multi-line value at the end of the document
+    if (isMultiLine) {
+        currentObject[currentKey] = multiLineValue;
+    }
+
+    return result;
+}
 // Convert Jira markup to markdown
 export const formatJiraMarkup = (text) => {
     if (!text) return '';

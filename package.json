@@ -1,7 +1,7 @@
 {
     "name": "ai-assistant-for-jira-desktop",
     "private": true,
-    "version": "0.5.2",
+    "version": "0.5.3",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -20,7 +20,6 @@
         "@tauri-apps/plugin-http": "~2",
         "@tauri-apps/plugin-shell": ">=2.0.0",
         "@tauri-apps/plugin-window-state": "~2",
-        "js-yaml": "^4.1.0",
         "markdown-it": "^14.1.0",
         "openai": "^4.63.0",
         "pinia": "^2.0.0",

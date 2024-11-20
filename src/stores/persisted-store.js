@@ -6,14 +6,14 @@ export const DEFAULT_PROVIDERS = [
     {
         id: 'openai',
         name: 'OpenAI',
-        models: ['gpt-4', 'gpt-3.5-turbo'],
+        models: ['gpt-4', 'gpt-4o'],
         baseURL: 'https://api.openai.com/v1',
         apiKey: ''
     },
     {
         id: 'ollama',
         name: 'Ollama',
-        models: ['llama2', 'mistral'],
+        models: ['llama3', 'llama3.2:1b', 'mistral'],
         baseURL: 'http://localhost:11434/v1',
         apiKey: ''
     }

@@ -12,6 +12,12 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.3 - 2024-11-20 - unreleased
+- Changed prompt to request responses in YAML format to improve support for streamed responses.
+- Added support for array of strings as input to MarkdowViewer component.
+- Updated default models for AI providers.
+- Updated dependencies.
+
 ### v0.5.2 - 2024-11-16
 - Fixed bug in Jira and Provider settings where the selected item looked indented and not dense.
 - Changed delete icon highlight in jira and provider settings to rounded.

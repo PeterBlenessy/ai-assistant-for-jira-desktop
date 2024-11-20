@@ -49,7 +49,7 @@ leave it as is and send it back using the original value of the "issueKey".
 `;
 
 export const PROMPT_GENERATE_IMPROVEMENT_MARKDOWN = `
-You are tasked with reviewing and improving Jira issues, focusing on the summary, description, and child issues. 
+You are tasked with reviewing and improving Jira issues, focusing on the summary, description, and potential child issues. 
 Analyze the information and suggest improvements where necessary.
 
 Potential issues include:
@@ -82,60 +82,52 @@ They may include sections for Minimum Viable Product (MVP) and Acceptance Criter
 
 Your task is to suggest improvements only when necessary.
 
-Your response will include only the improved fields, 
-plus any additional sections defined in the second system message.
-Do not return any unchanged fields.
+For each section, you need to include all of the following parameters: label, updated, text, and comment.
+- label: the name of the section used in the UI, such as "Summary" or "Description"
+- updated: true, when you have made changes to the text, false if not
+- text: the updated text for the section, could be merely grammatical or more substantial changes
+- comment: an explanation of the new text you suggest, no improvement ideas should be included here
 
-Use the “updated” key to indicate changes and provide brief feedback for each field.
+Format your response in the below YAML format.
+Note: this is an example, your response may include additional fields not listed here.
 
-Format your response in markdown as defined below, including the frontmatter too.
-
----
-issueKey: "ISSUE-123"
-issueType: "Story"
+issueKey: ISSUE-123
+issueType: Story
 
 summary:
-    title: "Summary" // Do not change this value in your response
+    label: Summary
     updated: true
-    text: "Improved summary of the issue."
-    comment: "The summary is too vague."
+    text: Summary text
+    comment: The summary is too vague.
 
 description:
-    title: "Description" // Do not change this value in your response
+    label: Description
     updated: true
-    text: "Improved description of the issue."
-    comment: "The description was not clear enough."
+    text: Description text
+    comment: The description was not clear enough.
 
 mvp:
-    title: "Minimal Viable Product" // Do not change this value in your response
+    label: Minimal Viable Product
     updated: true
-    text: "MVP description."
-    comment: "The MVP is missing."
+    text: MVP text
+    comment: The MVP is missing.
 
 acceptanceCriteria:
-    title: "Acceptance Criteria" // Do not change this value in your response
+    label: Acceptance Criteria
     updated: true
-    text: "List of acceptance criterias.
-    comment: "The acceptance criteria were not specific enough."
----
-
-### Summary
-Brief description of the issue.
-
-### Description
-...
-
-### Minimal Viable Product
-
-### Acceptance Criteria
-
+    text:
+        - Acceptance criteria text 1
+        - Acceptance criteria text 2
+        - Acceptance criteria text 3
+        - ...
+    comment: The acceptance criteria were not specific enough.
 
 Be concise and ensure clarity for both engineers and Product Owners. 
 `;
 
 // Old prompt kept for reference
 
-export const PROMPT_GENERATE_DESCRIPTION = BASE_PROMPT + `
+export const PROMPT_GENERATE_STRUCTURED_IMPROVEMENT = BASE_PROMPT + `
 Your response MUST include summary, description, acceptance criteria, and an MVP (Minimum Viable Product) suggestion.
 
 When you suggest improvements to any of the "summary" or "description" fields, set the "updated" key's value to true for that particular field.
