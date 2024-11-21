@@ -9,10 +9,16 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for notifying the user when an issue type without template is encountered.
 - Fix bug where some expansion rows throw error.
 - Add support for transformer.js
+- Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
+
 
 ## Releases
 
-### v0.5.3 - 2024-11-20 - unreleased
+### v0.5.4 - 2024-11-21
+- Fixed issue of importing removed package js-yaml.
+- Added Jira Server connection status and server information in Jira settings dialog.
+
+### v0.5.3 - 2024-11-20
 - Changed prompt to request responses in YAML format to improve support for streamed responses.
 - Added support for array of strings as input to MarkdowViewer component.
 - Updated default models for AI providers.
