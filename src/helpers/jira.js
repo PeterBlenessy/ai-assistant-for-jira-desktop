@@ -117,12 +117,22 @@ const JiraClient = (options) => {
         }
     };
 
+    const getServerInfo = async () => {
+        try {
+            return await jiraFetch(`/rest/api/2/serverInfo`);
+        } catch (error) {
+            console.error(`Error in getServerInfo: ${error.message}`);
+            throw error;
+        }
+    };
+
     return {
         getIssue,
         getUser,
         searchIssues,
         getIssueDetails,
         updateIssue,
+        getServerInfo,  // Add this line
     };
 };
 
