@@ -75,7 +75,6 @@ import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import MarkdownViewer from './MarkdownViewer.vue';
 import { useTemplateStore } from '../stores/template-store';
 import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../helpers/prompts.js";
-import yaml from 'js-yaml';
 
 import {
     parseYAML,
