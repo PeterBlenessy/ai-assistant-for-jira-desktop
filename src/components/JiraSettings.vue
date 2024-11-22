@@ -156,8 +156,10 @@
 import { ref, computed, watch } from 'vue';
 import { usePersistedStore } from '../stores/persisted-store';
 import JiraClient from '../helpers/jira';
+import { useJiraClient } from "../composables/JiraClient.js";
 
 const persistedStore = usePersistedStore();
+const { jiraClient } = useJiraClient();
 
 const selectedJiraConfigName = ref(persistedStore.selectedJiraConfig.name);
 const jiraConfigOptions = computed(() =>
@@ -212,14 +214,7 @@ function formatValue(value) {
 
 async function fetchServerInfo() {
     try {
-        const config = persistedStore.jiraConfigs.find(c => c.name === selectedJiraConfigName.value);
-        if (config) {
-            const client = JiraClient({
-                host: config.serverAddress,
-                personalAccessToken: config.personalAccessToken
-            });
-            serverInfo.value = await client.getServerInfo();
-        }
+        serverInfo.value = await jiraClient.value.getServerInfo();
     } catch (error) {
         console.error('Failed to fetch server info:', error);
         serverInfo.value = null;
