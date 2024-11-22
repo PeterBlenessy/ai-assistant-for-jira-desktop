@@ -130,33 +130,19 @@
     </q-dialog>
 
     <!-- Server Info Dialog -->
-    <q-dialog v-model="showServerInfo">
-        <q-card style="min-width: 350px">
-            <q-card-section>
-                <div class="text-h6">Jira Server Information</div>
-            </q-card-section>
-
-            <q-card-section v-if="serverInfo">
-                <div class="server-info-grid">
-                    <template v-for="(value, key) in displayableServerInfo" :key="key">
-                        <div class="text-caption text-weight-medium">{{ formatLabel(key) }}:</div>
-                        <div class="text-caption">{{ formatValue(value) }}</div>
-                    </template>
-                </div>
-            </q-card-section>
-
-            <q-card-actions align="right">
-                <q-btn flat label="Close" color="primary" v-close-popup />
-            </q-card-actions>
-        </q-card>
-    </q-dialog>
+    <InfoDialog
+        v-model="showServerInfo"
+        title="Jira Server Information"
+        :info="serverInfo"
+        :exclude-keys="['healthChecks']"
+    />
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { usePersistedStore } from '../stores/persisted-store';
-import JiraClient from '../helpers/jira';
 import { useJiraClient } from "../composables/JiraClient.js";
+import InfoDialog from './InfoDialog.vue';
 
 const persistedStore = usePersistedStore();
 const { jiraClient } = useJiraClient();
@@ -184,33 +170,6 @@ const configToDelete = ref(null);
 
 const serverInfo = ref(null);
 const showServerInfo = ref(false);
-
-const displayableServerInfo = computed(() => {
-    if (!serverInfo.value) return {};
-    
-    const info = { ...serverInfo.value };
-    // Remove healthChecks if you don't want to display them
-    delete info.healthChecks;
-    return info;
-});
-
-function formatLabel(key) {
-    return key
-        .replace(/([A-Z])/g, ' $1')
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-}
-
-function formatValue(value) {
-    if (Array.isArray(value)) {
-        return value.join('.');
-    }
-    if (value instanceof Date) {
-        return value.toLocaleString();
-    }
-    return value;
-}
 
 async function fetchServerInfo() {
     try {
@@ -306,10 +265,4 @@ if (selectedJiraConfigName.value) {
 </script>
 
 <style scoped>
-.server-info-grid {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px 16px;
-    align-items: baseline;
-}
 </style>
