@@ -97,7 +97,7 @@ const JiraClient = (options) => {
 
     const updateIssue = async (issueKey, data) => {
         try {
-            const response = await fetch(`${host}/rest/api/2/issue/${issueKey}`, {
+            const response = await fetch(`${host}/rest/api/latest/issue/${issueKey}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${personalAccessToken}`,
@@ -119,7 +119,7 @@ const JiraClient = (options) => {
 
     const getServerInfo = async () => {
         try {
-            return await jiraFetch(`/rest/api/2/serverInfo`);
+            return await jiraFetch(`/rest/api/latest/serverInfo`);
         } catch (error) {
             console.error(`Error in getServerInfo: ${error.message}`);
             throw error;

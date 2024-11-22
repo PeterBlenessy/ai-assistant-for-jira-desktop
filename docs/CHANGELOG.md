@@ -10,9 +10,17 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Fix bug where some expansion rows throw error.
 - Add support for transformer.js
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
-
+- Check available issuetypes: api/latest/issuetype
+- Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
 
 ## Releases
+
+### v0.5.5 - 2024-11-22
+- Fixed issue where jira calls were made directly instead of via the JiraClient composable.
+- Added new component InfoDialog.vue to display information in a dialog, and use it for server info.
+- Added support for displaying detailed user information when clicking the user avatar or name in the left drawer.
+- Updated Jira server connection indicator icons.
+- Added support for signing, notarizing, and updating the application using GitHub Actions.
 
 ### v0.5.4 - 2024-11-21
 - Fixed issue of importing removed package js-yaml.
