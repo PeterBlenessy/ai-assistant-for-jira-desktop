@@ -1,6 +1,6 @@
 [package]
 name = "ai-assistant-for-jira-desktop"
-version = "0.3.1"
+version = "0.3.2"
 description = "AI Assistant powered Jira application"
 authors = ["Péter Blénessy"]
 edition = "2021"
@@ -25,4 +25,5 @@ serde_json = "1"
 tauri-plugin-http = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"

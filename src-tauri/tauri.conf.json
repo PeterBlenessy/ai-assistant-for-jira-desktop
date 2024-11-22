@@ -23,6 +23,7 @@
     },
     "bundle": {
         "active": true,
+        "createUpdaterArtifacts": true,
         "targets": "all",
         "icon": [
             "icons/32x32.png",
@@ -31,5 +32,16 @@
             "icons/icon.icns",
             "icons/icon.ico"
         ]
+    },
+    "plugins": {
+        "updater": {
+            "endpoints": [
+                "https://github.com/PeterBlenessy/ai-assistant-for-jira-desktop/releases/latest/download/latest.json"
+            ],
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDkxMzkzREMyOTg3M0QyREEKUldUYTBuT1l3ajA1a1Q0NTlkaHh0VHVQY2piWUFoVjJiMnFiQXFKTDNiSWZUMFg3U0F4aHhldEsK",
+            "windows": {
+                "installMode": "passive"
+            }
+        }
     }
 }
