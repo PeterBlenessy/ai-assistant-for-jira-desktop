@@ -41,7 +41,7 @@
                     >
                         {{ serverInfo ? 'version '+serverInfo.version : 'no connection' }}
                         <q-icon class="q-pl-md" size="xs" 
-                            :name="serverInfo ? 'mdi-lan-connect' : 'mdi-lan-disconnect'" 
+                            :name="serverInfo ? 'mdi-server-network' : 'mdi-server-network-off'" 
                             :color="serverInfo ? 'positive' : 'negative'" 
                         />
                     </q-badge>
