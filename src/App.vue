@@ -10,6 +10,7 @@ import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import AboutDialog from './components/AboutDialog.vue';
 import ChangelogDialog from './components/ChangelogDialog.vue';
+import InfoDialog from './components/InfoDialog.vue';
 
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
@@ -22,6 +23,7 @@ const showMenu = ref(false);
 const isConnected = ref(false);
 const user = ref(null);
 const jqlSearch = ref(null);
+const showUserInfoDialog = ref(false);
 
 const { jiraClient } = useJiraClient();
 
@@ -134,20 +136,18 @@ function toggleRightPane() {
         </q-header>
 
         <!-- Left drawer -->
-        <q-drawer side="left" v-model="leftDrawer" bordered :width="250">
+        <q-drawer side="left" v-model="leftDrawer" bordered :width="200">
             <SearchHistory @select="handleHistorySelect" />
             <q-separator inset />
 
-            <q-item class="fixed-bottom q-pa-xs" :clickable=false>
+            <q-item class="fixed-bottom q-pa-sm" clickable @click="showUserInfoDialog = true">
                 <q-item-section side>
-                    <q-icon dense flat :color="isConnected ? 'positive' : 'negative'"
-                        :name="isConnected ? 'mdi-lan-connect' : 'mdi-lan-disconnect'" />
+                    <q-avatar v-if="isConnected">
+                        <img :src="user.avatarUrls['48x48']" spinner-color="primary" style="width: 36px; height: 36px;" />
+                    </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                    <q-item-label>{{ isConnected ? user.displayName : "" }}</q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                    <q-btn flat dense icon="mdi-cog" @click="openSettingsDialog" />
+                    <q-item-label class="text-subtitle2">{{ isConnected ? user.displayName : "" }}</q-item-label>
                 </q-item-section>
             </q-item>
         </q-drawer>
@@ -181,6 +181,7 @@ function toggleRightPane() {
         <SettingsDialog v-model="showSettingsDialog" />
         <AboutDialog v-model="showAboutDialog" />
         <ChangelogDialog v-model="showChangelogDialog" />
+        <InfoDialog v-model="showUserInfoDialog" title="User Information" :info="user" />
 
     </q-layout>
 </template>

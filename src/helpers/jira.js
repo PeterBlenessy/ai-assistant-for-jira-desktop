@@ -57,7 +57,7 @@ const JiraClient = (options) => {
 
     const getUser = async () => {
         try {
-            return await jiraFetch(`/rest/api/latest/myself`);
+            return await jiraFetch(`/rest/api/latest/myself?expand=groups,applicationRoles`);
         } catch (error) {
             console.error(`Error in getUser: ${error.message}`);
             throw error;
@@ -126,9 +126,19 @@ const JiraClient = (options) => {
         }
     };
 
+    const getConfiguration = async () => {
+        try {
+            return await jiraFetch(`/rest/api/latest/configuration`);
+        } catch (error) {
+            console.error(`Error in getUser: ${error.message}`);
+            throw error;
+        }
+    };
+
     return {
         getIssue,
         getUser,
+        getConfiguration,
         searchIssues,
         getIssueDetails,
         updateIssue,
