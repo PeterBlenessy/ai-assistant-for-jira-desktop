@@ -11,6 +11,11 @@ import { storeToRefs } from 'pinia';
 import InfoDialog from './components/InfoDialog.vue';
 import MarkdownDialog from "./components/MarkdownDialog.vue";
 
+import aboutMd from '../docs/ABOUT.md?raw';
+import changelogMd from '../docs/CHANGELOG.md?raw';
+import gettingStartedMd from '../docs/GETTINGSTARTED.md?raw';
+
+
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
 const { darkMode, leftDrawer, splitterRatio, showRightPane } = storeToRefs(persistedStore);
@@ -32,17 +37,17 @@ const splitterLimits = ref([20, 80]);
 
 const appMenu = {
     about: {
-        filename: 'ABOUT.md',
+        content: aboutMd,
         title: 'About',
         icon: 'mdi-information-box-outline'
     },
     changelog: {
-        filename: 'CHANGELOG.md',
+        content: changelogMd,
         title: 'Changelog',
         icon: 'mdi-timeline-text-outline'
     },
     gettingStarted: {
-        filename: 'GETTINGSTARTE.md', // Ensure this matches the actual filename
+        content: gettingStartedMd,
         title: 'Getting Started Guide',
         icon: 'mdi-file-document-outline'
     }
@@ -114,18 +119,10 @@ function toggleRightPane() {
 }
 
 async function openMarkdownDialog(key) {
-    try {
-        const mdConfig = appMenu[key];
-        const module = await import(`../docs/${mdConfig.filename}?raw`);
-        markdownContent.value = module.default || module;
-        markdownTitle.value = mdConfig.title;
-        showMarkdownDialog.value = true;
-    } catch (error) {
-        console.error(`Error loading markdown: ${error}`);
-        markdownContent.value = '# Error\nFailed to load content.';
-        markdownTitle.value = 'Error';
-        showMarkdownDialog.value = true;
-    }
+    const mdConfig = appMenu[key];
+    markdownContent.value = mdConfig.content;
+    markdownTitle.value = mdConfig.title;
+    showMarkdownDialog.value = true;
 }
 
 </script>
@@ -149,13 +146,8 @@ async function openMarkdownDialog(key) {
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
                     <q-menu anchor="bottom right" self="top right">
                         <q-list dense style="min-width: 150px">
-                            <q-item v-for="(md, key) in appMenu" 
-                                    :key="key"
-                                    clickable 
-                                    dense 
-                                    v-ripple 
-                                    v-close-popup 
-                                    @click="openMarkdownDialog(key)">
+                            <q-item v-for="(md, key) in appMenu" :key="key" clickable dense v-ripple v-close-popup
+                                @click="openMarkdownDialog(key)">
                                 <q-item-section avatar>
                                     <q-icon :name="md.icon" />
                                 </q-item-section>
@@ -175,7 +167,8 @@ async function openMarkdownDialog(key) {
             <q-item class="fixed-bottom q-pa-sm" clickable @click="showUserInfoDialog = true">
                 <q-item-section side>
                     <q-avatar v-if="isConnected">
-                        <img :src="user.avatarUrls['48x48']" spinner-color="primary" style="width: 36px; height: 36px;" />
+                        <img :src="user.avatarUrls['48x48']" spinner-color="primary"
+                            style="width: 36px; height: 36px;" />
                     </q-avatar>
                 </q-item-section>
                 <q-item-section>
@@ -212,11 +205,7 @@ async function openMarkdownDialog(key) {
 
         <SettingsDialog v-model="showSettingsDialog" />
         <InfoDialog v-model="showUserInfoDialog" title="User Information" :info="user" />
-        <MarkdownDialog
-            v-model="showMarkdownDialog"
-            :content="markdownContent"
-            :title="markdownTitle"
-        />
+        <MarkdownDialog v-model="showMarkdownDialog" :content="markdownContent" :title="markdownTitle" />
     </q-layout>
 </template>
 <style scoped>

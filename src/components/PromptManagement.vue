@@ -263,7 +263,7 @@ const editingContent = ref({
 // Markdown content for the InfoBox
 const infoBoxMarkdown = `
 The below information is provided to the AI as guidance when generating improvements.
-You can edit any of the fields to guide the AI in the direction of your specific needs.
+You can edit any of the fields to emphasize your specific needs.
 
 Each issue type has a description, a responsible role, and a list of fields.
 
