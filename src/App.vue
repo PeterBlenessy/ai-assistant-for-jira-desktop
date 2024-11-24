@@ -8,27 +8,45 @@ import SearchHistory from './components/SearchHistory.vue';
 import PromptManagement from './components/PromptManagement.vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
-import AboutDialog from './components/AboutDialog.vue';
-import ChangelogDialog from './components/ChangelogDialog.vue';
 import InfoDialog from './components/InfoDialog.vue';
+import MarkdownDialog from "./components/MarkdownDialog.vue";
 
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
 const { darkMode, leftDrawer, splitterRatio, showRightPane } = storeToRefs(persistedStore);
 
 const showSettingsDialog = ref(false);
-const showAboutDialog = ref(false);
-const showChangelogDialog = ref(false);
 const showMenu = ref(false);
 const isConnected = ref(false);
 const user = ref(null);
 const jqlSearch = ref(null);
 const showUserInfoDialog = ref(false);
+const showMarkdownDialog = ref(false);
+const markdownContent = ref('');
+const markdownTitle = ref('');
 
 const { jiraClient } = useJiraClient();
 
 // Update the splitter limits ref
 const splitterLimits = ref([20, 80]);
+
+const appMenu = {
+    about: {
+        filename: 'ABOUT.md',
+        title: 'About',
+        icon: 'mdi-information-box-outline'
+    },
+    changelog: {
+        filename: 'CHANGELOG.md',
+        title: 'Changelog',
+        icon: 'mdi-timeline-text-outline'
+    },
+    gettingStarted: {
+        filename: 'GETTINGSTARTE.md', // Ensure this matches the actual filename
+        title: 'Getting Started Guide',
+        icon: 'mdi-file-document-outline'
+    }
+};
 
 function openSettingsDialog() {
     showSettingsDialog.value = true;
@@ -95,6 +113,21 @@ function toggleRightPane() {
     }
 }
 
+async function openMarkdownDialog(key) {
+    try {
+        const mdConfig = appMenu[key];
+        const module = await import(`../docs/${mdConfig.filename}?raw`);
+        markdownContent.value = module.default || module;
+        markdownTitle.value = mdConfig.title;
+        showMarkdownDialog.value = true;
+    } catch (error) {
+        console.error(`Error loading markdown: ${error}`);
+        markdownContent.value = '# Error\nFailed to load content.';
+        markdownTitle.value = 'Error';
+        showMarkdownDialog.value = true;
+    }
+}
+
 </script>
 
 <template>
@@ -116,18 +149,17 @@ function toggleRightPane() {
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
                     <q-menu anchor="bottom right" self="top right">
                         <q-list dense style="min-width: 150px">
-                            <q-item clickable dense v-ripple v-close-popup @click="showAboutDialog = true">
+                            <q-item v-for="(md, key) in appMenu" 
+                                    :key="key"
+                                    clickable 
+                                    dense 
+                                    v-ripple 
+                                    v-close-popup 
+                                    @click="openMarkdownDialog(key)">
                                 <q-item-section avatar>
-                                    <q-icon name="mdi-information-box-outline" />
+                                    <q-icon :name="md.icon" />
                                 </q-item-section>
-                                <q-item-section>About</q-item-section>
-                            </q-item>
-
-                            <q-item clickable v-ripple v-close-popup @click="showChangelogDialog = true">
-                                <q-item-section avatar>
-                                    <q-icon name="mdi-timeline-text-outline" />
-                                </q-item-section>
-                                <q-item-section>Changelog</q-item-section>
+                                <q-item-section>{{ md.title }}</q-item-section>
                             </q-item>
                         </q-list>
                     </q-menu>
@@ -179,10 +211,12 @@ function toggleRightPane() {
         </q-page-container>
 
         <SettingsDialog v-model="showSettingsDialog" />
-        <AboutDialog v-model="showAboutDialog" />
-        <ChangelogDialog v-model="showChangelogDialog" />
         <InfoDialog v-model="showUserInfoDialog" title="User Information" :info="user" />
-
+        <MarkdownDialog
+            v-model="showMarkdownDialog"
+            :content="markdownContent"
+            :title="markdownTitle"
+        />
     </q-layout>
 </template>
 <style scoped>
