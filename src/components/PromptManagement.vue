@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- Info Box Section -->
-        <InfoBox v-if="isInfoBoxVisible" :markdownContent="infoBoxMarkdown" @dismiss="dismissInfoBox" />
+        <InfoBox v-if="isInfoBoxVisible('PromptManagement')" :markdownContent="infoBoxMarkdown" @dismiss="dismissInfoBox('PromptManagement')" />
 
         <!-- Template Selection -->
         <div class="text-subtitle2 q-pt-md q-pb-sm">Jira issue type</div>
@@ -212,7 +212,7 @@ const templateStore = useTemplateStore();
 const { templates, selectedTemplateType } = storeToRefs(templateStore);
 
 const persistedStore = usePersistedStore();
-const { infoBoxes } = storeToRefs(persistedStore);
+const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
 
 // Compute template options from the store
 const templateOptions = computed(() =>
@@ -273,20 +273,6 @@ Each issue type has a description, a responsible role, and a list of fields.
 
 **Fields**: The specific details that will guide the AI when reviewing the original issue details and when generating improvements. Fields can be existing Jira fields or sections of the issue description.
 `;
-
-// Check if the info box should be visible
-const isInfoBoxVisible = computed(() => {
-    const infoBox = infoBoxes.value.find(box => box.infoBox === "PromptManagement");
-    return infoBox ? infoBox.display : true;
-});
-
-// Dismiss the info box
-function dismissInfoBox() {
-    const infoBox = infoBoxes.value.find(box => box.infoBox === "PromptManagement");
-    if (infoBox) {
-        infoBox.display = false;
-    }
-}
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);

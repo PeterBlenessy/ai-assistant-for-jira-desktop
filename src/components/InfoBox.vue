@@ -1,13 +1,13 @@
 <template>
     <q-card v-if="isVisible" bordered flat>
         <q-card-section>
-            <q-icon name="mdi-information-outline" color="positive" size="md"/>
+            <q-icon name="mdi-information-outline" color="positive" size="sm"/>
         </q-card-section>
         <q-card-section class="q-pt-none q-pb-none">
             <MarkdownViewer :content="markdownContent" />
         </q-card-section>
         <q-card-actions align="right">
-            <q-btn flat color="positive" label="Dismiss" @click="dismissInfoBox" />
+            <q-btn flat icon="mdi-eye-off" size="sm" label="Dismiss" @click="dismissInfoBox" />
         </q-card-actions>
     </q-card>
 </template>
