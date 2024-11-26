@@ -101,6 +101,19 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     // Watcher for info box state
     watch(infoBoxes, (newValue) => { saveStateToLocalStorage("infoBoxes", newValue); }, { deep: true });
 
+    function dismissInfoBox(infoBoxName) {
+        const infoBox = infoBoxes.value.find(box => box.infoBox === infoBoxName);
+        if (infoBox) {
+            infoBox.display = false;
+            saveStateToLocalStorage("infoBoxes", infoBoxes.value);
+        }
+    }
+
+    const isInfoBoxVisible = (infoBoxName) => {
+        const infoBox = infoBoxes.value.find(box => box.infoBox === infoBoxName);
+        return infoBox ? infoBox.display : true;
+    };
+
     return {
         // Jira state
         jiraServerAddress,
@@ -124,5 +137,8 @@ export const usePersistedStore = defineStore("persisted-store", () => {
 
         // Info box state
         infoBoxes,
+
+        dismissInfoBox,
+        isInfoBoxVisible,
     };
 });
