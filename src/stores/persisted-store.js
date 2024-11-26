@@ -102,10 +102,12 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     watch(infoBoxes, (newValue) => { saveStateToLocalStorage("infoBoxes", newValue); }, { deep: true });
 
     function dismissInfoBox(infoBoxName) {
-        const infoBox = infoBoxes.value.find(box => box.infoBox === infoBoxName);
-        if (infoBox) {
+        let infoBox = infoBoxes.value.find(box => box.infoBox === infoBoxName);
+        if (!infoBox) {
+            infoBox = { infoBox: infoBoxName, display: false };
+            infoBoxes.value.push(infoBox);
+        } else {
             infoBox.display = false;
-            saveStateToLocalStorage("infoBoxes", infoBoxes.value);
         }
     }
 
