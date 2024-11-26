@@ -3,7 +3,6 @@
 All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Backlog
-- Add support for signing, notarizing, and automatic updates.
 - Add support for logging using Sentry.
 - Add support for in-app notifications.
 - Add support for notifying the user when an issue type without template is encountered.
@@ -14,6 +13,14 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
 
 ## Releases
+
+### v0.5.6 - 2024-11-26
+- Added Getting Started Guide to app menu.
+- Added infoBox functions to persisted store to be accessible to all components.
+- Added info box to settings dialog.
+- Removed unused Tauri plugin `shell`.
+- Added Tauri plugin `process` to be able to restart and apply updates.
+- Added support for checking for and installing updates.
 
 ### v0.5.5 - 2024-11-22
 - Fixed issue where jira calls were made directly instead of via the JiraClient composable.
