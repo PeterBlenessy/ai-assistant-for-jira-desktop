@@ -14,6 +14,10 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.7 - 2024-11-26
+- Added support for displaying version number in the app menu when a new update is available.
+- Upgraded dependencies.
+
 ### v0.5.6 - 2024-11-26
 - Added Getting Started Guide to app menu.
 - Added infoBox functions to persisted store to be accessible to all components.

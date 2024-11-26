@@ -207,7 +207,7 @@ async function openMarkdownDialog(key) {
                                     <q-item-label>
                                         {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
                                     </q-item-label>
-                                    <q-item-label caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
+                                    <q-item-label v-if="isUpdateAvailable" caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
                                 </q-item-section>
                             </q-item>
                         </q-list>
