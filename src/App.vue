@@ -68,24 +68,24 @@ function openSettingsDialog() {
 // --- Updater ---
 const isUpdateAvailable = ref(false);
 const progress = ref(0);
-let newUpdate = null;
+const newUpdate = ref(null);
 watch(downloaded, () => {
     progress.value = Math.round((downloaded.value / contentLength.value) * 100);
 });
 
 const handleClickUpdateButton = async () => {
-    
+
     if (!isUpdateAvailable.value) {
-        newUpdate = await checkForUpdates();
-        if (newUpdate) {
+        newUpdate.value = await checkForUpdates();
+        if (newUpdate.value) {
             isUpdateAvailable.value = true;
         }
     }
-    
+
     if (isUpdateAvailable.value && progress.value == 0) {
-        downloadAndInstall(newUpdate);
+        downloadAndInstall(newUpdate.value);
     }
-    
+
     if (isUpdateAvailable.value && progress.value == 100) {
         relaunchApp();
     }
@@ -95,7 +95,7 @@ onMounted(() => {
     checkForUpdates().then((update) => {
         if (update) {
             isUpdateAvailable.value = true;
-            newUpdate = update;
+            newUpdate.value = update;
         }
     });
 });
@@ -196,17 +196,18 @@ async function openMarkdownDialog(key) {
                                 </q-item-section>
                                 <q-item-section>{{ md.title }}</q-item-section>
                             </q-item>
-                            <q-separator spaced inset class="q-ma-sm"/>
-                            <q-item clickable @click.stop="handleClickUpdateButton()" >
+                            <q-separator spaced inset class="q-ma-sm" />
+                            <q-item clickable @click.stop="handleClickUpdateButton()">
                                 <q-item-section avatar>
-                                    <q-icon
-                                        :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
+                                    <q-icon :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
                                         :color="isUpdateAvailable ? 'positive' : ''"
-                                        :loading="progress > 0 && progress < 100"
-                                    />
+                                        :loading="progress > 0 && progress < 100" />
                                 </q-item-section>
                                 <q-item-section>
-                                    {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
+                                    <q-item-label>
+                                        {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
+                                    </q-item-label>
+                                    <q-item-label caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
                                 </q-item-section>
                             </q-item>
                         </q-list>
