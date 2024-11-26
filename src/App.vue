@@ -15,6 +15,14 @@ import aboutMd from '../docs/ABOUT.md?raw';
 import changelogMd from '../docs/CHANGELOG.md?raw';
 import gettingStartedMd from '../docs/GETTINGSTARTED.md?raw';
 
+import { useUpdater } from "./composables/useUpdater.js";
+const {
+    checkForUpdates,
+    downloadAndInstall,
+    downloaded,
+    contentLength,
+    relaunchApp,
+} = useUpdater();
 
 const $q = useQuasar();
 const persistedStore = usePersistedStore();
@@ -48,7 +56,7 @@ const appMenu = {
     },
     gettingStarted: {
         content: gettingStartedMd,
-        title: 'Getting Started Guide',
+        title: 'Getting Started',
         icon: 'mdi-file-document-outline'
     }
 };
@@ -57,6 +65,42 @@ function openSettingsDialog() {
     showSettingsDialog.value = true;
 }
 
+// --- Updater ---
+const isUpdateAvailable = ref(false);
+const progress = ref(0);
+let newUpdate = null;
+watch(downloaded, () => {
+    progress.value = Math.round((downloaded.value / contentLength.value) * 100);
+});
+
+const handleClickUpdateButton = async () => {
+    
+    if (!isUpdateAvailable.value) {
+        newUpdate = await checkForUpdates();
+        if (newUpdate) {
+            isUpdateAvailable.value = true;
+        }
+    }
+    
+    if (isUpdateAvailable.value && progress.value == 0) {
+        downloadAndInstall(newUpdate);
+    }
+    
+    if (isUpdateAvailable.value && progress.value == 100) {
+        relaunchApp();
+    }
+};
+
+onMounted(() => {
+    checkForUpdates().then((update) => {
+        if (update) {
+            isUpdateAvailable.value = true;
+            newUpdate = update;
+        }
+    });
+});
+
+// --- Jira ---
 async function checkJiraConnection() {
     if (persistedStore.selectedJiraConfig.serverAddress === "" || persistedStore.selectedJiraConfig.personalAccessToken === "") {
         console.log("Missing Jira server address or personal access token");
@@ -81,7 +125,6 @@ onMounted(() => {
     checkJiraConnection();
 });
 
-// Watch for changes in selectedJiraConfig
 watch(
     () => [
         persistedStore.selectedJiraConfig.name,
@@ -144,14 +187,27 @@ async function openMarkdownDialog(key) {
                     :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" />
                 <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
-                    <q-menu anchor="bottom right" self="top right">
-                        <q-list dense style="min-width: 150px">
-                            <q-item v-for="(md, key) in appMenu" :key="key" clickable dense v-ripple v-close-popup
+                    <q-menu anchor="bottom right" self="top right" class="q-pa-sm">
+                        <q-list dense style="min-width: 100px">
+                            <q-item v-for="(md, key) in appMenu" :key="key" clickable v-ripple v-close-popup
                                 @click="openMarkdownDialog(key)">
                                 <q-item-section avatar>
                                     <q-icon :name="md.icon" />
                                 </q-item-section>
                                 <q-item-section>{{ md.title }}</q-item-section>
+                            </q-item>
+                            <q-separator spaced inset class="q-ma-sm"/>
+                            <q-item clickable @click.stop="handleClickUpdateButton()" >
+                                <q-item-section avatar>
+                                    <q-icon
+                                        :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
+                                        :color="isUpdateAvailable ? 'positive' : ''"
+                                        :loading="progress > 0 && progress < 100"
+                                    />
+                                </q-item-section>
+                                <q-item-section>
+                                    {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
+                                </q-item-section>
                             </q-item>
                         </q-list>
                     </q-menu>
