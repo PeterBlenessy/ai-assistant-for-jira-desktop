@@ -90,7 +90,7 @@ const handleClickUpdateButton = async () => {
     }
 
     if (isUpdateAvailable.value && progress.value == 0) {
-        downloadAndInstall(newUpdate.value);
+        downloadAndInstall();
     }
 
     if (isUpdateAvailable.value && progress.value == 100) {

@@ -22,7 +22,8 @@ export function useUpdater() {
         return update;
     };
 
-    const downloadAndInstall = async (update) => {
+    const downloadAndInstall = async () => {
+        const update = await check();
         if (update) {
             await update.downloadAndInstall((event) => {
                 switch (event.event) {
