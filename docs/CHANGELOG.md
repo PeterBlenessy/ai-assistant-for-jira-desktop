@@ -4,18 +4,20 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Backlog
 - Add support for logging using Sentry.
-- Add support for in-app notifications.
 - Add support for notifying the user when an issue type without template is encountered.
 - Fix bug where some expansion rows throw error.
 - Add support for transformer.js
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
-- Add error handling to update checks.
-- Fix left drawer being over page content.
-- Fix error where updater doesn't restart the app.
 
 ## Releases
+
+### v0.5.9 - 2024-11-27
+- Fixed error where models could not be added or edited in provider settings.
+- Fixed error where app could not be restarted after downloading and installing an update.
+- Added support for notifying user checks for updates and when no updates are available.
+- Added support for logging using Tauri log plugin.
 
 ### v0.5.8 - 2024-11-27
 - Fixed error where app didn't restart after downloaded and installed update.
