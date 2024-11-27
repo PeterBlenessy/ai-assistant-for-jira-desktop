@@ -74,17 +74,6 @@
                     />
                 </q-item-section>
             </q-item>
-            <!-- AI Model -->
-            <q-item class="q-pa-none">
-                <q-item-section>
-                    <q-input
-                        v-model="editProviderData.model"
-                        label="AI Model"
-                        dense
-                        filled
-                    />
-                </q-item-section>
-            </q-item>
             <!-- API Endpoint -->
             <q-item class="q-pa-none">
                 <q-item-section>
@@ -115,6 +104,23 @@
                             />
                         </template>
                     </q-input>
+                </q-item-section>
+            </q-item>
+            <!-- AI Model -->
+            <q-item class="q-pa-none">
+                <q-item-section>
+                    <q-select
+                        v-model="editProviderData.models"
+                        label="AI Models"
+                        dense
+                        filled
+                        use-chips
+                        use-input
+                        multiple
+                        new-value-mode="add-unique"
+                        input-debounce="0"
+                        hide-dropdown-icon
+                    />
                 </q-item-section>
             </q-item>
             <!-- Save and Cancel Buttons -->
@@ -220,7 +226,7 @@ function addProvider() {
 }
 
 function saveProvider() {
-    if (!editProviderData.value.name || !editProviderData.value.model) {
+    if (!editProviderData.value.name || editProviderData.value.models.length === 0) {
         return;
     }
     if (mode.value === 'edit') {
