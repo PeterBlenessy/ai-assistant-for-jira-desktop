@@ -75,6 +75,7 @@ import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import MarkdownViewer from './MarkdownViewer.vue';
 import { useTemplateStore } from '../stores/template-store';
 import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../helpers/prompts.js";
+import { useLogger } from '../composables/Logger.js';
 
 import {
     parseYAML,
@@ -90,6 +91,7 @@ const props = defineProps({
     }
 });
 
+const logger = useLogger();
 const loading = ref(false);
 const issueFields = ref(null);
 const improvementProposal = ref(null);
@@ -171,10 +173,9 @@ const generateImprovement = async (issueKey) => {
             await new Promise(resolve => setTimeout(resolve, 5));
         }
     } catch (error) {
-        console.error("Error fetching improvements:", error);
+        logger.error(`[IssueFields] - Error fetching improvements: ${error}`);
     } finally {
         loading.value = false;
-        console.log(fullResponse);
     }
 };
 
@@ -204,7 +205,7 @@ const acceptImprovement = async (type, improvement) => {
         issueFields.value = issueDetails.fields;
 
     } catch (error) {
-        console.error('Error updating issue:', error);
+        logger.error(`[IssueFields] Error updating issue: ${error}`);
     }
 };
 

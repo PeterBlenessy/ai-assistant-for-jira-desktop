@@ -15,7 +15,8 @@ import aboutMd from '../docs/ABOUT.md?raw';
 import changelogMd from '../docs/CHANGELOG.md?raw';
 import gettingStartedMd from '../docs/GETTINGSTARTED.md?raw';
 
-import { useUpdater } from "./composables/useUpdater.js";
+import { useUpdater } from "./composables/Updater.js";
+import { useLogger } from './composables/Logger.js';
 
 const {
     checkForUpdates,
@@ -26,6 +27,8 @@ const {
 } = useUpdater();
 
 const $q = useQuasar();
+const logger = useLogger();
+const { jiraClient } = useJiraClient();
 const persistedStore = usePersistedStore();
 const { darkMode, leftDrawer, splitterRatio, showRightPane } = storeToRefs(persistedStore);
 
@@ -38,8 +41,6 @@ const showUserInfoDialog = ref(false);
 const showMarkdownDialog = ref(false);
 const markdownContent = ref('');
 const markdownTitle = ref('');
-
-const { jiraClient } = useJiraClient();
 
 // Update the splitter limits ref
 const splitterLimits = ref([20, 80]);
@@ -75,26 +76,29 @@ watch(downloaded, () => {
 });
 
 const handleClickUpdateButton = async () => {
-
-    if (!isUpdateAvailable.value) {
-        newUpdate.value = await checkForUpdates();
-        if (newUpdate.value) {
-            isUpdateAvailable.value = true;
-        } else {
-            $q.notify({
-                message: "No updates available",
-                position: "bottom-right",
-                timeout: 2000,
-            });
+    try {
+        if (!isUpdateAvailable.value) {
+            newUpdate.value = await checkForUpdates();
+            if (newUpdate.value) {
+                isUpdateAvailable.value = true;
+            } else {
+                $q.notify({
+                    message: "No updates available",
+                    position: "bottom-right",
+                    timeout: 2000,
+                });
+            }
         }
-    }
 
-    if (isUpdateAvailable.value && progress.value == 0) {
-        downloadAndInstall();
-    }
+        if (isUpdateAvailable.value && progress.value == 0) {
+            downloadAndInstall();
+        }
 
-    if (isUpdateAvailable.value && progress.value == 100) {
-        relaunchApp();
+        if (isUpdateAvailable.value && progress.value == 100) {
+            relaunchApp();
+        }
+    } catch (error) {
+        logger.error(`[app] Checking for updates error: ${error}`);
     }
 };
 
@@ -104,13 +108,15 @@ onMounted(() => {
             isUpdateAvailable.value = true;
             newUpdate.value = update;
         }
+    }).catch((error) => {
+        logger.error(`[app] Checking for updates error: ${error}`);
     });
 });
 
 // --- Jira ---
 async function checkJiraConnection() {
     if (persistedStore.selectedJiraConfig.serverAddress === "" || persistedStore.selectedJiraConfig.personalAccessToken === "") {
-        console.log("Missing Jira server address or personal access token");
+        logger.log("[app] Missing Jira server address or personal access token");
         showSettingsDialog.value = true;
         return;
     }
@@ -122,7 +128,7 @@ async function checkJiraConnection() {
             isConnected.value = true;
         })
         .catch((error) => {
-            console.log(error);
+            logger.error(`[app] - ${error}`);
             isConnected.value = false;
             showSettingsDialog.value = true;
         });

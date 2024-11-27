@@ -89,6 +89,7 @@ import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
 import { useJiraClient } from "../composables/JiraClient.js";
 import IssueFields from "./IssueFields.vue";
+import { useLogger } from "../composables/Logger.js";
 
 const loading = ref(false);
 const jqlQuery = ref("");
@@ -135,6 +136,7 @@ const persistedStore = usePersistedStore();
 const { searchHistory } = storeToRefs(persistedStore);
 
 const { jiraClient } = useJiraClient();
+const logger = useLogger();
 
 const emit = defineEmits(['issue-click']);
 
@@ -164,7 +166,7 @@ function onRequest(props) {
             loading.value = false;
         })
         .catch(() => {
-            console.error(`Error requesting page ${page}`);
+            logger.error(`[JqlSearch] Error requesting page ${page}`);
             loading.value = false;
         });
 }
@@ -182,8 +184,8 @@ async function performSearch() {
             startAt,
             maxRows,
         );
-        // console.log(response);
-
+        // Comment removed since it was just a debug log
+        
         // Update pagination rows with total number of items for this search query
         pagination.value.rowsNumber = response.total;
 
@@ -204,7 +206,7 @@ async function performSearch() {
             searchHistory.value.push(jqlQuery.value);
         }
     } catch (error) {
-        console.error("Error performing JQL search:", error);
+        logger.error(`[JqlSearch] Error performing JQL search ${page}`);
     }
 }
 

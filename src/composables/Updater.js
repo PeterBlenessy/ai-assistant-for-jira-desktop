@@ -1,22 +1,24 @@
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { ref } from "vue";
+import { useLogger } from "./Logger";
 
 export function useUpdater() {
+    const logger = useLogger();
     const updateInfo = ref(null);
     const downloaded = ref(0);
     const contentLength = ref(0);
 
     const checkForUpdates = async () => {
-        console.log("[updater] - checking for updates");
+        logger.info("[updater] - checking for updates");
         const update = await check();
         if (update) {
             updateInfo.value = update;
-            console.log(
-                `[updater] - found update ${update.version} from ${update.date} with following release notes \n${update.body}`,
+            logger.info(
+                `[updater] Found update ${update.version} from ${update.date} with following release notes \n${update.body}`,
             );
         } else {
-            console.log("[updater] - no updates found");
+            logger.info("[updater] No updates found");
         }
 
         return update;
@@ -29,28 +31,28 @@ export function useUpdater() {
                 switch (event.event) {
                     case "Started":
                         contentLength.value = event.data.contentLength;
-                        console.log(
-                            `[updater] - started downloading ${event.data.contentLength} bytes`,
+                        logger.info(
+                            `[updater] Started downloading ${event.data.contentLength} bytes`,
                         );
                         break;
                     case "Progress":
                         downloaded.value += event.data.chunkLength;
-                        console.log(
+                        logger.info(
                             `downloaded ${downloaded.value} from ${contentLength.value}`,
                         );
                         break;
                     case "Finished":
-                        console.log("[updater] - download finished");
+                        logger.info("[updater] Download finished");
                         break;
                 }
             });
 
-            console.log("[updater] - update installed");
+            logger.info("[updater] Update installed");
         }
     };
 
     const relaunchApp = async () => {
-        console.log("[updater] - relaunching application");
+        logger.info("[updater] Relaunching application");
         await relaunch();
     };
 
