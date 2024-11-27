@@ -13,6 +13,10 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.11 - 2024-11-27
+- Added better error handling for updater calls.
+- Changed to centralized logging by using the Logger composable.
+
 ### v0.5.10 - 2024-11-27
 - Fixed issue where update could not be downloaded.
 
