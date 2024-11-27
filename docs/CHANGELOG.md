@@ -13,6 +13,9 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.10 - 2024-11-27
+- Fixed issue where update could not be downloaded.
+
 ### v0.5.9 - 2024-11-27
 - Fixed error where models could not be added or edited in provider settings.
 - Fixed error where app could not be restarted after downloading and installing an update.
