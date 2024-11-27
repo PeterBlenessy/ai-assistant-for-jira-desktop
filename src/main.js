@@ -36,8 +36,8 @@ app.use(Quasar, {
     
             positive: '#21BA45',
             negative: '#ff0000',
-            info: '#ebebeb',
-            warning: '#ffff00'
+            info: '#31ccec',
+            warning: '#f2c037'
           },
     },
     iconSet: quasarIconSet,

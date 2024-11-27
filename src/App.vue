@@ -16,6 +16,7 @@ import changelogMd from '../docs/CHANGELOG.md?raw';
 import gettingStartedMd from '../docs/GETTINGSTARTED.md?raw';
 
 import { useUpdater } from "./composables/useUpdater.js";
+
 const {
     checkForUpdates,
     downloadAndInstall,
@@ -79,6 +80,12 @@ const handleClickUpdateButton = async () => {
         newUpdate.value = await checkForUpdates();
         if (newUpdate.value) {
             isUpdateAvailable.value = true;
+        } else {
+            $q.notify({
+                message: "No updates available",
+                position: "bottom-right",
+                timeout: 2000,
+            });
         }
     }
 
