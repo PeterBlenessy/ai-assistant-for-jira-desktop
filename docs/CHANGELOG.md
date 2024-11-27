@@ -11,8 +11,15 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
+- Add error handling to update checks.
+- Fix left drawer being over page content.
+- Fix error where updater doesn't restart the app.
 
 ## Releases
+
+### v0.5.8 - 2024-11-27
+- Fixed error where app didn't restart after downloaded and installed update.
+- Add support for saving window positions and sizes and restore them when app is reopened.
 
 ### v0.5.7 - 2024-11-26
 - Added support for displaying version number in the app menu when a new update is available.
