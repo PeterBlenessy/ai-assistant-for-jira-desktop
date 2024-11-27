@@ -222,13 +222,18 @@ function addJiraConfig() {
 }
 
 function saveJiraConfig() {
-    if (!editJiraConfigData.value.name || !editJiraConfigData.value.serverAddress) {
+    if (!editJiraConfigData.value.name || !editJiraConfigData.value.serverAddress || !editJiraConfigData.value.personalAccessToken) {
         return;
     }
     if (mode.value === 'edit') {
-        const index = persistedStore.jiraConfigs.findIndex(c => c.name === editJiraConfigData.value.name);
-        if (index !== -1) {
+        // Find the original config being edited
+        const originalConfig = persistedStore.jiraConfigs.find(c => c.name === selectedJiraConfigName.value);
+        if (originalConfig) {
+            // Find the index of the original config
+            const index = persistedStore.jiraConfigs.indexOf(originalConfig);
+            // Update the config at that index
             persistedStore.jiraConfigs[index] = { ...editJiraConfigData.value };
+            // Update selected config name in case it changed
             selectedJiraConfigName.value = editJiraConfigData.value.name;
         }
     } else if (mode.value === 'add') {
@@ -250,13 +255,14 @@ function selectConfig(configName) {
     selectedJiraConfigName.value = configName;
 }
 
-watch(selectedJiraConfigName, async (newValue) => {
-    const config = persistedStore.jiraConfigs.find(c => c.name === newValue);
-    if (config) {
-        persistedStore.selectedJiraConfig = { ...config };
-        await fetchServerInfo();
-    }
-});
+watch(
+    () => [
+        persistedStore.selectedJiraConfig.name,
+        persistedStore.selectedJiraConfig.serverAddress,
+        persistedStore.selectedJiraConfig.personalAccessToken
+    ],
+    fetchServerInfo
+);
 
 // Initial fetch of server info
 if (selectedJiraConfigName.value) {

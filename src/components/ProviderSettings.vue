@@ -226,7 +226,7 @@ function addProvider() {
 }
 
 function saveProvider() {
-    if (!editProviderData.value.name || editProviderData.value.models.length === 0) {
+    if (!editProviderData.value.name || !editProviderData.value.baseURL || !editProviderData.value.apiKey || editProviderData.value.models.length === 0) {
         return;
     }
     if (mode.value === 'edit') {
