@@ -13,6 +13,12 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.14 - 2024-11-28
+- Removed old and unused Jira server configuration states.
+- Add support for notifying the user when an issue type without template is encountered.
+- Updated default in-app notification settings.
+- Improved indication of successful and failed improvements.
+
 ### v0.5.13 - 2024-11-28
 - Added badge to menu button to indicate when a new update is available.
 
