@@ -29,24 +29,9 @@ export const PROTECTED_MODELS = DEFAULT_PROVIDERS.reduce((acc, provider) => {
 export const usePersistedStore = defineStore("persisted-store", () => {
 
     // --- Jira state ---
-    const jiraServerAddress = ref(loadStateFromLocalStorage("jiraServerAddress") || "");
-    const jiraPersonalAccessToken = ref(loadStateFromLocalStorage("jiraPersonalAccessToken") || "");
     const searchHistory = ref(loadStateFromLocalStorage("searchHistory") || []);
     const jiraConfigs = ref(loadStateFromLocalStorage("jiraConfigs") || []);
     const selectedJiraConfig = ref(loadStateFromLocalStorage("selectedJiraConfig") || { name: '', serverAddress: '', personalAccessToken: '' });
-
-    // Check for old Jira settings and create a default config if none exist
-    if (jiraConfigs.value.length === 0 && jiraServerAddress.value && jiraPersonalAccessToken.value) {
-        const defaultConfig = {
-            name: 'Default Jira Config',
-            serverAddress: jiraServerAddress.value,
-            personalAccessToken: jiraPersonalAccessToken.value
-        };
-        jiraConfigs.value.push(defaultConfig);
-        selectedJiraConfig.value = defaultConfig;
-        saveStateToLocalStorage("jiraConfigs", jiraConfigs.value);
-        saveStateToLocalStorage("selectedJiraConfig", selectedJiraConfig.value);
-    }
 
     // --- UI state ---
     const darkMode = ref(loadStateFromLocalStorage("darkMode") || false);
@@ -56,9 +41,6 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     const lastSplitterRatio = ref(loadStateFromLocalStorage("lastSplitterRatio") || 70);
 
     // --- AI state ---
-    const aiProviderUrl = ref(loadStateFromLocalStorage("aiProviderUrl") || "");
-    const aiProviderApiKey = ref(loadStateFromLocalStorage("aiProviderApiKey") || "");
-
     const aiProviders = ref(loadStateFromLocalStorage("aiProviders") || DEFAULT_PROVIDERS);
     const selectedProvider = ref(loadStateFromLocalStorage("selectedProvider") || {
         providerId: 'openai',
@@ -79,8 +61,6 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     }
 
     // --- Jira state watchers ---
-    watch(jiraServerAddress, (newValue) => {saveStateToLocalStorage("jiraServerAddress", newValue);});
-    watch(jiraPersonalAccessToken, (newValue) => { saveStateToLocalStorage("jiraPersonalAccessToken", newValue); });
     watch(searchHistory, (newValue) => { saveStateToLocalStorage("searchHistory", newValue); }, { deep: true });
     watch(jiraConfigs, (newValue) => { saveStateToLocalStorage("jiraConfigs", newValue); }, { deep: true });
     watch(selectedJiraConfig, (newValue) => { saveStateToLocalStorage("selectedJiraConfig", newValue); }, { deep: true });
@@ -93,8 +73,6 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     watch(lastSplitterRatio, (newValue) => { saveStateToLocalStorage("lastSplitterRatio", newValue); });
     
     // --- AI state watchers ---
-    watch(aiProviderUrl, (newValue) => { saveStateToLocalStorage("aiProviderUrl", newValue); });
-    watch(aiProviderApiKey, (newValue) => { saveStateToLocalStorage("aiProviderApiKey", newValue); });
     watch(aiProviders, (newValue) => { saveStateToLocalStorage("aiProviders", newValue); }, { deep: true });
     watch(selectedProvider, (newValue) => { saveStateToLocalStorage("selectedProvider", newValue); }, { deep: true });
 
@@ -118,8 +96,6 @@ export const usePersistedStore = defineStore("persisted-store", () => {
 
     return {
         // Jira state
-        jiraServerAddress,
-        jiraPersonalAccessToken,
         searchHistory,
         jiraConfigs,
         selectedJiraConfig,
@@ -132,8 +108,6 @@ export const usePersistedStore = defineStore("persisted-store", () => {
         lastSplitterRatio,
 
         // AI state
-        aiProviderUrl,
-        aiProviderApiKey,
         aiProviders,
         selectedProvider,
 
