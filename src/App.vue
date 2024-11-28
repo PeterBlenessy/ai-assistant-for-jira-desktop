@@ -200,6 +200,7 @@ async function openMarkdownDialog(key) {
                     :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" />
                 <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
+                    <q-badge v-if="isUpdateAvailable" floating rounded />
                     <q-menu anchor="bottom right" self="top right" class="q-pa-sm">
                         <q-list dense style="min-width: 100px">
                             <q-item v-for="(md, key) in appMenu" :key="key" clickable v-ripple v-close-popup
@@ -225,6 +226,7 @@ async function openMarkdownDialog(key) {
                             </q-item>
                         </q-list>
                     </q-menu>
+                    
                 </q-btn>
             </q-toolbar>
         </q-header>

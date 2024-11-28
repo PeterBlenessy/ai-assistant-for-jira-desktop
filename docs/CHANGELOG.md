@@ -13,6 +13,9 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.13 - 2024-11-28
+- Added badge to menu button to indicate when a new update is available.
+
 ### v0.5.12 - 2024-11-27
 - Fixed issue where Jira configs were not saved correctly.
 - Fixed issue where Jira server connection was not checked correctly when config changed.
