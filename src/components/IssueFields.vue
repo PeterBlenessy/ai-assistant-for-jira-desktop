@@ -41,15 +41,13 @@
                                 <q-item-label v-if="field?.text">
                                     <MarkdownViewer :content="field?.text" />
                                 </q-item-label>
-                                <q-item-label v-if="field?.comment" caption
-                                    class="text-italic q-mt-xs">
+                                <q-item-label v-if="field?.comment" caption class="text-italic q-mt-xs">
                                     Comment: {{ field?.comment }}
                                 </q-item-label>
                             </q-item-section>
                             <q-item-section side top>
                                 <q-chip square size="sm" class="text-caption text-uppercase q-ma-none" color="primary"
-                                    :clickable="!field.accepted"
-                                    :outline="field.accepted"
+                                    :clickable="!field.accepted" :outline="field.accepted"
                                     :label="field.accepted ? 'Accepted' : 'Accept'"
                                     :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
                                     @click="acceptImprovement(key, field)" />
@@ -57,11 +55,38 @@
                         </q-item>
                     </template>
                 </q-list>
-                <div v-else-if="!hasImprovements && !loading" class="text-grey-5 q-pt-lg">
-                    <div>All fields look great! No improvements needed.</div>
-                    <div class="text-h2 q-ma-xl">👍</div>
+                <!-- Failed improvement -->
+                <q-list v-else-if="improvementFailed" bordered padding class="rounded-borders"
+                    style="border-color: var(--q-negative); background-color: rgb(from var(--q-negative) r g b / 10%)">
+                    <q-item>
+                        <q-item-section avatar top>
+                            <q-icon name="mdi-alert-circle-outline" color="negative" />
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label class="text-subtitle2">Failed to generate improvements</q-item-label>
+                            <q-item-label>{{ errorMessage }}</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </q-list>
+                <!-- No improvements needed -->
+                <q-list v-else-if="!improvementFailed && !loading" bordered padding class="rounded-borders"
+                    style="border-color: var(--q-positive); background: rgb(from var(--q-positive) r g b / 10%)">
+                    <q-item>
+                        <q-item-section avatar top>
+                            <q-icon name="mdi-check-circle-outline" color="positive" />
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label>All fields look great! No improvements needed.</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </q-list>
+
+                <!-- Generating improvement -->
+                <div v-else-if="loading">
+                    Generating improvements...
                 </div>
-                <div v-else-if="loading" class="q-pa-md">Generating improvements...</div>
+
+                <!-- First open -->
                 <div v-else class="q-pa-md">Click the improve button to generate improvement proposals</div>
             </div>
         </div>
@@ -70,7 +95,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
-import { useQuasar } from 'quasar';
+import { colors, getCssVar, useQuasar } from 'quasar';
 import { useJiraClient } from '../composables/JiraClient.js';
 import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import MarkdownViewer from './MarkdownViewer.vue';
@@ -98,10 +123,14 @@ const { jiraClient } = useJiraClient();
 const { openAIClient } = useOpenAIClient();
 const templateStore = useTemplateStore();
 
+const { textToRgb } = colors
+
 const loading = ref(false);
 const issueFields = ref(null);
 const improvementProposal = ref(null);
 const chunks = ref(0);
+const improvementFailed = ref(false);
+const errorMessage = ref('');
 
 const issueDisplayFields = ['summary', 'description'];
 const improvementDisplayFields = computed(() => Object.keys(improvementProposal.value || {}));
@@ -156,6 +185,8 @@ const getIssueTypeInstructions = (issueType) => {
 const generateImprovement = async (issueKey) => {
     loading.value = true;
     chunks.value = 0;
+    improvementFailed.value = false;
+    errorMessage.value = '';
     const issueType = getIssueField('issuetype.name');
 
     const userMessage = {
@@ -180,7 +211,14 @@ const generateImprovement = async (issueKey) => {
             await new Promise(resolve => setTimeout(resolve, 5));
         }
     } catch (error) {
-        logger.error(`[IssueFields] - Error fetching improvements: ${error}`);
+        logger.error(`[IssueFields] - Error fetching improvements: ${error.message}`);
+        improvementFailed.value = true;
+        errorMessage.value = error.message;
+        $q.notify({
+            message: 'Failed to generate improvements',
+            caption: error.message,
+            color: 'negative'
+        });
     } finally {
         loading.value = false;
     }
