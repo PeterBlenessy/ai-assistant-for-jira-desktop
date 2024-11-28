@@ -1,4 +1,3 @@
-
 <template>
     <q-dialog v-model="dialogOpen">
         <q-card style="min-width: 350px">

@@ -38,7 +38,7 @@ app.use(Quasar, {
             'dark-page': '#191919',
     
             positive: '#21BA45',
-            negative: '#ff0000',
+            negative: '#f44336',
             info: '#31ccec',
             warning: '#f2c037'
           },
