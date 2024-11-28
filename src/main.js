@@ -25,7 +25,10 @@ app.use(Quasar, {
     plugins: { Dark, Notify }, // import Quasar plugins and add here
     config: {
         dark: true,
-        notify: {},
+        notify: {
+            position: 'bottom',
+            timeout: 2500,
+        },
         brand: {
             primary: '#21BA45',
             secondary: '#ff8000',
