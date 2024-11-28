@@ -70,6 +70,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { useQuasar } from 'quasar';
 import { useJiraClient } from '../composables/JiraClient.js';
 import { useOpenAIClient } from '../composables/OpenAIClient.js';
 import MarkdownViewer from './MarkdownViewer.vue';
@@ -91,15 +92,16 @@ const props = defineProps({
     }
 });
 
+const $q = useQuasar();
 const logger = useLogger();
+const { jiraClient } = useJiraClient();
+const { openAIClient } = useOpenAIClient();
+const templateStore = useTemplateStore();
+
 const loading = ref(false);
 const issueFields = ref(null);
 const improvementProposal = ref(null);
 const chunks = ref(0);
-
-const { jiraClient } = useJiraClient();
-const { openAIClient } = useOpenAIClient();
-const templateStore = useTemplateStore();
 
 const issueDisplayFields = ['summary', 'description'];
 const improvementDisplayFields = computed(() => Object.keys(improvementProposal.value || {}));
@@ -119,7 +121,6 @@ const getIssueField = (field, defaultValue = null) => {
 }
 
 const getIssueTypeInstructions = (issueType) => {
-
     const templates = templateStore.templates;
     const currentTemplate = templates.find(t => t.name === issueType);
 
@@ -142,6 +143,12 @@ const getIssueTypeInstructions = (issueType) => {
                 issueTypeInstructions += `- **${field.title}**: ${field.definition}\n`;
             });
         }
+    } else {
+        $q.notify({
+            message: `No AI guidance found for the issue type: ${issueType}`,
+            caption: 'You should consider adding one.',
+            color: 'warning',
+        });
     }
 
     return issueTypeInstructions;
