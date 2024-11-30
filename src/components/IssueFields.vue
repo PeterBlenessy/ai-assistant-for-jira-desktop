@@ -271,9 +271,14 @@ const generateImprovement = async (issueKey) => {
         improvementFailed.value = true;
         errorMessage.value = error.message;
         $q.notify({
+            type: 'negative',
             message: 'Failed to generate improvements',
             caption: error.message,
-            color: 'negative'
+            timeout: 0,
+            actions: [
+                { label: 'Dismiss', color: 'white', handler: () => { /* ... */ } }
+            ]
+
         });
     } finally {
         loading.value = false;
