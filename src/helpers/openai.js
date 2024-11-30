@@ -14,6 +14,15 @@ const OpenAIClient = (options) => {
         fetch: fetch,
     });
 
+    let currentController = null;
+
+    const abort = () => {
+        if (currentController) {
+            currentController.abort();
+            currentController = null;
+        }
+    };
+
     const handleError = (error) => {
         if (error.response) {
             const { status, data } = error.response;
@@ -60,20 +69,26 @@ const OpenAIClient = (options) => {
 
     const createChatCompletion = async (messages) => {
         try {
+            currentController = new AbortController();
             return await client.chat.completions.create({
                 messages: messages,
                 model: model,
                 temperature: temperature,
                 max_tokens: maxTokens,
                 stream: true
-            });
+            }, { signal: currentController.signal });
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Request aborted');
+                return null;
+            }
             handleError(error);
         }
     };
 
     const createStructuredChatCompletion = async (messages, responseFormat) => {
         try {
+            currentController = new AbortController();
             return await client.chat.completions.create({
                 messages: messages,
                 model: model,
@@ -84,8 +99,12 @@ const OpenAIClient = (options) => {
                     json_schema: responseFormat
                 },
                 stream: true
-            });
+            }, { signal: currentController.signal });
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Request aborted');
+                return null;
+            }
             handleError(error);
         }
     };
@@ -93,6 +112,7 @@ const OpenAIClient = (options) => {
     return {
         createChatCompletion,
         createStructuredChatCompletion,
+        abort,
     };
 };
 

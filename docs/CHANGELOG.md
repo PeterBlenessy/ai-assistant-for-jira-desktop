@@ -11,8 +11,14 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
 - Add support for stopping an ongoing generation.
+- Notification about missing template disapears too fast.
 
 ## Releases
+
+### v0.5.16 - 2024-11-30
+- Added support for aborting the generation process.
+- Added spinner to indicate ongoing generation process.
+- Updated `pinia` to version `2.2.8`.
 
 ### v0.5.15 - 2024-11-30
 - Fixed issue where flex columns did not occupy full available width in IssueFields component.

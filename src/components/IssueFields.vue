@@ -21,8 +21,9 @@
                 </template>
             </q-list>
             <div class="float-right q-mt-sm q-mb-sm">
-                <q-btn color="primary" label="IMPROVE" @click="generateImprovement(props.issueKey)"
-                    :loading="loading" />
+                <q-btn v-if="!loading" color="primary" label="IMPROVE" icon="mdi-creation-outline"
+                    @click="generateImprovement(props.issueKey)" />
+                <q-btn v-else label="ABORT" icon="mdi-stop" @click="abortGeneration" />
             </div>
         </div>
 
@@ -33,7 +34,8 @@
 
                 <!-- STATE: GENERATING -->
                 <!-- Field text is displayed if updated; comment is always displayed if available -->
-                <q-list v-if="improvementProposal && improvementFieldsFiltered.length > 0" separator bordered padding class="rounded-borders">
+                <q-list v-if="improvementProposal && improvementFieldsFiltered.length > 0" separator bordered padding
+                    class="rounded-borders">
                     <template v-for="(field, key) in improvementProposal" :key="key">
                         <q-item v-if="shouldDisplayField(key)" style="cursor: default">
                             <q-item-section>
@@ -61,7 +63,8 @@
                 <!-- STATE: WAITING -->
                 <!-- for streaming respons to start -->
                 <div v-else-if="loading">
-                    Generating improvements...
+                    <q-spinner-ios size="24px" />
+                    Generating improvements
                 </div>
 
                 <!-- STATE: IDLE -->
@@ -208,14 +211,27 @@ const getIssueTypeInstructions = (issueType) => {
         }
     } else {
         $q.notify({
-            message: `No AI guidance found for the issue type: ${issueType}`,
+            type: 'info',
+            message: `No prompt template exists for the issue type: ${issueType}`,
             caption: 'You should consider adding one.',
             color: 'warning',
+            timeout: 0,
+            actions: [
+                { label: 'Dismiss', color: 'white', handler: () => { /* ... */ } }
+            ]
         });
     }
 
     return issueTypeInstructions;
 }
+
+const abortGeneration = () => {
+    openAIClient.value.abort();
+    loading.value = false;
+    improvementFailed.value = true;
+    errorMessage.value = 'Generation aborted by user';
+};
+
 const generateImprovement = async (issueKey) => {
     loading.value = true;
     chunks.value = 0;
@@ -238,8 +254,13 @@ const generateImprovement = async (issueKey) => {
             { role: "user", content: JSON.stringify(userMessage) }
         ]);
 
+        if (!stream) {
+            // Stream is null when aborted
+            return;
+        }
+
         for await (const chunk of stream) {
-            fullResponse += chunk.choices[0]?.delta?.content || "";;
+            fullResponse += chunk.choices[0]?.delta?.content || "";
             improvementProposal.value = parseYAML(fullResponse);
 
             // Wait to improve streamed response UX
