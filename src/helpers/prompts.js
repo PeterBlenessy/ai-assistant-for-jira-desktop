@@ -84,8 +84,8 @@ Your task is to suggest improvements only when necessary.
 
 For each section, you need to include all of the following parameters: label, updated, text, and comment.
 - label: the name of the section used in the UI, such as "Summary" or "Description"
-- updated: true, when you have made changes to the text, false if not
-- text: the updated text for the section, could be merely grammatical or more substantial changes
+- updated: true, when you have made changes to the text or if it was missing in original, false if no updates were made
+- text: the updated or new text for the section, could be merely grammatical or more substantial changes
 - comment: an explanation of the new text you suggest, no improvement ideas should be included here
 
 Format your response in the below YAML format.

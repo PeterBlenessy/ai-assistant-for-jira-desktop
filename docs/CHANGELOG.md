@@ -10,8 +10,16 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
+- Add support for stopping an ongoing generation.
 
 ## Releases
+
+### v0.5.15 - 2024-11-30
+- Fixed issue where flex columns did not occupy full available width in IssueFields component.
+- Fixed issue where improvements were not reset and removed from UI when re-generating.
+- Fixed issue where update was set to false for fields missing in issue but reqired in template.
+- Improved UX by refactoring improvement generation state update indications.
+- Improved UX by displaying AI comments for issue fields with no updates.
 
 ### v0.5.14 - 2024-11-28
 - Removed old and unused Jira server configuration states.

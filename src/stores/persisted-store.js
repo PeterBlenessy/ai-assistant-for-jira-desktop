@@ -13,7 +13,7 @@ export const DEFAULT_PROVIDERS = [
     {
         id: 'ollama',
         name: 'Ollama',
-        models: ['llama3', 'llama3.2:1b', 'mistral'],
+        models: ['llama3.2:1b', 'mistral'],
         baseURL: 'http://localhost:11434/v1',
         apiKey: ''
     }
