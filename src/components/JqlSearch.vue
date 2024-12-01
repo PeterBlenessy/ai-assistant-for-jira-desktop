@@ -148,10 +148,6 @@ function resetSearch() {
     showHistory.value = false;
 }
 
-const getIssueField = (field, defaultValue = null) => {
-    return field.split('.').reduce((obj, key) => obj && obj[key] !== undefined ? obj[key] : defaultValue, issueFields.value);
-}
-
 // Handle pagination requests
 function onRequest(props) {
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
@@ -192,11 +188,11 @@ async function performSearch() {
         searchResults.value = response.issues.map((issue) => ({
             id: issue.id,
             key: issue.key,
-            summary: issue.fields.summary,
-            status: issue.fields.status.name,
-            assignee: issue.fields.assignee?.displayName || "Unassigned",
-            issueType: issue.fields.issuetype.name,
-            issueTypeIconURL: issue.fields.issuetype.iconUrl
+            summary: issue?.fields?.summary || '',
+            status: issue?.fields?.status?.name || '',
+            assignee: issue?.fields?.assignee?.displayName || "Unassigned",
+            issueType: issue?.fields?.issuetype?.name || '',
+            issueTypeIconURL: issue?.fields?.issuetype?.iconUrl || ''
         }));
 
         if (
@@ -231,15 +227,6 @@ function setQuery(query) {
 
 // Expose the setQuery method to the parent component
 defineExpose({ setQuery });
-
-const improvedDescriptions = ref({});
-
-function generateImprovement(issueKey) {
-    const issue = issues.value.find(i => i.key === issueKey);
-    if (issue) {
-        improvedDescriptions.value[issueKey] = issue.fields.description;
-    }
-}
 
 </script>
 <style lang="sass">
