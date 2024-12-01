@@ -182,8 +182,8 @@ const isFieldUpdated = (field) => {
 };
 
 // Get the value of a field from the issue fields object
-const getIssueField = (field, defaultValue = null) => {
-    return field.split('.').reduce((obj, key) => obj?.[key] ?? defaultValue, issueFields.value);
+const getIssueField = (field, defaultValue = 'not available') => {
+    return field.split('.').reduce((obj, key) => obj && obj[key] !== undefined && obj[key] !== null ? obj[key] : defaultValue, issueFields.value);
 }
 
 const getIssueTypeInstructions = (issueType) => {
