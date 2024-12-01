@@ -4,13 +4,17 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Backlog
 - Add support for logging using Sentry.
-- Fix bug where some expansion rows throw error.
 - Add support for transformer.js
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
 
 ## Releases
+
+### v0.5.18 - 2024-12-01
+- Updated app icons to be aligned with Apple design guidelines.
+- Removed unused code from JqlQuery component.
+- Fixed bug where expansion rows throw error when description field is empty.
 
 ### v0.5.17 - 2024-12-01
 - Updated error notifications to require user action to dismiss.
