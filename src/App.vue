@@ -189,14 +189,21 @@ async function openMarkdownDialog(key) {
                 </q-avatar>
                 <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
                 <q-btn dense flat icon="mdi-compare" :color="darkMode ? 'grey-4' : 'grey-6'"
-                    @click="darkMode = !darkMode" />
+                    @click="darkMode = !darkMode">
+                    <q-tooltip>Toggle Dark Mode</q-tooltip>
+                </q-btn>
                 <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
-                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" />
+                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" >
+                    <q-tooltip>Toggle History Panel</q-tooltip>
+                </q-btn>
                 <q-btn dense flat :color="showRightPane ? 'grey-4' : 'grey-6'"
-                    :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" />
+                    :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" >
+                    <q-tooltip>Toggle Details Panel</q-tooltip>
+                </q-btn>
                 <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
                     <q-badge v-if="isUpdateAvailable" floating rounded />
+                    <q-tooltip>Menu</q-tooltip>
                     <q-menu anchor="bottom right" self="top right" class="q-pa-sm">
                         <q-list dense style="min-width: 100px">
                             <q-item v-for="(md, key) in appMenu" :key="key" clickable v-ripple v-close-popup
