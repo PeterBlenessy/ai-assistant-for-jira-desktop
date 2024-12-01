@@ -4,16 +4,18 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Backlog
 - Add support for logging using Sentry.
-- Add support for notifying the user when an issue type without template is encountered.
 - Fix bug where some expansion rows throw error.
 - Add support for transformer.js
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
-- Add support for stopping an ongoing generation.
-- Notification about missing template disapears too fast.
 
 ## Releases
+
+### v0.5.17 - 2024-12-01
+- Updated error notifications to require user action to dismiss.
+- Updated notification about missing template to require user action to dismiss.
+- Added tooltip to main window buttons.
 
 ### v0.5.16 - 2024-11-30
 - Added support for aborting the generation process.
