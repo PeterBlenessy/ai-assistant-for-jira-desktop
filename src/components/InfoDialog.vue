@@ -77,6 +77,26 @@ function formatValue(value) {
     if (value instanceof Date) {
         return value.toLocaleString();
     }
+    if (typeof value === 'object' && value !== null) {
+        if (value.size && Array.isArray(value.items)) {
+            return (
+                <q-table
+                    :rows="value.items"
+                    row-key="name"
+                    flat bordered
+                />
+            );
+        }
+        if (Object.keys(value).every(key => typeof value[key] === 'string')) {
+            return (
+                <q-table
+                    :rows="Object.entries(value).map(([resolution, url]) => ({ resolution, url }))}
+                    row-key="resolution"
+                    flat bordered
+                />
+            );
+        }
+    }
     return value;
 }
 </script>
