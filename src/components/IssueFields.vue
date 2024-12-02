@@ -285,22 +285,50 @@ const generateImprovement = async (issueKey) => {
     }
 };
 
-// Watch for changes in the issue key and fetch the issue details
-watch(() => props.issueKey, async (newIssueKey) => {
-    if (newIssueKey) {
-        const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
-        issueFields.value = issueDetails.fields;
+// Helper function to normalize field names for comparison
+const normalizeFieldName = (name) => {
+    return name.toLowerCase().replace(/\s+/g, '');
+};
+
+// Helper function to format array content as a numbered list
+const formatArrayContent = (content) => {
+    if (Array.isArray(content)) {
+        return content.map((item, index) => `${index + 1}. ${item}`).join('\n');
     }
-}, { immediate: true });
+    return content;
+};
 
 // Dynamic field handling for accepting an improvement proposal
 const acceptImprovement = async (type, improvement) => {
     try {
         let updateFields = {};
         if (improvementProposal.value[type]) {
-            const currentDescription = getIssueField('description') || '';
-            const descriptionSections = extractDescriptionSections(currentDescription);
-            updateFields.description = formatDescription(descriptionSections, improvement);
+            if (type === 'summary') {
+                updateFields.summary = improvement.text;
+            } else {
+                // Any field that's not summary is treated as a section in the description
+                const currentDescription = getIssueField('description') || '';
+                const descriptionSections = extractDescriptionSections(currentDescription);
+                
+                // Format the content if it's an array
+                const formattedContent = formatArrayContent(improvement.text);
+                
+                if (type === 'description') {
+                    // For main description, update the main content
+                    descriptionSections.description = formattedContent;
+                    updateFields.description = formatDescription(descriptionSections, {
+                        updated: false  // We've already updated the content
+                    });
+                } else {
+                    // For any other field, update or add it as a user-defined field
+                    const fieldLabel = improvementProposal.value[type].label || type;
+                    updateFields.description = formatDescription(descriptionSections, {
+                        updated: true,
+                        fieldName: fieldLabel,
+                        text: formattedContent
+                    });
+                }
+            }
         }
 
         await jiraClient.value.updateIssue(props.issueKey, { fields: updateFields });
@@ -314,6 +342,14 @@ const acceptImprovement = async (type, improvement) => {
         logger.error(`[IssueFields] Error updating issue: ${error}`);
     }
 };
+
+// Watch for changes in the issue key and fetch the issue details
+watch(() => props.issueKey, async (newIssueKey) => {
+    if (newIssueKey) {
+        const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
+        issueFields.value = issueDetails.fields;
+    }
+}, { immediate: true });
 
 </script>
 

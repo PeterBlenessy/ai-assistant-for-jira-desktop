@@ -8,8 +8,17 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Check available issuetypes: api/latest/issuetype
 - Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
+- Fix issue where content=null in MarkdownViewer throws error
 
 ## Releases
+
+### v0.5.20 - 2024-12-02
+- Updated the rendering pipeline to convert Jira markup before rendering markdown.
+- Fixed issue where user-defined field names were used instead of their labels in description sections.
+- Fixed issue where similar field names would create duplicate sections.
+- Fixed formatting of array-based content (like acceptance criteria) to maintain proper numbered lists.
+- Fixed issue where existing sections were not properly updated when accepting improvements.
+- Fixed issue where field updates would incorrectly modify the main description.
 
 ### v0.5.19 - 2024-12-02
 - Fixed issue where last logged in user's info was available when Jira server was not connected.

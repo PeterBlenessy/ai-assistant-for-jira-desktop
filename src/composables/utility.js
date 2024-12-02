@@ -103,28 +103,31 @@ export const formatJiraMarkup = (text) => {
         .replace(/^(\d+)\.\s(.*)$/gm, '- $2');
 };
 
+// Helper function to normalize field names for comparison
+const normalizeFieldName = (name) => {
+    return name.toLowerCase().replace(/\s+/g, '');
+};
+
 // Helper function to extract description sections
 export const extractDescriptionSections = (currentDescription) => {
     const sections = {
         description: '',
-        acceptanceCriteria: [],
         userDefinedFields: {}
     };
 
     // Extract main description
-    const mainDescMatch = currentDescription.match(/^([^]*?)(?=\n+##|$)/);
+    // Match content until the first h2. or ## heading
+    const mainDescMatch = currentDescription.match(/^([^]*?)(?=\n+(?:h2\.|##)|$)/);
     sections.description = mainDescMatch ? mainDescMatch[1].trim() : '';
 
-    // Extract user-defined fields and acceptance criteria
-    const sectionMatches = currentDescription.match(/##\s*(.*?)\s*\n+([^]*?)(?=\n+##|$)/g) || [];
+    // Extract user-defined fields
+    // Match both Jira wiki markup (h2.) and markdown (##) headings
+    const sectionMatches = currentDescription.match(/(?:h2\.|##)\s*(.*?)\s*\n+([^]*?)(?=\n+(?:h2\.|##)|$)/g) || [];
     sectionMatches.forEach(section => {
         const [title, content] = section.split(/\n+/).filter(Boolean);
-        const fieldName = title.replace(/^##\s*/, '').trim(); // Remove the "## " prefix
-        if (fieldName === 'Acceptance Criteria') {
-            sections.acceptanceCriteria.push(content.trim());
-        } else {
-            sections.userDefinedFields[fieldName] = content.trim();
-        }
+        // Remove both h2. and ## prefixes
+        const fieldName = title.replace(/^(?:h2\.|##)\s*/, '').trim();
+        sections.userDefinedFields[fieldName] = content.trim();
     });
 
     return sections;
@@ -132,16 +135,32 @@ export const extractDescriptionSections = (currentDescription) => {
 
 // Helper function to format the description
 export const formatDescription = (sections, improvement) => {
+    // Start with the main description section
     let formattedDescription = sections.description.trim();
 
-    // Append user-defined fields to the formatted description
-    Object.keys(sections.userDefinedFields).forEach(field => {
-        formattedDescription += `\n\n## ${field}\n${sections.userDefinedFields[field]}`;
-    });
+    // Handle user-defined fields
+    const existingFields = Object.keys(sections.userDefinedFields);
+    const fieldsToProcess = new Set(existingFields);
 
-    // If the improvement is for the description, update it
-    if (improvement.updated) {
-        formattedDescription = improvement.text;
+    // If we're adding/updating a field, make sure it's in our processing list
+    if (improvement.updated && improvement.fieldName) {
+        fieldsToProcess.add(improvement.fieldName);
+    }
+
+    // Process all fields
+    for (const field of fieldsToProcess) {
+        formattedDescription += '\n\n';
+        
+        // If this is the field we're updating
+        if (improvement.updated && improvement.fieldName && 
+            normalizeFieldName(field) === normalizeFieldName(improvement.fieldName)) {
+            // Use the original field name if it exists, otherwise use the new one
+            const fieldName = existingFields.find(f => normalizeFieldName(f) === normalizeFieldName(field)) || field;
+            formattedDescription += `h2. ${fieldName}\n${improvement.text}`;
+        } else if (sections.userDefinedFields[field]) {
+            // Otherwise use the existing content
+            formattedDescription += `h2. ${field}\n${sections.userDefinedFields[field]}`;
+        }
     }
 
     return formattedDescription;
