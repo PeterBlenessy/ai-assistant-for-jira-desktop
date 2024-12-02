@@ -11,6 +11,12 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.19 - 2024-12-02
+- Fixed issue where last logged in user's info was available when Jira server was not connected.
+- Fixed issue where user info dialog could not be closed.
+- Updated transparent area around app icons.
+- Updated tooltips.
+
 ### v0.5.18 - 2024-12-01
 - Updated app icons to be aligned with Apple design guidelines.
 - Removed unused code from JqlQuery component.

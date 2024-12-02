@@ -1,8 +1,10 @@
 <template>
     <q-dialog v-model="dialogOpen">
-        <q-card style="min-width: 350px">
-            <q-card-section>
-                <div class="text-h6">{{ title }}</div>
+        <q-card>
+            <q-card-section class="row q-pa-sm q-pl-md vertical-middle" style="height: 45px">
+                <div class="text-subtitle1 text-weight-bold">{{ title }}</div>
+                <q-space />
+                <q-btn icon="mdi-close" flat dense v-close-popup />
             </q-card-section>
 
             <q-card-section v-if="info">
@@ -33,10 +35,6 @@
                     </template>
                 </div>
             </q-card-section>
-
-            <q-card-actions align="right">
-                <q-btn flat :label="closeButtonText" color="primary" v-close-popup />
-            </q-card-actions>
         </q-card>
     </q-dialog>
 </template>
@@ -71,7 +69,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const dialogOpen = computed({
     get: () => props.modelValue,
-    set: (value) => emit('dismiss', value)
+    set: (value) => emit('update:modelValue', value)
 });
 
 const displayableInfo = computed(() => {

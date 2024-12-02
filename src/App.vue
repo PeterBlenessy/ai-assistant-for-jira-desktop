@@ -125,6 +125,7 @@ async function checkJiraConnection() {
         })
         .catch((error) => {
             logger.error(`[app] - ${error}`);
+            user.value = null;
             isConnected.value = false;
             showSettingsDialog.value = true;
         });
@@ -194,13 +195,15 @@ async function openMarkdownDialog(key) {
                 </q-btn>
                 <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
                     :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" >
-                    <q-tooltip>Toggle History Panel</q-tooltip>
+                    <q-tooltip>Toggle Primary Side Panel</q-tooltip>
                 </q-btn>
                 <q-btn dense flat :color="showRightPane ? 'grey-4' : 'grey-6'"
                     :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" >
-                    <q-tooltip>Toggle Details Panel</q-tooltip>
+                    <q-tooltip>Toggle AI Prompt Management Panel</q-tooltip>
                 </q-btn>
-                <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" />
+                <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" >
+                    <q-tooltip>Settings</q-tooltip>
+                </q-btn>
                 <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
                     <q-badge v-if="isUpdateAvailable" floating rounded />
                     <q-tooltip>Menu</q-tooltip>
@@ -226,6 +229,7 @@ async function openMarkdownDialog(key) {
                                     </q-item-label>
                                     <q-item-label v-if="isUpdateAvailable" caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
                                 </q-item-section>
+                                <q-tooltip>{{ isUpdateAvailable ? 'Download update' : 'Restart and install update...' }}</q-tooltip>
                             </q-item>
                         </q-list>
                     </q-menu>
@@ -239,9 +243,9 @@ async function openMarkdownDialog(key) {
             <SearchHistory @select="handleHistorySelect" />
             <q-separator inset />
 
-            <q-item class="fixed-bottom q-pa-sm" clickable @click="showUserInfoDialog = true">
+            <q-item v-if="isConnected" class="fixed-bottom q-pa-sm" clickable @click="showUserInfoDialog = true">
                 <q-item-section side>
-                    <q-avatar v-if="isConnected">
+                    <q-avatar>
                         <img :src="user.avatarUrls['48x48']" spinner-color="primary"
                             style="width: 36px; height: 36px;" />
                     </q-avatar>
@@ -249,6 +253,7 @@ async function openMarkdownDialog(key) {
                 <q-item-section>
                     <q-item-label class="text-subtitle2">{{ isConnected ? user.displayName : "" }}</q-item-label>
                 </q-item-section>
+                <q-tooltip>Display user profile information</q-tooltip>
             </q-item>
         </q-drawer>
 
