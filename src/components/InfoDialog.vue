@@ -9,7 +9,27 @@
                 <div class="info-grid">
                     <template v-for="(value, key) in displayableInfo" :key="key">
                         <div class="text-caption text-weight-medium">{{ formatLabel(key) }}:</div>
-                        <div class="text-caption">{{ formatValue(value) }}</div>
+                        <div class="text-caption">
+                            <!-- Value can be an object -->
+                            <div v-if="typeof value === 'object' && value !== null">
+                                <!-- ... containing an array with specific size -->
+                                <!-- ...containing simple objects with key-value pairs -->
+                                <div v-if="value?.size && Array.isArray(value?.items)">
+                                    <div v-for="(value, key) in value.items">
+                                        <li>{{ value?.name }}</li>
+                                    </div>
+                                </div>
+                                <!-- ... containing key-value pairs -->
+                                <div v-else v-for="(value, key) in value" :key="key">
+                                    <li><a href="{{value}}">{{ key }}</a></li>
+                                </div>
+                            </div>
+                            <!-- Value can be string, array of strings, date -->
+                            <div v-else>
+                                {{ formatValue(value) }}
+                            </div>
+                        </div>
+
                     </template>
                 </div>
             </q-card-section>
@@ -51,12 +71,12 @@ const emit = defineEmits(['update:modelValue']);
 
 const dialogOpen = computed({
     get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+    set: (value) => emit('dismiss', value)
 });
 
 const displayableInfo = computed(() => {
     if (!props.info) return {};
-    
+
     const info = { ...props.info };
     props.excludeKeys.forEach(key => delete info[key]);
     return info;
@@ -77,26 +97,7 @@ function formatValue(value) {
     if (value instanceof Date) {
         return value.toLocaleString();
     }
-    if (typeof value === 'object' && value !== null) {
-        if (value.size && Array.isArray(value.items)) {
-            return (
-                <q-table
-                    :rows="value.items"
-                    row-key="name"
-                    flat bordered
-                />
-            );
-        }
-        if (Object.keys(value).every(key => typeof value[key] === 'string')) {
-            return (
-                <q-table
-                    :rows="Object.entries(value).map(([resolution, url]) => ({ resolution, url }))}
-                    row-key="resolution"
-                    flat bordered
-                />
-            );
-        }
-    }
+
     return value;
 }
 </script>
