@@ -9,13 +9,47 @@
                         <q-item-section>
                             <q-item-label class="text-capitalize text-subtitle2">{{ field }}</q-item-label>
                             <q-item-label>
-                                <div v-if="field === 'description'">
-                                    <MarkdownViewer :content="getIssueField(field)" />
+                                <div v-if="field === 'description'" class="field-container">
+                                    <template v-if="editingField === field && editingType === 'original'">
+                                        <q-input
+                                            v-model="editingContent"
+                                            type="textarea"
+                                            filled
+                                            dense
+                                            :autogrow="true"
+                                            @keyup.enter.ctrl="saveEdit"
+                                            @keyup.esc="cancelEdit"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <MarkdownViewer :content="getIssueField(field)" />
+                                    </template>
                                 </div>
-                                <div v-else>
-                                    <div v-html="formatJiraMarkup(getIssueField(field))"></div>
+                                <div v-else class="field-container">
+                                    <template v-if="editingField === field && editingType === 'original'">
+                                        <q-input
+                                            v-model="editingContent"
+                                            filled
+                                            dense
+                                            :autogrow="true"
+                                            @keyup.enter="saveEdit"
+                                            @keyup.esc="cancelEdit"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <div v-html="formatJiraMarkup(getIssueField(field))"></div>
+                                    </template>
                                 </div>
                             </q-item-label>
+                        </q-item-section>
+                        <q-item-section top side>
+                                <template v-if="editingField === field && editingType === 'original'">
+                                    <q-btn class="q-pa-xs q-ma-none" size="sm" flat icon="mdi-check" color="positive" @click="saveEdit" />
+                                    <q-btn class="q-pa-xs q-ma-none" size="sm" flat icon="mdi-close" @click="cancelEdit" />
+                                </template>
+                                <template v-else>
+                                    <q-btn class="q-pa-xs q-ma-none" flat size="sm" icon="mdi-pencil"  @click="startEdit(field, 'original', getIssueField(field))" />
+                                </template>
                         </q-item-section>
                     </q-item>
                 </template>
@@ -42,8 +76,22 @@
                                 <q-item-label class="text-capitalize text-subtitle2">
                                     {{ field?.label || field }}
                                 </q-item-label>
-                                <q-item-label v-if="field?.text && isFieldUpdated(field)">
-                                    <MarkdownViewer :content="field?.text" />
+                                <q-item-label v-if="field?.text && isFieldUpdated(field)" class="field-container">
+                                    <template v-if="editingField === key && editingType === 'improved'">
+                                        <q-input
+                                            v-model="editingContent"
+                                            type="textarea"
+                                            filled
+                                            autofocus
+                                            :autogrow="true"
+                                            @blur="saveEdit"
+                                            @keyup.enter.ctrl="saveEdit"
+                                            @keyup.esc="cancelEdit"
+                                        />
+                                    </template>
+                                    <template v-else>
+                                        <MarkdownViewer :content="field?.text" />
+                                    </template>
                                 </q-item-label>
                                 <q-item-label v-if="field?.comment" caption class="text-italic q-mt-xs">
                                     Comment: {{ field?.comment }}
@@ -343,6 +391,56 @@ const acceptImprovement = async (type, improvement) => {
     }
 };
 
+// State for editing
+const editingField = ref(null);
+const editingType = ref(null);
+const editingContent = ref('');
+
+// Editing functions
+const startEdit = (fieldName, type, content) => {
+    editingField.value = fieldName;
+    editingType.value = type;
+    editingContent.value = content;
+};
+
+const saveEdit = async () => {
+    if (!editingField.value || !editingType.value) return;
+
+    // Only allow saving original fields
+    if (editingType.value !== 'original') return;
+
+    try {
+        const updateFields = {
+            fields: {
+                [editingField.value]: editingContent.value
+            }
+        };
+        
+        // Save to Jira
+        await jiraClient.value.updateIssue(props.issueKey, updateFields);
+        
+        // Update local state
+        issueFields.value[editingField.value] = editingContent.value;
+    } catch (error) {
+        console.error('Error saving edit:', error);
+        $q.notify({
+            type: 'negative',
+            message: 'Failed to save changes',
+            caption: error.message,
+            position: 'top',
+            timeout: 5000
+        });
+    } finally {
+        cancelEdit();
+    }
+};
+
+const cancelEdit = () => {
+    editingField.value = null;
+    editingType.value = null;
+    editingContent.value = '';
+};
+
 // Watch for changes in the issue key and fetch the issue details
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
@@ -354,6 +452,15 @@ watch(() => props.issueKey, async (newIssueKey) => {
 </script>
 
 <style scoped>
+.field-container {
+    position: relative;
+    width: 100%;
+}
+
+.q-input {
+    width: 100%;
+}
+
 /* Add some spacing for the formatted content */
 h1,
 h2,

@@ -12,6 +12,14 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.21 - 2024-12-02
+- Added in-place editing for original Jira issue fields.
+- Implemented hover-based edit icon for fields.
+- Added save and cancel buttons for inline editing.
+- Integrated Jira API for updating issue fields.
+- Added error handling and notifications for edit actions.
+- Added support for automatically adjusting the input height based on content.
+
 ### v0.5.20 - 2024-12-02
 - Updated the rendering pipeline to convert Jira markup before rendering markdown.
 - Fixed issue where user-defined field names were used instead of their labels in description sections.
