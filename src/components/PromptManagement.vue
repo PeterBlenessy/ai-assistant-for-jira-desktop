@@ -14,12 +14,43 @@
             <q-btn v-if="selectedTemplate" icon="mdi-delete" label="Delete" class="q-mb-md q-pl-xs" size="sm" @click="handleDeleteTemplate" />
         </div>
 
+        <!-- Issue Type Editing -->
+        <template v-if="selectedTemplate && currentTemplateInfo">
+            <q-item>
+                <q-item-section>
+                    <template v-if="editingSection === 'issueType'">
+                        <q-input v-model="editingContent.issueType" label="Issue Type" filled dense
+                            :rules="[val => !!val || 'Issue type is required']" lazy-rules="ondemand"
+                        />
+                    </template>
+                    <template v-else>
+                        <q-item-label>Issue Type</q-item-label>
+                        <q-item-label caption>{{ currentTemplateInfo.issueType }}</q-item-label>
+                    </template>
+                </q-item-section>
+        
+                <q-item-section side>
+                    <div class="row q-gutter-sm">
+                        <template v-if="editingSection === 'issueType'">
+                            <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
+                            <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
+                        </template>
+                        <template v-else>
+                            <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
+                                @click="handleEditContent('issueType')" />
+                        </template>
+                    </div>
+                </q-item-section>
+            </q-item>
+            <q-separator spaced inset />
+        </template>
+
         <!-- Template Name Editing -->
         <template v-if="selectedTemplate && currentTemplateInfo">
             <q-item>
                 <q-item-section>
                     <template v-if="editingSection === 'name'">
-                        <q-input v-model="editingContent.name" label="Template Name" filled dense
+                        <q-input v-model="editingContent.name" label="Name" filled dense
                             :rules="[val => !!val || 'Template name is required']" lazy-rules="ondemand"
                         />
                     </template>
@@ -252,6 +283,7 @@ const currentTemplateInfo = computed(() => {
 // Add new refs for template info editing
 const editingSection = ref(null); // 'definition' or 'persona'
 const editingContent = ref({
+    issueType: '',
     name: '',
     description: '',
     persona: {
@@ -342,6 +374,7 @@ function cancelEdit() {
     // Reset content editing state
     editingSection.value = null;
     editingContent.value = {
+        issueType: '',
         name: '',
         description: '',
         persona: {
@@ -384,7 +417,9 @@ function handleDeleteField(index) {
 
 function handleEditContent(section) {
     editingSection.value = section;
-    if (section === 'name') {
+    if (section === 'issueType') {
+        editingContent.value.issueType = currentTemplateInfo.value.issueType;
+    } else if (section === 'name') {
         editingContent.value.name = currentTemplateInfo.value.name;
     } else if (section === 'definition') {
         editingContent.value.definition = currentTemplateInfo.value.definition;
@@ -394,6 +429,9 @@ function handleEditContent(section) {
 }
 
 function handleSaveContent() {
+    if (editingSection.value === 'issueType' && !editingContent.value.issueType) {
+        return;
+    }
     if (editingSection.value === 'name' && !editingContent.value.name) {
         return;
     }
@@ -408,7 +446,12 @@ function handleSaveContent() {
     const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
     const updatedTemplate = { ...templates.value[templateIndex] };
 
-    if (editingSection.value === 'name') {
+    if (editingSection.value === 'issueType') {
+        const newIssueType = cleanText(editingContent.value.issueType);
+        updatedTemplate.issueType = newIssueType;
+        // Update the selection after saving
+        selectedTemplateType.value = newIssueType;
+    } else if (editingSection.value === 'name') {
         updatedTemplate.name = cleanText(editingContent.value.name);
     } else if (editingSection.value === 'description') {
         updatedTemplate.description = cleanText(editingContent.value.description);
@@ -425,8 +468,8 @@ function handleSaveContent() {
 
 function handleAddTemplate() {
     const newTemplate = {
-        issueType: 'newType',
-        name: 'New Issue Type',
+        issueType: '',
+        name: '',
         definition: '',
         persona: {
             name: '',
@@ -435,9 +478,20 @@ function handleAddTemplate() {
         fields: []
     };
     templateStore.addTemplate(newTemplate);
-    selectedTemplateType.value = 'newType';
+    selectedTemplateType.value = newTemplate.issueType;
+    
+    // Automatically set issue type to edit mode
+    editingSection.value = 'issueType';
+    editingContent.value = { 
+        issueType: '',
+        name: '',
+        definition: '',
+        persona: {
+            name: '',
+            definition: ''
+        }
+    };
 }
-
 function handleDeleteTemplate() {
     const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
     if (templateIndex !== -1) {
