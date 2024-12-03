@@ -33,8 +33,8 @@ const convertJiraToMarkdown = (text) => {
         .replace(/_([^_\n]+)_/g, '*$1*')      // Italic
         .replace(/\{\{([^}]+)\}\}/g, '`$1`')  // Monospace
         // Lists
-        .replace(/^[-*#]\s+/gm, '- ')         // Unordered lists
-        .replace(/^#\s+/gm, '1. ')            // Ordered lists
+        .replace(/^[-*]\s+/gm, '- ')         // Unordered lists
+        .replace(/^#(?!#|\s*[A-Za-z])\s+/gm, '1. ')  // Jira wiki ordered lists only
         // Links
         .replace(/\[([^|]+)\|([^\]]+)\]/g, '[$2]($1)')  // Links with text
         .replace(/\[([^\]]+)\]/g, '<$1>')     // URLs
