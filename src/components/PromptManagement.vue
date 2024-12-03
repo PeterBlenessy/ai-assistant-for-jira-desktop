@@ -14,6 +14,9 @@
             <q-btn v-if="selectedTemplate" icon="mdi-delete" label="Delete" class="q-mb-md q-pl-xs" size="sm" @click="handleDeleteTemplate" />
         </div>
 
+        <!-- Jira Issue Type Info -->
+        <InfoBox v-if="jiraIssueTypeInfo && selectedTemplate && isInfoBoxVisible(jiraIssueTypeInfo.name)" :markdownContent="jiraTypeInfoMarkdown" @dismiss="dismissInfoBox(jiraIssueTypeInfo.name)" />
+
         <!-- Issue Type Editing -->
         <template v-if="selectedTemplate && currentTemplateInfo">
             <q-item>
@@ -28,7 +31,7 @@
                         <q-item-label caption>{{ currentTemplateInfo.issueType }}</q-item-label>
                     </template>
                 </q-item-section>
-        
+
                 <q-item-section side>
                     <div class="row q-gutter-sm">
                         <template v-if="editingSection === 'issueType'">
@@ -237,13 +240,16 @@ import { ref, computed } from 'vue';
 import { useTemplateStore } from '../stores/template-store';
 import { storeToRefs } from 'pinia';
 import { usePersistedStore } from '../stores/persisted-store';
-import InfoBox from './InfoBox.vue'; // Import the new InfoBox component
+import { useJiraClient } from '../composables/JiraClient';
+import InfoBox from './InfoBox.vue';
 
 const templateStore = useTemplateStore();
 const { templates, selectedTemplateType } = storeToRefs(templateStore);
 
 const persistedStore = usePersistedStore();
 const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
+
+const { jiraClient } = useJiraClient();
 
 // Compute template options from the store
 const templateOptions = computed(() =>
@@ -267,17 +273,25 @@ const currentFields = computed(() => {
     return template?.fields || [];
 });
 
+// Add new computed property for current template info
+const currentTemplateInfo = computed(() => {
+    checkIssueType(selectedTemplateType.value);
+    return templates.value.find(t => t.issueType === selectedTemplateType.value);
+});
+
+// Add computed property for Jira issue type info markdown
+const jiraTypeInfoMarkdown = computed(() => {
+    if (!jiraIssueTypeInfo.value) return '';
+    
+    return `*${jiraIssueTypeInfo.value.name}* ${jiraIssueTypeInfo.value.description || 'No description available'}`;
+});
+
 const editingIndex = ref(-1);
 const isNewField = ref(false);
 const editingField = ref({
     title: '',
     definition: '',
     name: ''
-});
-
-// Add new computed property for current template info
-const currentTemplateInfo = computed(() => {
-    return templates.value.find(t => t.issueType === selectedTemplateType.value);
 });
 
 // Add new refs for template info editing
@@ -291,6 +305,9 @@ const editingContent = ref({
         definition: ''
     }
 });
+
+// Add new ref for Jira issue type info
+const jiraIssueTypeInfo = ref(null);
 
 // Markdown content for the InfoBox
 const infoBoxMarkdown = `
@@ -449,7 +466,7 @@ function handleSaveContent() {
     if (editingSection.value === 'issueType') {
         const newIssueType = cleanText(editingContent.value.issueType);
         updatedTemplate.issueType = newIssueType;
-        // Update the selection after saving
+        // Update the selection in the dropdown box after saving
         selectedTemplateType.value = newIssueType;
     } else if (editingSection.value === 'name') {
         updatedTemplate.name = cleanText(editingContent.value.name);
@@ -497,6 +514,23 @@ function handleDeleteTemplate() {
     if (templateIndex !== -1) {
         templateStore.deleteTemplate(templateIndex);
         selectedTemplateType.value = templates.value[0]?.issueType || '';
+    }
+}
+
+async function checkIssueType(issueType) {
+    try {
+        // Get all issue types
+        const issueTypes = await jiraClient.value.getIssueTypes();
+        
+        const matchingType = issueTypes.find(type => 
+            type.name.toLowerCase() === issueType.toLowerCase()
+        );
+        
+        jiraIssueTypeInfo.value = matchingType ? matchingType : null;
+
+    } catch (error) {
+        console.error('Error checking issue type:', error);
+        jiraIssueTypeInfo.value = null;
     }
 }
 </script>

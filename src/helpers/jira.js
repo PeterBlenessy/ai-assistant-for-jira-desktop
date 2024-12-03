@@ -55,6 +55,15 @@ const JiraClient = (options) => {
         }
     };
 
+    const getIssueTypes = async () => {
+        try {
+            return await jiraFetch('/rest/api/latest/issuetype');
+        } catch (error) {
+            console.error(`Error in getIssueTypes: ${error.message}`);
+            throw error;
+        }
+    };
+
     const getUser = async () => {
         try {
             return await jiraFetch(`/rest/api/latest/myself?expand=groups,applicationRoles`);
@@ -137,12 +146,13 @@ const JiraClient = (options) => {
 
     return {
         getIssue,
+        getIssueTypes,
         getUser,
         getConfiguration,
         searchIssues,
         getIssueDetails,
         updateIssue,
-        getServerInfo,  // Add this line
+        getServerInfo,
     };
 };
 
