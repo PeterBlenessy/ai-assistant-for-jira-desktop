@@ -5,12 +5,17 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 ## Backlog
 - Add support for logging using Sentry.
 - Add support for transformer.js
+- Add support for listing child issues, linked issues, fetching issue comments, and attachments,
+- Add support for fetching links in the description.
+- Add support for improving the context for the AI by adding child issues, comments, and attachments.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
-- Check available issuetypes: api/latest/issuetype
-- Add support for fetching issue attachments: api/latest/issue/{issueIdOrKey}/attachments - to improve context for the AI
-- Fix issue where content=null in MarkdownViewer throws error
 
 ## Releases
+
+### v0.5.22 - 2024-12-03
+- Fixed null content handling in MarkdownViewer component
+- Added support for editing the issue type name in PromptManagement
+- Added InfoBox to display official Jira issue type descriptions
 
 ### v0.5.21 - 2024-12-02
 - Added in-place editing for original Jira issue fields.
