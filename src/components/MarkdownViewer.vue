@@ -8,8 +8,9 @@ import MarkdownIt from 'markdown-it';
 
 const props = defineProps({
     content: {
-        type: [String, Array],
-        required: true
+        type: [String, Array, null],
+        required: false,
+        default: null
     }
 });
 
@@ -54,6 +55,12 @@ const formatList = (array) => {
 
 const renderedContent = computed(() => {
     let contentToRender = props.content;
+    
+    // Handle null or undefined content
+    if (contentToRender === null || contentToRender === undefined) {
+        return '';
+    }
+    
     if (Array.isArray(contentToRender)) {
         contentToRender = formatList(contentToRender);
     }
