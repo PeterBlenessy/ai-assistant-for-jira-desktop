@@ -2,12 +2,12 @@
     <div v-if="issueFields" class="row items-start">
         <!-- Original Issue Column -->
         <div class="col-12 col-md-6 q-pa-sm">
-            <div class="text-subtitle1 q-mb-sm">Original Issue Fields</div>
+            <div class="text-h2 q-mb-sm">Original Issue Fields</div>
             <q-list separator bordered padding class="rounded-borders">
                 <template v-for="field in issueDisplayFields" :key="field">
                     <q-item>
                         <q-item-section>
-                            <q-item-label class="text-capitalize text-subtitle2">{{ field }}</q-item-label>
+                            <q-item-label class="text-capitalize text-h2">{{ field }}</q-item-label>
                             <q-item-label>
                                 <div v-if="field === 'description'" class="field-container">
                                     <template v-if="editingField === field && editingType === 'original'">
@@ -63,7 +63,7 @@
 
         <!-- Improvements Column -->
         <div class="col-12 col-md-6 q-pa-sm">
-            <div class="text-subtitle1 q-mb-sm">AI Generated Improvement Proposals</div>
+            <div class="text-h2 q-mb-sm">AI Generated Improvement Proposals</div>
             <div class="description-text">
 
                 <!-- STATE: GENERATING -->
@@ -73,7 +73,7 @@
                     <template v-for="(field, key) in improvementProposal" :key="key">
                         <q-item v-if="shouldDisplayField(key)" style="cursor: default">
                             <q-item-section>
-                                <q-item-label class="text-capitalize text-subtitle2">
+                                <q-item-label class="text-capitalize text-h2">
                                     {{ field?.label || field }}
                                 </q-item-label>
                                 <q-item-label v-if="field?.text && isFieldUpdated(field)" class="field-container">
@@ -154,7 +154,7 @@
                                 <q-icon name="mdi-alert-circle-outline" color="negative" />
                             </q-item-section>
                             <q-item-section>
-                                <q-item-label class="text-subtitle2">Failed to generate improvements</q-item-label>
+                                <q-item-label class="text-h3">Failed to generate improvements</q-item-label>
                                 <q-item-label>{{ errorMessage }}</q-item-label>
                             </q-item-section>
                         </q-item>

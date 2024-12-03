@@ -4,7 +4,7 @@
         <InfoBox v-if="isInfoBoxVisible('PromptManagement')" :markdownContent="infoBoxMarkdown" @dismiss="dismissInfoBox('PromptManagement')" />
 
         <!-- Template Selection -->
-        <div class="text-subtitle2 q-pt-md q-pb-sm">Jira issue type</div>
+        <div class="text-h2 q-pt-md q-pb-sm">Jira issue type</div>
         <q-select v-model="selectedTemplate" :options="templateOptions" label="Select Issue Type" option-label="label"
             option-value="value" class="q-mb-md" />
 
@@ -156,7 +156,7 @@
             </q-list>
 
             <!-- Fields Management -->
-            <div class="text-subtitle2 q-pb-sm">Fields</div>
+            <div class="text-h2 q-pb-sm">Fields</div>
 
             <!-- Existing Fields -->
             <q-list v-for="(field, index) in currentFields" :key="index">
