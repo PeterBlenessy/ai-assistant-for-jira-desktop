@@ -8,7 +8,7 @@
                     <q-item>
                         <q-item-section>
                             <q-item-label class="text-capitalize text-h2">{{ field }}</q-item-label>
-                            <q-item-label>
+                            <q-item-label class="field-wrapper">
                                 <div v-if="field === 'description'" class="field-container">
                                     <template v-if="editingField === field && editingType === 'original'">
                                         <q-input
@@ -42,13 +42,15 @@
                                 </div>
                             </q-item-label>
                         </q-item-section>
-                        <q-item-section top side>
+                        <q-item-section top side class="floating-buttons">
                                 <template v-if="editingField === field && editingType === 'original'">
-                                    <q-btn class="q-pa-xs q-ma-none" size="sm" flat icon="mdi-check" color="positive" @click="saveEdit" />
-                                    <q-btn class="q-pa-xs q-ma-none" size="sm" flat icon="mdi-close" @click="cancelEdit" />
+                                    <div class="row">
+                                        <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" size="sm" flat icon="mdi-check" color="positive" @click="saveEdit" />
+                                        <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" size="sm" flat icon="mdi-close" @click="cancelEdit" />
+                                    </div>
                                 </template>
                                 <template v-else>
-                                    <q-btn class="q-pa-xs q-ma-none" flat size="sm" icon="mdi-pencil"  @click="startEdit(field, 'original', getIssueField(field))" />
+                                    <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" flat size="sm" icon="mdi-pencil"  @click="startEdit(field, 'original', getIssueField(field))" />
                                 </template>
                         </q-item-section>
                     </q-item>
@@ -452,20 +454,28 @@ watch(() => props.issueKey, async (newIssueKey) => {
 </script>
 
 <style scoped>
+.field-wrapper {
+    position: relative;
+}
+
 .field-container {
     position: relative;
-    width: 100%;
+}
+
+.floating-buttons {
+    position: absolute !important;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+}
+
+.q-item:hover .floating-buttons {
+    opacity: 1;
 }
 
 .q-input {
     width: 100%;
-}
-
-/* Add some spacing for the formatted content */
-h1,
-h2,
-h3 {
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
 }
 </style>

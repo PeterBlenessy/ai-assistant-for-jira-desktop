@@ -22,7 +22,7 @@
             <q-item>
                 <q-item-section>
                     <template v-if="editingSection === 'issueType'">
-                        <q-input v-model="editingContent.issueType" label="Issue Type" filled dense
+                        <q-input v-model="editingContent.issueType" label="Issue Type" filled dense stack-label
                             :rules="[val => !!val || 'Issue type is required']" lazy-rules="ondemand"
                         />
                     </template>
@@ -32,17 +32,16 @@
                     </template>
                 </q-item-section>
 
-                <q-item-section side>
-                    <div class="row q-gutter-sm">
-                        <template v-if="editingSection === 'issueType'">
+                <q-item-section side class="floating-buttons">
+                    <template v-if="editingSection === 'issueType'">
+                        <div class="row">
                             <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
                             <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
-                        </template>
-                        <template v-else>
-                            <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
-                                @click="handleEditContent('issueType')" />
-                        </template>
-                    </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none" @click="handleEditContent('issueType')" />
+                    </template>
                 </q-item-section>
             </q-item>
             <q-separator spaced inset />
@@ -53,7 +52,7 @@
             <q-item>
                 <q-item-section>
                     <template v-if="editingSection === 'name'">
-                        <q-input v-model="editingContent.name" label="Name" filled dense
+                        <q-input v-model="editingContent.name" label="Name" filled dense stack-label
                             :rules="[val => !!val || 'Template name is required']" lazy-rules="ondemand"
                         />
                     </template>
@@ -63,17 +62,16 @@
                     </template>
                 </q-item-section>
 
-                <q-item-section side>
-                    <div class="row q-gutter-sm">
-                        <template v-if="editingSection === 'name'">
+                <q-item-section side class="floating-buttons">
+                    <template v-if="editingSection === 'name'">
+                        <div class="row">
                             <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
                             <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
-                        </template>
-                        <template v-else>
-                            <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
-                                @click="handleEditContent('name')" />
-                        </template>
-                    </div>
+                        </div>
+                    </template>
+                    <template v-else>
+                        <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none" @click="handleEditContent('name')" />
+                    </template>
                 </q-item-section>
             </q-item>
             <q-separator spaced inset />
@@ -86,7 +84,7 @@
                 <q-item>
                     <q-item-section>
                         <template v-if="editingSection === 'definition'">
-                            <q-input v-model="editingContent.definition" type="textarea" label="Definition" filled
+                            <q-input v-model="editingContent.definition" type="textarea" label="Definition" filled stack-label
                                 dense autogrow @paste="handlePaste"
                                 :rules="[val => !!val || 'Definition is required']" lazy-rules="ondemand"
                             />
@@ -97,15 +95,14 @@
                         </template>
                     </q-item-section>
 
-                    <q-item-section side>
+                    <q-item-section side class="floating-buttons">
                         <div class="row q-gutter-sm">
                             <template v-if="editingSection === 'definition'">
                                 <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
                                 <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                             </template>
                             <template v-else>
-                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
-                                    @click="handleEditContent('definition')" />
+                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none" @click="handleEditContent('definition')" />
                             </template>
                         </div>
                     </q-item-section>
@@ -119,14 +116,14 @@
                             <template v-if="editingSection === 'persona'">
                                 <div class="row q-col-gutter-sm">
                                     <div class="col-12">
-                                        <q-input v-model="editingContent.persona.name" label="Responsible person role" filled dense
+                                        <q-input v-model="editingContent.persona.name" label="Responsible person role" filled dense stack-label
                                             @paste="handlePaste"
                                             :rules="[val => !!val || 'Responsible person role is required']" lazy-rules="ondemand"
                                         />
                                     </div>
                                     <div class="col-12">
                                         <q-input v-model="editingContent.persona.definition" type="textarea"
-                                            label="Responsible person definition" filled dense autogrow @paste="handlePaste"
+                                            label="Responsible person definition" filled dense stack-label autogrow @paste="handlePaste"
                                             :rules="[val => !!val || 'Responsible person definition is required']" lazy-rules="ondemand"
                                         />
                                     </div>
@@ -138,15 +135,14 @@
                             </template>
                         </q-item-section>
 
-                        <q-item-section side>
+                        <q-item-section side class="floating-buttons">
                             <div class="row q-gutter-sm">
                                 <template v-if="editingSection === 'persona'">
                                     <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveContent" />
                                     <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                                 </template>
                                 <template v-else>
-                                    <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
-                                        @click="handleEditContent('persona')" />
+                                    <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none" @click="handleEditContent('persona')" />
                                 </template>
                             </div>
                         </q-item-section>
@@ -164,15 +160,20 @@
                     <q-item-section>
                         <template v-if="editingIndex === index">
                             <div class="row q-col-gutter-sm">
-                                <div class="col-12">
-                                    <q-input v-model="editingField.title" label="Field Title" filled dense autofocus
-                                        @update:model-value="updateFieldName" @paste="handlePaste"
+                                <div class="col-12 col-sm-6">
+                                    <q-input v-model="editingField.name" label="Field Name" filled dense stack-label
+                                        :rules="[val => !!val || 'Field name is required']" lazy-rules="ondemand"
+                                        @update:model-value="updateFieldName"
+                                    />
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <q-input v-model="editingField.title" label="Field Title" filled dense stack-label
                                         :rules="[val => !!val || 'Field title is required']" lazy-rules="ondemand"
                                     />
                                 </div>
                                 <div class="col-12">
-                                    <q-input v-model="editingField.definition" type="textarea"
-                                        label="Field definition" filled dense autogrow @paste="handlePaste"
+                                    <q-input v-model="editingField.definition" type="textarea" label="Field definition" filled stack-label
+                                        dense autogrow @paste="handlePaste"
                                         :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand"
                                     />
                                 </div>
@@ -184,16 +185,15 @@
                         </template>
                     </q-item-section>
 
-                    <q-item-section side>
+                    <q-item-section side class="floating-buttons">
                         <div class="row q-gutter-sm">
                             <template v-if="editingIndex === index">
                                 <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveField" />
                                 <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                             </template>
                             <template v-else>
-                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none"
-                                    @click="handleEditField(index)" />
-                                <q-btn v-if="field.name != 'summary' && field.name != 'description'" flat icon="mdi-delete" size="sm" class="q-pa-xs q-ma-none"
+                                <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none" @click="handleEditField(index)" />
+                                <q-btn v-if="field.name != 'summary' && field.name != 'description'" flat icon="mdi-delete" size="sm" class="q-pa-xs"
                                     @click="handleDeleteField(index)" />
                             </template>
                         </div>
@@ -206,14 +206,19 @@
             <q-item v-if="isNewField">
                 <q-item-section>
                     <div class="row q-col-gutter-sm">
-                        <div class="col-12">
-                            <q-input v-model="editingField.title" label="Field Title" filled dense autofocus
-                                @update:model-value="updateFieldName" @paste="handlePaste" 
+                        <div class="col-12 col-sm-6">
+                            <q-input v-model="editingField.name" label="Field Name" filled dense stack-label
+                                :rules="[val => !!val || 'Field name is required']" lazy-rules="ondemand"
+                                @update:model-value="updateFieldName"
+                            />
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <q-input v-model="editingField.title" label="Field Title" filled dense stack-label
                                 :rules="[val => !!val || 'Field title is required']" lazy-rules="ondemand"
                             />
                         </div>
                         <div class="col-12">
-                            <q-input v-model="editingField.definition" type="textarea" label="Field definition" filled
+                            <q-input v-model="editingField.definition" type="textarea" label="Field definition" filled stack-label
                                 dense autogrow @paste="handlePaste"
                                 :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand"
                             />
@@ -221,10 +226,10 @@
                     </div>
                 </q-item-section>
 
-                <q-item-section side>
+                <q-item-section side class="floating-buttons">
                     <div class="row q-gutter-sm">
-                        <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs" color="primary" @click="handleSaveField" />
-                        <q-btn flat icon="mdi-close" size="sm" class="q-pa-none" @click="cancelEdit" />
+                        <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary" @click="handleSaveField" />
+                        <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
                     </div>
                 </q-item-section>
             </q-item>
@@ -502,7 +507,7 @@ function handleAddTemplate() {
     editingContent.value = { 
         issueType: '',
         name: '',
-        definition: '',
+        description: '',
         persona: {
             name: '',
             definition: ''
@@ -536,5 +541,19 @@ async function checkIssueType(issueType) {
 </script>
 
 <style scoped>
-/* No specific styles added yet */
+.floating-buttons {
+    position: absolute !important;
+    top: 0.75rem;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+}
+.q-item:hover .floating-buttons {
+    opacity: 1;
+}
+.q-item {
+    position: relative;
+}
+
 </style>
