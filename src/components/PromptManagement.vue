@@ -262,13 +262,21 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useTemplateStore } from '../stores/template-store';
 import { storeToRefs } from 'pinia';
 import { usePersistedStore } from '../stores/persisted-store';
 import { useJiraClient } from '../composables/JiraClient';
 import InfoBox from './InfoBox.vue';
+import { useConfirmDialog } from '../helpers/dialogUtils'
+import { useJiraIssueTypes } from '../helpers/jiraUtils'
+import {
+    cleanText,
+    capitalizeFirstLetter,
+    handleInputPaste,
+    toCamelCase
+} from '../helpers/textUtils'
 
 const q = useQuasar();
 const templateStore = useTemplateStore();
@@ -278,6 +286,16 @@ const persistedStore = usePersistedStore();
 const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
 
 const { jiraClient } = useJiraClient();
+const { jiraIssueTypeInfo, discoverIssueTypeInfo } = useJiraIssueTypes(jiraClient)
+
+// Watch for template type changes to update Jira info
+watch(selectedTemplateType, async (newValue) => {
+    if (newValue) {
+        await discoverIssueTypeInfo(newValue);
+    }
+});
+
+const { confirmDelete } = useConfirmDialog()
 
 // Compute template options from the store
 const templateOptions = computed(() =>
@@ -334,9 +352,6 @@ const editingContent = ref({
     }
 });
 
-// Add new ref for Jira issue type info
-const jiraIssueTypeInfo = ref(null);
-
 // Markdown content for the InfoBox
 const infoBoxMarkdown = `
 The below information is provided to the AI as guidance when generating improvements.
@@ -350,26 +365,6 @@ Each issue type has a description, a responsible role, and a list of fields.
 
 **Fields**: The specific details that will guide the AI when reviewing the original issue details and when generating improvements. Fields can be existing Jira fields or sections of the issue description.
 `;
-
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function toCamelCase(str) {
-    return str
-        .trim()
-        .replace(/[\s-_]+(.)/g, (_, c) => c.toUpperCase())
-        .replace(/^(.)/, c => c.toLowerCase())
-        .replace(/[^a-zA-Z0-9]/g, '');
-}
-
-function cleanText(text) {
-    return text
-        .trim()
-        .replace(/^\s+/gm, '')      // Remove leading whitespace from each line
-        .replace(/\n\s*\n\s*/g, '\n\n')  // Replace multiple blank lines with a single one
-        .replace(/\s+/g, ' ');      // Replace multiple spaces with a single space
-}
 
 function handleEditField(index) {
     editingField.value = { ...currentFields.value[index] };
@@ -427,27 +422,14 @@ function handleSaveField() {
 
 function handleDeleteField(index) {
     const field = currentFields.value[index];
-    q.dialog({
-        message: `Are you sure you want to delete the  <em><strong>${field.title}</strong></em> field?`,
-        html: true,
-        cancel: true,
-        persistent: true,
-        ok: {
-            label: 'Delete',
-            color: 'negative',
-            size: "sm"
-        },
-        cancel: {
-            label: 'Cancel',
-            color: 'dark',
-            size: "sm",
-            flat: true
+    confirmDelete({
+        message: `Are you sure you want to delete the <em><strong>${field.title}</strong></em> field?`,
+        onConfirm: () => {
+            const template = templates.value.find(t => t.issueType === selectedTemplateType.value);
+            const templateIndex = templates.value.indexOf(template);
+            template.fields.splice(index, 1);
+            templateStore.editTemplate(templateIndex, template);
         }
-    }).onOk(() => {
-        const template = templates.value.find(t => t.issueType === selectedTemplateType.value);
-        const templateIndex = templates.value.indexOf(template);
-        template.fields.splice(index, 1);
-        templateStore.editTemplate(templateIndex, template);
     });
 }
 
@@ -530,71 +512,16 @@ function handleAddTemplate() {
 }
 function handleDeleteTemplate() {
     const currentTemplate = templates.value.find(t => t.issueType === selectedTemplateType.value);
-    q.dialog({
+
+    confirmDelete({
         message: `Are you sure you want to delete the <em><strong>${currentTemplate.name}</strong></em> template?`,
-        html: true,
-        cancel: true,
-        persistent: true,
-        ok: {
-            label: 'Delete',
-            color: 'negative',
-            size: "sm"
-        },
-        cancel: {
-            label: 'Cancel',
-            color: 'dark',
-            size: "sm",
-            flat: true
+        onConfirm: () => {
+            const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
+            if (templateIndex !== -1) {
+                templateStore.deleteTemplate(templateIndex);
+                selectedTemplateType.value = templates.value[0]?.issueType || '';
+            }
         }
-    }).onOk(() => {
-        const templateIndex = templates.value.findIndex(t => t.issueType === selectedTemplateType.value);
-        if (templateIndex !== -1) {
-            templateStore.deleteTemplate(templateIndex);
-            selectedTemplateType.value = templates.value[0]?.issueType || '';
-        }
-    });
-}
-
-async function discoverIssueTypeInfo(issueType) {
-    try {
-        // Get all issue types
-        const issueTypes = await jiraClient.value.getIssueTypes();
-
-        const matchingType = issueTypes.find(type =>
-            type.name.toLowerCase() === issueType.toLowerCase()
-        );
-
-        jiraIssueTypeInfo.value = matchingType ? matchingType : null;
-
-    } catch (error) {
-        console.error('Error checking issue type:', error);
-        jiraIssueTypeInfo.value = null;
-    }
-}
-
-function handleInputPaste(event, updateValue) {
-    // Get the input element
-    const input = event.target;
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-
-    // Get the pasted text and clean it
-    const pastedText = event.clipboardData.getData('text');
-    const cleanedText = cleanText(pastedText);
-
-    // Get the current value and insert cleaned text at cursor position
-    const currentValue = input.value;
-    const newValue = currentValue.substring(0, start) + cleanedText + currentValue.substring(end);
-
-    // Update the value
-    updateValue(newValue);
-
-    // Prevent default paste
-    event.preventDefault();
-
-    // Set cursor position after paste
-    nextTick(() => {
-        input.setSelectionRange(start + cleanedText.length, start + cleanedText.length);
     });
 }
 

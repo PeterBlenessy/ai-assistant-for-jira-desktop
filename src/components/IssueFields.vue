@@ -3,7 +3,7 @@
         <!-- Original Issue Column -->
         <div class="col-12 col-md-6 q-pa-sm">
             <div class="text-h2 q-mb-sm">Original Issue Fields</div>
-            <q-list separator bordered padding class="rounded-borders">
+            <q-list separator bordered padding class="rounded-borders q-pt-none">
                 <template v-for="field in issueDisplayFields" :key="field">
                     <q-item>
                         <q-item-section>
@@ -11,15 +11,8 @@
                             <q-item-label class="field-wrapper">
                                 <div v-if="field === 'description'" class="field-container">
                                     <template v-if="editingField === field && editingType === 'original'">
-                                        <q-input
-                                            v-model="editingContent"
-                                            type="textarea"
-                                            filled
-                                            dense
-                                            :autogrow="true"
-                                            @keyup.enter.ctrl="saveEdit"
-                                            @keyup.esc="cancelEdit"
-                                        />
+                                        <q-input v-model="editingContent" type="textarea" filled dense :autogrow="true"
+                                            @keyup.enter.ctrl="saveEdit" @keyup.esc="cancelEdit" />
                                     </template>
                                     <template v-else>
                                         <MarkdownViewer :content="getIssueField(field)" />
@@ -27,14 +20,8 @@
                                 </div>
                                 <div v-else class="field-container">
                                     <template v-if="editingField === field && editingType === 'original'">
-                                        <q-input
-                                            v-model="editingContent"
-                                            filled
-                                            dense
-                                            :autogrow="true"
-                                            @keyup.enter="saveEdit"
-                                            @keyup.esc="cancelEdit"
-                                        />
+                                        <q-input v-model="editingContent" filled dense :autogrow="true"
+                                            @keyup.enter="saveEdit" @keyup.esc="cancelEdit" />
                                     </template>
                                     <template v-else>
                                         <div v-html="formatJiraMarkup(getIssueField(field))"></div>
@@ -43,15 +30,18 @@
                             </q-item-label>
                         </q-item-section>
                         <q-item-section top side class="floating-buttons">
-                                <template v-if="editingField === field && editingType === 'original'">
-                                    <div class="row">
-                                        <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" size="sm" flat icon="mdi-check" color="positive" @click="saveEdit" />
-                                        <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" size="sm" flat icon="mdi-close" @click="cancelEdit" />
-                                    </div>
-                                </template>
-                                <template v-else>
-                                    <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" flat size="sm" icon="mdi-pencil"  @click="startEdit(field, 'original', getIssueField(field))" />
-                                </template>
+                            <template v-if="editingField === field && editingType === 'original'">
+                                <div class="row">
+                                    <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" size="sm" flat icon="mdi-check"
+                                        color="positive" @click="saveEdit" />
+                                    <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" size="sm" flat icon="mdi-close"
+                                        @click="cancelEdit" />
+                                </div>
+                            </template>
+                            <template v-else>
+                                <q-btn class="q-pa-xs q-ma-none q-mt-sm q-mr-sm" flat size="sm" icon="mdi-pencil"
+                                    @click="startEdit(field, 'original', getIssueField(field))" />
+                            </template>
                         </q-item-section>
                     </q-item>
                 </template>
@@ -71,7 +61,7 @@
                 <!-- STATE: GENERATING -->
                 <!-- Field text is displayed if updated; comment is always displayed if available -->
                 <q-list v-if="improvementProposal && improvementFieldsFiltered.length > 0" separator bordered padding
-                    class="rounded-borders">
+                    class="rounded-borders q-pt-none">
                     <template v-for="(field, key) in improvementProposal" :key="key">
                         <q-item v-if="shouldDisplayField(key)" style="cursor: default">
                             <q-item-section>
@@ -80,16 +70,9 @@
                                 </q-item-label>
                                 <q-item-label v-if="field?.text && isFieldUpdated(field)" class="field-container">
                                     <template v-if="editingField === key && editingType === 'improved'">
-                                        <q-input
-                                            v-model="editingContent"
-                                            type="textarea"
-                                            filled
-                                            autofocus
-                                            :autogrow="true"
-                                            @blur="saveEdit"
-                                            @keyup.enter.ctrl="saveEdit"
-                                            @keyup.esc="cancelEdit"
-                                        />
+                                        <q-input v-model="editingContent" type="textarea" filled autofocus
+                                            :autogrow="true" @blur="saveEdit" @keyup.enter.ctrl="saveEdit"
+                                            @keyup.esc="cancelEdit" />
                                     </template>
                                     <template v-else>
                                         <MarkdownViewer :content="field?.text" />
@@ -99,12 +82,13 @@
                                     Comment: {{ field?.comment }}
                                 </q-item-label>
                             </q-item-section>
-                            <q-item-section side top v-if="isFieldUpdated(field)">
-                                <q-chip square size="sm" class="text-caption text-uppercase q-ma-none" color="primary"
+                            <q-item-section side top v-if="isFieldUpdated(field)" class="floating-accept">
+                                <q-btn class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" color="primary" size="sm"
                                     :clickable="!field.accepted" :outline="field.accepted"
                                     :label="field.accepted ? 'Accepted' : 'Accept'"
                                     :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
-                                    @click="acceptImprovement(key, field)" />
+                                    @click="acceptImprovement(key, field)"
+                                />
                             </q-item-section>
                         </q-item>
                     </template>
@@ -182,7 +166,7 @@ import {
     formatJiraMarkup,
     extractDescriptionSections,
     formatDescription
-} from '../composables/utility.js';
+} from '../helpers/markupUtils.js';
 
 const props = defineProps({
     issueKey: {
@@ -359,10 +343,10 @@ const acceptImprovement = async (type, improvement) => {
                 // Any field that's not summary is treated as a section in the description
                 const currentDescription = getIssueField('description') || '';
                 const descriptionSections = extractDescriptionSections(currentDescription);
-                
+
                 // Format the content if it's an array
                 const formattedContent = formatArrayContent(improvement.text);
-                
+
                 if (type === 'description') {
                     // For main description, update the main content
                     descriptionSections.description = formattedContent;
@@ -417,10 +401,10 @@ const saveEdit = async () => {
                 [editingField.value]: editingContent.value
             }
         };
-        
+
         // Save to Jira
         await jiraClient.value.updateIssue(props.issueKey, updateFields);
-        
+
         // Update local state
         issueFields.value[editingField.value] = editingContent.value;
     } catch (error) {
@@ -473,6 +457,13 @@ watch(() => props.issueKey, async (newIssueKey) => {
 
 .q-item:hover .floating-buttons {
     opacity: 1;
+}
+
+.floating-accept {
+    position: absolute !important;
+    top: 0;
+    right: 0;
+    z-index: 1;
 }
 
 .q-input {

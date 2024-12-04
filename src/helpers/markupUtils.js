@@ -91,6 +91,7 @@ export function parseYAML(yamlStr) {
 
     return result;
 }
+
 // Convert Jira markup to markdown
 export const formatJiraMarkup = (text) => {
     if (!text) return '';
