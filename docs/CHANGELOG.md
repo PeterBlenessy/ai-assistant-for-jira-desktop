@@ -12,6 +12,18 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.5.23 - 2024-12-03
+- Updated header styles for improved UX.
+- Fixed issue where markdown headers were converted to list items.
+- Updated the PromptManagement action buttons to floating and displayed on hover to improve UX.
+- Fixed issue where pasting text did not work as expected when editing issue type templates.
+- Added support for Quasar Dialog plugin.
+- Added confirmation dialog when deleting issue type templates and fields.
+- Refactored text handling, dialog confirmations, and Jira utilities into separate helper files.
+- Updated IssueFields component to make the accept buttons floating.
+- Added revert functionality for accepted improvements.
+- Fixed issue where the original summary and the generated had different styles.
+
 ### v0.5.22 - 2024-12-03
 - Fixed null content handling in MarkdownViewer component
 - Added support for editing the issue type name in PromptManagement
