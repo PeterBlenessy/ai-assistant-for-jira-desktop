@@ -8,8 +8,7 @@
                     <q-item>
                         <q-item-section>
                             <q-item-label class="text-capitalize text-h2">{{ field }}</q-item-label>
-                            <q-item-label class="field-wrapper">
-                                <div v-if="field === 'description'" class="field-container">
+                            <q-item-label class="field-container">
                                     <template v-if="editingField === field && editingType === 'original'">
                                         <q-input v-model="editingContent" type="textarea" filled dense :autogrow="true"
                                             @keyup.enter.ctrl="saveEdit" @keyup.esc="cancelEdit" />
@@ -17,16 +16,6 @@
                                     <template v-else>
                                         <MarkdownViewer :content="getIssueField(field)" />
                                     </template>
-                                </div>
-                                <div v-else class="field-container">
-                                    <template v-if="editingField === field && editingType === 'original'">
-                                        <q-input v-model="editingContent" filled dense :autogrow="true"
-                                            @keyup.enter="saveEdit" @keyup.esc="cancelEdit" />
-                                    </template>
-                                    <template v-else>
-                                        <div v-html="formatJiraMarkup(getIssueField(field))"></div>
-                                    </template>
-                                </div>
                             </q-item-label>
                         </q-item-section>
                         <q-item-section top side class="floating-buttons">
@@ -56,97 +45,91 @@
         <!-- Improvements Column -->
         <div class="col-12 col-md-6 q-pa-sm">
             <div class="text-h2 q-mb-sm">AI Generated Improvement Proposals</div>
-            <div class="description-text">
+            <!-- STATE: GENERATING -->
+            <!-- Field text is displayed if updated; comment is always displayed if available -->
+            <q-list v-if="improvementProposal && improvementFieldsFiltered.length > 0" separator bordered padding
+                class="rounded-borders q-pt-none">
+                <template v-for="(field, key) in improvementProposal" :key="key">
+                    <q-item v-if="shouldDisplayField(key)">
+                        <q-item-section>
+                            <q-item-label class="text-capitalize text-h2">{{ field?.label || field }}</q-item-label>
+                            <q-item-label v-if="field?.text && isFieldUpdated(field)" class="field-container">
+                                <template v-if="editingField === key && editingType === 'improved'">
+                                    <q-input v-model="editingContent" type="textarea" filled autofocus :autogrow="true"
+                                        @blur="saveEdit" @keyup.enter.ctrl="saveEdit" @keyup.esc="cancelEdit" />
+                                </template>
+                                <template v-else>
+                                    <MarkdownViewer :content="field?.text" />
+                                </template>
+                            </q-item-label>
+                            <q-item-label v-if="field?.comment" caption class="text-italic q-mt-xs">
+                                Comment: {{ field?.comment }}
+                            </q-item-label>
+                        </q-item-section>
+                        <q-item-section side top v-if="isFieldUpdated(field)" class="floating-accept">
+                            <q-btn class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" color="primary"
+                                size="sm" :clickable="!field.accepted" :outline="field.accepted"
+                                :label="field.accepted ? 'Accepted' : 'Accept'"
+                                :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
+                                @click="acceptImprovement(key, field)" />
+                        </q-item-section>
+                    </q-item>
+                </template>
+            </q-list>
 
-                <!-- STATE: GENERATING -->
-                <!-- Field text is displayed if updated; comment is always displayed if available -->
-                <q-list v-if="improvementProposal && improvementFieldsFiltered.length > 0" separator bordered padding
-                    class="rounded-borders q-pt-none">
-                    <template v-for="(field, key) in improvementProposal" :key="key">
-                        <q-item v-if="shouldDisplayField(key)" style="cursor: default">
-                            <q-item-section>
-                                <q-item-label class="text-capitalize text-h2">
-                                    {{ field?.label || field }}
-                                </q-item-label>
-                                <q-item-label v-if="field?.text && isFieldUpdated(field)" class="field-container">
-                                    <template v-if="editingField === key && editingType === 'improved'">
-                                        <q-input v-model="editingContent" type="textarea" filled autofocus
-                                            :autogrow="true" @blur="saveEdit" @keyup.enter.ctrl="saveEdit"
-                                            @keyup.esc="cancelEdit" />
-                                    </template>
-                                    <template v-else>
-                                        <MarkdownViewer :content="field?.text" />
-                                    </template>
-                                </q-item-label>
-                                <q-item-label v-if="field?.comment" caption class="text-italic q-mt-xs">
-                                    Comment: {{ field?.comment }}
-                                </q-item-label>
-                            </q-item-section>
-                            <q-item-section side top v-if="isFieldUpdated(field)" class="floating-accept">
-                                <q-btn class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" color="primary" size="sm"
-                                    :clickable="!field.accepted" :outline="field.accepted"
-                                    :label="field.accepted ? 'Accepted' : 'Accept'"
-                                    :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
-                                    @click="acceptImprovement(key, field)"
-                                />
-                            </q-item-section>
-                        </q-item>
-                    </template>
+            <!-- STATE: WAITING -->
+            <!-- for streaming respons to start -->
+            <div v-else-if="loading">
+                <q-spinner-ios size="24px" />
+                Generating improvements
+            </div>
+
+            <!-- STATE: IDLE -->
+            <div v-else-if="!loading">
+
+                <!-- STATE: NOT STARTED -->
+                <q-list v-if="improvementProposal == null" bordered class="rounded-borders"
+                    style="border-color: var(--q-warning); background-color: rgb(from var(--q-warning) r g b / 10%)">
+                    <q-item>
+                        <q-item-section avatar>
+                            <q-icon name="mdi-information-outline" color="warning" />
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label>Click the improve button to generate improvement proposals</q-item-label>
+                        </q-item-section>
+                    </q-item>
                 </q-list>
 
-                <!-- STATE: WAITING -->
-                <!-- for streaming respons to start -->
-                <div v-else-if="loading">
-                    <q-spinner-ios size="24px" />
-                    Generating improvements
-                </div>
+                <!-- STATE: NO IMPROVEMENTS AND NO COMMENTS -->
+                <q-list v-else-if="improvementProposal != null && improvementFieldsFiltered.length == 0" bordered
+                    class="rounded-borders"
+                    style="border-color: var(--q-warning); background-color: rgb(from var(--q-warning) r g b / 10%)">
+                    <q-item>
+                        <q-item-section avatar>
+                            <q-icon name="mdi-information-outline" color="warning" />
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label>No improvement proposals or comments</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </q-list>
 
-                <!-- STATE: IDLE -->
-                <div v-else-if="!loading">
-
-                    <!-- STATE: NOT STARTED -->
-                    <q-list v-if="improvementProposal == null" bordered class="rounded-borders"
-                        style="border-color: var(--q-warning); background-color: rgb(from var(--q-warning) r g b / 10%)">
-                        <q-item>
-                            <q-item-section avatar>
-                                <q-icon name="mdi-information-outline" color="warning" />
-                            </q-item-section>
-                            <q-item-section>
-                                <q-item-label>Click the improve button to generate improvement proposals</q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-
-                    <!-- STATE: NO IMPROVEMENTS AND NO COMMENTS -->
-                    <q-list v-else-if="improvementProposal != null && improvementFieldsFiltered.length == 0" bordered
-                        class="rounded-borders"
-                        style="border-color: var(--q-warning); background-color: rgb(from var(--q-warning) r g b / 10%)">
-                        <q-item>
-                            <q-item-section avatar>
-                                <q-icon name="mdi-information-outline" color="warning" />
-                            </q-item-section>
-                            <q-item-section>
-                                <q-item-label>No improvement proposals or comments</q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-
-                    <!-- STATE: FAILED -->
-                    <!-- This happens due to connection issues, e.g. if user has no AI credits left.  -->
-                    <q-list v-else-if="improvementFailed" bordered padding class="rounded-borders"
-                        style="border-color: var(--q-negative); background-color: rgb(from var(--q-negative) r g b / 10%)">
-                        <q-item>
-                            <q-item-section avatar>
-                                <q-icon name="mdi-alert-circle-outline" color="negative" />
-                            </q-item-section>
-                            <q-item-section>
-                                <q-item-label class="text-h3">Failed to generate improvements</q-item-label>
-                                <q-item-label>{{ errorMessage }}</q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </div>
+                <!-- STATE: FAILED -->
+                <!-- This happens due to connection issues, e.g. if user has no AI credits left.  -->
+                <q-list v-else-if="improvementFailed" bordered padding class="rounded-borders"
+                    style="border-color: var(--q-negative); background-color: rgb(from var(--q-negative) r g b / 10%)">
+                    <q-item>
+                        <q-item-section avatar>
+                            <q-icon name="mdi-alert-circle-outline" color="negative" />
+                        </q-item-section>
+                        <q-item-section>
+                            <q-item-label class="text-h3">Failed to generate improvements</q-item-label>
+                            <q-item-label>{{ errorMessage }}</q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </q-list>
             </div>
+
         </div>
     </div>
 </template>
@@ -438,10 +421,6 @@ watch(() => props.issueKey, async (newIssueKey) => {
 </script>
 
 <style scoped>
-.field-wrapper {
-    position: relative;
-}
-
 .field-container {
     position: relative;
 }
