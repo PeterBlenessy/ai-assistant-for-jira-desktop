@@ -10,12 +10,12 @@
 
         <!-- Template Action Buttons -->
         <div class="q-gutter-sm">
-            <q-btn icon="mdi-plus" label="Add new" class="q-mb-md q-pl-xs" size="sm" @click="handleAddTemplate" />
+            <q-btn icon="mdi-plus" label="Add new" class="q-mb-md q-pl-xs" color="primary" size="sm" @click="handleAddTemplate" />
             <q-btn v-if="selectedTemplate" icon="mdi-delete" label="Delete" class="q-mb-md q-pl-xs" size="sm" @click="handleDeleteTemplate" />
         </div>
 
         <!-- Jira Issue Type Info -->
-        <InfoBox v-if="jiraIssueTypeInfo && selectedTemplate && isInfoBoxVisible(jiraIssueTypeInfo.name)" :markdownContent="jiraTypeInfoMarkdown" @dismiss="dismissInfoBox(jiraIssueTypeInfo.name)" />
+        <InfoBox v-if="jiraIssueTypeInfo && selectedTemplate && isInfoBoxVisible(jiraIssueTypeInfo.name)" :markdownContent="jiraIssueTypeInfoMarkdown" @dismiss="dismissInfoBox(jiraIssueTypeInfo.name)" />
 
         <!-- Issue Type Editing -->
         <template v-if="selectedTemplate && currentTemplateInfo">
@@ -24,6 +24,7 @@
                     <template v-if="editingSection === 'issueType'">
                         <q-input v-model="editingContent.issueType" label="Issue Type" filled dense stack-label
                             :rules="[val => !!val || 'Issue type is required']" lazy-rules="ondemand"
+                            @paste="e => handleInputPaste(e, v => editingContent.issueType = v)"
                         />
                     </template>
                     <template v-else>
@@ -54,6 +55,7 @@
                     <template v-if="editingSection === 'name'">
                         <q-input v-model="editingContent.name" label="Name" filled dense stack-label
                             :rules="[val => !!val || 'Template name is required']" lazy-rules="ondemand"
+                            @paste="e => handleInputPaste(e, v => editingContent.name = v)"
                         />
                     </template>
                     <template v-else>
@@ -85,8 +87,9 @@
                     <q-item-section>
                         <template v-if="editingSection === 'definition'">
                             <q-input v-model="editingContent.definition" type="textarea" label="Definition" filled stack-label
-                                dense autogrow @paste="handlePaste"
+                                dense autogrow
                                 :rules="[val => !!val || 'Definition is required']" lazy-rules="ondemand"
+                                @paste="e => handleInputPaste(e, v => editingContent.definition = v)"
                             />
                         </template>
                         <template v-else>
@@ -117,13 +120,14 @@
                                 <div class="row q-col-gutter-sm">
                                     <div class="col-12">
                                         <q-input v-model="editingContent.persona.name" label="Responsible person role" filled dense stack-label
-                                            @paste="handlePaste"
+                                            @paste="e => handleInputPaste(e, v => editingContent.persona.name = v)"
                                             :rules="[val => !!val || 'Responsible person role is required']" lazy-rules="ondemand"
                                         />
                                     </div>
                                     <div class="col-12">
                                         <q-input v-model="editingContent.persona.definition" type="textarea"
-                                            label="Responsible person definition" filled dense stack-label autogrow @paste="handlePaste"
+                                            label="Responsible person definition" filled dense stack-label autogrow
+                                            @paste="e => handleInputPaste(e, v => editingContent.persona.definition = v)"
                                             :rules="[val => !!val || 'Responsible person definition is required']" lazy-rules="ondemand"
                                         />
                                     </div>
@@ -164,16 +168,19 @@
                                     <q-input v-model="editingField.name" label="Field Name" filled dense stack-label
                                         :rules="[val => !!val || 'Field name is required']" lazy-rules="ondemand"
                                         @update:model-value="updateFieldName"
+                                        @paste="e => handleInputPaste(e, v => { editingField.name = v; updateFieldName(v); })"
                                     />
                                 </div>
                                 <div class="col-12 col-sm-6">
                                     <q-input v-model="editingField.title" label="Field Title" filled dense stack-label
                                         :rules="[val => !!val || 'Field title is required']" lazy-rules="ondemand"
+                                        @paste="e => handleInputPaste(e, v => editingField.title = v)"
                                     />
                                 </div>
                                 <div class="col-12">
                                     <q-input v-model="editingField.definition" type="textarea" label="Field definition" filled stack-label
-                                        dense autogrow @paste="handlePaste"
+                                        dense autogrow
+                                        @paste="e => handleInputPaste(e, v => editingField.definition = v)"
                                         :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand"
                                     />
                                 </div>
@@ -193,7 +200,7 @@
                             </template>
                             <template v-else>
                                 <q-btn flat icon="mdi-pencil" size="sm" class="q-pa-xs q-ma-none" @click="handleEditField(index)" />
-                                <q-btn v-if="field.name != 'summary' && field.name != 'description'" flat icon="mdi-delete" size="sm" class="q-pa-xs"
+                                <q-btn v-if="field.name != 'summary' && field.name != 'description'" flat icon="mdi-delete" size="sm" class="q-pa-xs q-ma-none"
                                     @click="handleDeleteField(index)" />
                             </template>
                         </div>
@@ -210,16 +217,19 @@
                             <q-input v-model="editingField.name" label="Field Name" filled dense stack-label
                                 :rules="[val => !!val || 'Field name is required']" lazy-rules="ondemand"
                                 @update:model-value="updateFieldName"
+                                @paste="e => handleInputPaste(e, v => { editingField.name = v; updateFieldName(v); })"
                             />
                         </div>
                         <div class="col-12 col-sm-6">
                             <q-input v-model="editingField.title" label="Field Title" filled dense stack-label
                                 :rules="[val => !!val || 'Field title is required']" lazy-rules="ondemand"
+                                @paste="e => handleInputPaste(e, v => editingField.title = v)"
                             />
                         </div>
                         <div class="col-12">
                             <q-input v-model="editingField.definition" type="textarea" label="Field definition" filled stack-label
-                                dense autogrow @paste="handlePaste"
+                                dense autogrow
+                                @paste="e => handleInputPaste(e, v => editingField.definition = v)"
                                 :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand"
                             />
                         </div>
@@ -241,7 +251,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useTemplateStore } from '../stores/template-store';
 import { storeToRefs } from 'pinia';
 import { usePersistedStore } from '../stores/persisted-store';
@@ -280,15 +290,15 @@ const currentFields = computed(() => {
 
 // Add new computed property for current template info
 const currentTemplateInfo = computed(() => {
-    checkIssueType(selectedTemplateType.value);
+    discoverIssueTypeInfo(selectedTemplateType.value);
     return templates.value.find(t => t.issueType === selectedTemplateType.value);
 });
 
 // Add computed property for Jira issue type info markdown
-const jiraTypeInfoMarkdown = computed(() => {
+const jiraIssueTypeInfoMarkdown = computed(() => {
     if (!jiraIssueTypeInfo.value) return '';
     
-    return `*${jiraIssueTypeInfo.value.name}* ${jiraIssueTypeInfo.value.description || 'No description available'}`;
+    return `*${jiraIssueTypeInfo.value.name}:* ${jiraIssueTypeInfo.value.description || 'has no description on the Jira server.'}`;
 });
 
 const editingIndex = ref(-1);
@@ -346,33 +356,6 @@ function cleanText(text) {
         .replace(/^\s+/gm, '')      // Remove leading whitespace from each line
         .replace(/\n\s*\n\s*/g, '\n\n')  // Replace multiple blank lines with a single one
         .replace(/\s+/g, ' ');      // Replace multiple spaces with a single space
-}
-
-function handlePaste(event) {
-    // Prevent the default paste
-    event.preventDefault();
-
-    // Get the clipboard text
-    const text = event.clipboardData.getData('text');
-
-    // Clean the text
-    const cleanedText = cleanText(text);
-
-    // Get the target input name from the event
-    const targetName = event.target.name || event.target.getAttribute('aria-label')?.toLowerCase();
-
-    // Update the appropriate field
-    if (targetName?.includes('title')) {
-        editingField.value.title = cleanedText;
-        updateFieldName(cleanedText);
-    } else if (targetName?.includes('definition')) {
-        editingField.value.definition = cleanedText;
-    }
-}
-
-function updateFieldName(newTitle) {
-    editingField.value.name = toCamelCase(newTitle);
-    editingField.value.title = capitalizeFirstLetter(cleanText(newTitle));
 }
 
 function handleEditField(index) {
@@ -457,7 +440,7 @@ function handleSaveContent() {
     if (editingSection.value === 'name' && !editingContent.value.name) {
         return;
     }
-    if (editingSection.value === 'description' && !editingContent.value.description) {
+    if (editingSection.value === 'definition' && !editingContent.value.definition) {
         return;
     }
     if (editingSection.value === 'persona' &&
@@ -475,8 +458,8 @@ function handleSaveContent() {
         selectedTemplateType.value = newIssueType;
     } else if (editingSection.value === 'name') {
         updatedTemplate.name = cleanText(editingContent.value.name);
-    } else if (editingSection.value === 'description') {
-        updatedTemplate.description = cleanText(editingContent.value.description);
+    } else if (editingSection.value === 'definition') {
+        updatedTemplate.definition = cleanText(editingContent.value.definition);
     } else if (editingSection.value === 'persona') {
         updatedTemplate.persona = {
             name: cleanText(editingContent.value.persona.name),
@@ -522,7 +505,7 @@ function handleDeleteTemplate() {
     }
 }
 
-async function checkIssueType(issueType) {
+async function discoverIssueTypeInfo(issueType) {
     try {
         // Get all issue types
         const issueTypes = await jiraClient.value.getIssueTypes();
@@ -537,6 +520,37 @@ async function checkIssueType(issueType) {
         console.error('Error checking issue type:', error);
         jiraIssueTypeInfo.value = null;
     }
+}
+
+function handleInputPaste(event, updateValue) {
+    // Get the input element
+    const input = event.target;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    
+    // Get the pasted text and clean it
+    const pastedText = event.clipboardData.getData('text');
+    const cleanedText = cleanText(pastedText);
+    
+    // Get the current value and insert cleaned text at cursor position
+    const currentValue = input.value;
+    const newValue = currentValue.substring(0, start) + cleanedText + currentValue.substring(end);
+    
+    // Update the value
+    updateValue(newValue);
+    
+    // Prevent default paste
+    event.preventDefault();
+    
+    // Set cursor position after paste
+    nextTick(() => {
+        input.setSelectionRange(start + cleanedText.length, start + cleanedText.length);
+    });
+}
+
+function updateFieldName(newTitle) {
+    editingField.value.name = toCamelCase(newTitle);
+    editingField.value.title = capitalizeFirstLetter(cleanText(newTitle));
 }
 </script>
 
