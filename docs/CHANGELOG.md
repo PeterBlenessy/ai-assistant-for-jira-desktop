@@ -5,12 +5,17 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 ## Backlog
 - Add support for logging using Sentry.
 - Add support for transformer.js
-- Add support for listing child issues, linked issues, fetching issue comments, and attachments,
 - Add support for fetching links in the description.
 - Add support for improving the context for the AI by adding child issues, comments, and attachments.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
+- Fix issue where tooltip for update button remains 'Restart and install update' after restart.
+
 
 ## Releases
+
+### v0.6.0 - 2024-12-05
+- Added support for listing child issues, linked issues, and issue comments.
+- Changed position of improve button to make space for additional issue information.
 
 ### v0.5.23 - 2024-12-03
 - Updated header styles for improved UX.

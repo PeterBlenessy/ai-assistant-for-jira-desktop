@@ -1,3 +1,111 @@
+<template>
+    <q-layout view="hHh LpR lff">
+        <q-header class="bg-grey-10">
+
+            <q-toolbar>
+                <q-avatar rounded>
+                    <img src="./assets/ai-assistant-logo.png" />
+                </q-avatar>
+                <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
+                <q-btn dense flat icon="mdi-compare" :color="darkMode ? 'grey-4' : 'grey-6'"
+                    @click="darkMode = !darkMode">
+                    <q-tooltip>Toggle Dark Mode</q-tooltip>
+                </q-btn>
+                <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
+                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" >
+                    <q-tooltip>Toggle Primary Side Panel</q-tooltip>
+                </q-btn>
+                <q-btn dense flat :color="showRightPane ? 'grey-4' : 'grey-6'"
+                    :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" >
+                    <q-tooltip>Toggle AI Prompt Management Panel</q-tooltip>
+                </q-btn>
+                <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" >
+                    <q-tooltip>Settings</q-tooltip>
+                </q-btn>
+                <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
+                    <q-badge v-if="isUpdateAvailable" floating rounded />
+                    <q-tooltip>Menu</q-tooltip>
+                    <q-menu anchor="bottom right" self="top right" class="q-pa-sm">
+                        <q-list dense style="min-width: 100px">
+                            <q-item v-for="(md, key) in appMenu" :key="key" clickable v-ripple v-close-popup
+                                @click="openMarkdownDialog(key)">
+                                <q-item-section avatar>
+                                    <q-icon :name="md.icon" />
+                                </q-item-section>
+                                <q-item-section>{{ md.title }}</q-item-section>
+                            </q-item>
+                            <q-separator spaced inset class="q-ma-sm" />
+                            <q-item clickable @click.stop="handleClickUpdateButton()">
+                                <q-item-section avatar>
+                                    <q-icon :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
+                                        :color="isUpdateAvailable ? 'positive' : ''"
+                                        :loading="progress > 0 && progress < 100" />
+                                </q-item-section>
+                                <q-item-section>
+                                    <q-item-label>
+                                        {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
+                                    </q-item-label>
+                                    <q-item-label v-if="isUpdateAvailable" caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
+                                </q-item-section>
+                                <q-tooltip>{{ isUpdateAvailable ? 'Download update' : 'Restart and install update...' }}</q-tooltip>
+                            </q-item>
+                        </q-list>
+                    </q-menu>
+                    
+                </q-btn>
+            </q-toolbar>
+        </q-header>
+
+        <!-- Left drawer -->
+        <q-drawer side="left" v-model="leftDrawer" bordered :width="200">
+            <SearchHistory @select="handleHistorySelect" />
+            <q-separator inset />
+
+            <q-item v-if="isConnected" class="fixed-bottom q-pa-sm" clickable @click="showUserInfoDialog = true">
+                <q-item-section side>
+                    <q-avatar>
+                        <img :src="user.avatarUrls['48x48']" spinner-color="primary"
+                            style="width: 36px; height: 36px;" />
+                    </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                    <q-item-label class="text-subtitle2">{{ isConnected ? user.displayName : "" }}</q-item-label>
+                </q-item-section>
+                <q-tooltip>Display user profile information</q-tooltip>
+            </q-item>
+        </q-drawer>
+
+        <q-page-container>
+            <q-page style="height: calc(100vh - 50px)">
+                <q-splitter v-model="splitterRatio" :limits="splitterLimits" style="height: 100%;">
+                    <!-- Left side of the page -->
+                    <template v-slot:before>
+                        <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                            <JqlSearch ref="jqlSearch" />
+                        </div>
+                    </template>
+
+                    <!-- -->
+                    <template v-slot:separator>
+                        <q-avatar text-color="grey-6" size="60px" icon="mdi-drag-vertical" />
+                    </template>
+
+                    <!-- Right side of the page - Right pane -->
+                    <template v-slot:after>
+                        <div class="q-pa-md" style="height: 100%; overflow: auto;">
+                            <PromptManagement />
+                        </div>
+                    </template>
+                </q-splitter>
+
+            </q-page>
+        </q-page-container>
+
+        <SettingsDialog v-model="showSettingsDialog" />
+        <InfoDialog v-model="showUserInfoDialog" title="User Information" :info="user" />
+        <MarkdownDialog v-model="showMarkdownDialog" :content="markdownContent" :title="markdownTitle" />
+    </q-layout>
+</template>
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import SettingsDialog from "./components/SettingsDialog.vue";
@@ -180,114 +288,6 @@ async function openMarkdownDialog(key) {
 
 </script>
 
-<template>
-    <q-layout view="hHh LpR lff">
-        <q-header class="bg-grey-10">
-
-            <q-toolbar>
-                <q-avatar rounded>
-                    <img src="./assets/ai-assistant-logo.png" />
-                </q-avatar>
-                <q-toolbar-title> AI Assistant for Jira </q-toolbar-title>
-                <q-btn dense flat icon="mdi-compare" :color="darkMode ? 'grey-4' : 'grey-6'"
-                    @click="darkMode = !darkMode">
-                    <q-tooltip>Toggle Dark Mode</q-tooltip>
-                </q-btn>
-                <q-btn dense flat :color="leftDrawer ? 'grey-4' : 'grey-6'"
-                    :icon="leftDrawer ? 'mdi-dock-left' : 'mdi-dock-left'" @click="leftDrawer = !leftDrawer" >
-                    <q-tooltip>Toggle Primary Side Panel</q-tooltip>
-                </q-btn>
-                <q-btn dense flat :color="showRightPane ? 'grey-4' : 'grey-6'"
-                    :icon="showRightPane ? 'mdi-dock-right' : 'mdi-dock-right'" @click="toggleRightPane" >
-                    <q-tooltip>Toggle AI Prompt Management Panel</q-tooltip>
-                </q-btn>
-                <q-btn flat dense color="grey-6" icon="mdi-cog" @click="openSettingsDialog" >
-                    <q-tooltip>Settings</q-tooltip>
-                </q-btn>
-                <q-btn flat dense color="grey-6" icon="mdi-dots-vertical" @click="showMenu = true">
-                    <q-badge v-if="isUpdateAvailable" floating rounded />
-                    <q-tooltip>Menu</q-tooltip>
-                    <q-menu anchor="bottom right" self="top right" class="q-pa-sm">
-                        <q-list dense style="min-width: 100px">
-                            <q-item v-for="(md, key) in appMenu" :key="key" clickable v-ripple v-close-popup
-                                @click="openMarkdownDialog(key)">
-                                <q-item-section avatar>
-                                    <q-icon :name="md.icon" />
-                                </q-item-section>
-                                <q-item-section>{{ md.title }}</q-item-section>
-                            </q-item>
-                            <q-separator spaced inset class="q-ma-sm" />
-                            <q-item clickable @click.stop="handleClickUpdateButton()">
-                                <q-item-section avatar>
-                                    <q-icon :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
-                                        :color="isUpdateAvailable ? 'positive' : ''"
-                                        :loading="progress > 0 && progress < 100" />
-                                </q-item-section>
-                                <q-item-section>
-                                    <q-item-label>
-                                        {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
-                                    </q-item-label>
-                                    <q-item-label v-if="isUpdateAvailable" caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
-                                </q-item-section>
-                                <q-tooltip>{{ isUpdateAvailable ? 'Download update' : 'Restart and install update...' }}</q-tooltip>
-                            </q-item>
-                        </q-list>
-                    </q-menu>
-                    
-                </q-btn>
-            </q-toolbar>
-        </q-header>
-
-        <!-- Left drawer -->
-        <q-drawer side="left" v-model="leftDrawer" bordered :width="200">
-            <SearchHistory @select="handleHistorySelect" />
-            <q-separator inset />
-
-            <q-item v-if="isConnected" class="fixed-bottom q-pa-sm" clickable @click="showUserInfoDialog = true">
-                <q-item-section side>
-                    <q-avatar>
-                        <img :src="user.avatarUrls['48x48']" spinner-color="primary"
-                            style="width: 36px; height: 36px;" />
-                    </q-avatar>
-                </q-item-section>
-                <q-item-section>
-                    <q-item-label class="text-subtitle2">{{ isConnected ? user.displayName : "" }}</q-item-label>
-                </q-item-section>
-                <q-tooltip>Display user profile information</q-tooltip>
-            </q-item>
-        </q-drawer>
-
-        <q-page-container>
-            <q-page style="height: calc(100vh - 50px)">
-                <q-splitter v-model="splitterRatio" :limits="splitterLimits" style="height: 100%;">
-                    <!-- Left side of the page -->
-                    <template v-slot:before>
-                        <div class="q-pa-md" style="height: 100%; overflow: auto;">
-                            <JqlSearch ref="jqlSearch" />
-                        </div>
-                    </template>
-
-                    <!-- -->
-                    <template v-slot:separator>
-                        <q-avatar text-color="grey-6" size="60px" icon="mdi-drag-vertical" />
-                    </template>
-
-                    <!-- Right side of the page - Right pane -->
-                    <template v-slot:after>
-                        <div class="q-pa-md" style="height: 100%; overflow: auto;">
-                            <PromptManagement />
-                        </div>
-                    </template>
-                </q-splitter>
-
-            </q-page>
-        </q-page-container>
-
-        <SettingsDialog v-model="showSettingsDialog" />
-        <InfoDialog v-model="showUserInfoDialog" title="User Information" :info="user" />
-        <MarkdownDialog v-model="showMarkdownDialog" :content="markdownContent" :title="markdownTitle" />
-    </q-layout>
-</template>
 <style scoped>
 /* Hide scrollbars on Macs (and WebKit based webviews) */
 ::-webkit-scrollbar {

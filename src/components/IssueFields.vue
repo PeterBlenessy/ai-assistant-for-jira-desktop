@@ -2,20 +2,27 @@
     <div v-if="issueFields" class="row items-start">
         <!-- Original Issue Column -->
         <div class="col-12 col-md-6 q-pa-sm">
-            <div class="text-h2 q-mb-sm">Original Issue Fields</div>
+            <div class="row items-center justify-between">
+                <div class="text-h2">Original Issue Fields</div>
+                <div>
+                    <q-btn class="q-pl-xs q-mb-sm" size="sm" :color="loading ? 'negative' : 'primary'"
+                        :label="loading ? 'ABORT' : 'IMPROVE'" :icon="loading ? 'mdi-stop' : 'mdi-creation-outline'"
+                        @click="() => loading ? abortGeneration() : generateImprovement(props.issueKey)" />
+                </div>
+            </div>
             <q-list separator bordered padding class="rounded-borders q-pt-none">
                 <template v-for="field in issueDisplayFields" :key="field">
                     <q-item>
                         <q-item-section>
                             <q-item-label class="text-capitalize text-h2">{{ field }}</q-item-label>
                             <q-item-label class="field-container">
-                                    <template v-if="editingField === field && editingType === 'original'">
-                                        <q-input v-model="editingContent" type="textarea" filled dense :autogrow="true"
-                                            @keyup.enter.ctrl="saveEdit" @keyup.esc="cancelEdit" />
-                                    </template>
-                                    <template v-else>
-                                        <MarkdownViewer :content="getIssueField(field)" />
-                                    </template>
+                                <template v-if="editingField === field && editingType === 'original'">
+                                    <q-input v-model="editingContent" type="textarea" filled dense :autogrow="true"
+                                        @keyup.enter.ctrl="saveEdit" @keyup.esc="cancelEdit" />
+                                </template>
+                                <template v-else>
+                                    <MarkdownViewer :content="getIssueField(field)" />
+                                </template>
                             </q-item-label>
                         </q-item-section>
                         <q-item-section top side class="floating-buttons">
@@ -35,13 +42,103 @@
                     </q-item>
                 </template>
             </q-list>
-            <div class="float-right q-mt-sm q-mb-sm">
-                <q-btn v-if="!loading" color="primary" label="IMPROVE" icon="mdi-creation-outline"
-                    @click="generateImprovement(props.issueKey)" />
-                <q-btn v-else label="ABORT" icon="mdi-stop" @click="abortGeneration" />
-            </div>
-        </div>
 
+            <!-- Issues and Comments Section -->
+            <q-list bordered class="rounded-borders q-mt-md q-pa-none" dense>
+                <!-- Child Issues -->
+                <q-expansion-item dense>
+                    <template v-slot:header>
+                        <q-item-section avatar>
+                            <q-avatar class="q-ma-none" icon="mdi-file-tree-outline" size="md" />
+                        </q-item-section>
+                        <q-item-section class="text-uppercase">Child Issues</q-item-section>
+                        <q-item-section side class="text-caption">
+                            {{ childIssues?.length }} issue{{ childIssues?.length === 1 ? '' : 's' }}
+                        </q-item-section>
+                    </template>
+                    <q-list dense separator>
+                        <q-item v-for="issue in childIssues" :key="issue?.key" class="q-ma-none q-pa-none">
+                            <q-item-section avatar>
+                                <q-avatar size="24px">
+                                    <img :src="issue?.fields?.issuetype?.iconUrl" :alt="issue?.fields?.issuetype?.name">
+                                </q-avatar>
+                                <span class="issue-key q-ml-sm">{{ issue?.key }}</span>
+                            </q-item-section>
+                            <q-item-section>
+                                <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
+                            </q-item-section>
+                            <q-item-section side>
+                                <q-chip dense color="grey-7" text-color="white" class="status-chip">
+                                    {{ issue?.fields?.status?.name }}
+                                </q-chip>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-expansion-item>
+                <q-separator />
+
+                <!-- Related Issues -->
+                <q-expansion-item dense>
+                    <template v-slot:header>
+                        <q-item-section avatar>
+                            <q-avatar class="q-ma-none" icon="mdi-link-variant" size="md" />
+                        </q-item-section>
+                        <q-item-section class="text-uppercase">Linked Issues</q-item-section>
+                        <q-item-section side class="text-caption">
+                            {{ relatedIssues.length }} issue{{ relatedIssues.length === 1 ? '' : 's' }}
+                        </q-item-section>
+                    </template>
+                    <q-list dense>
+                        <q-item v-for="issue in relatedIssues" :key="issue?.key" class="q-ma-none q-pa-none">
+                            <q-item-section avatar>
+                                <q-avatar size="24px">
+                                    <img :src="issue?.fields?.issuetype?.iconUrl" :alt="issue?.fields?.issuetype?.name">
+                                </q-avatar>
+                                <span class="issue-key q-ml-sm">{{ issue?.key }}</span>
+                            </q-item-section>
+                            <q-item-section>
+                                <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
+                            </q-item-section>
+                            <q-item-section side>
+                                <q-chip dense color="grey-7" text-color="white" class="status-chip">
+                                    {{ issue?.fields?.status?.name }}
+                                </q-chip>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-expansion-item>
+
+                <q-separator />
+
+                <!-- Comments -->
+                <q-expansion-item dense>
+                    <template v-slot:header>
+                        <q-item-section avatar>
+                            <q-avatar class="q-ma-none" icon="mdi-comment-text-multiple-outline" size="md" />
+                        </q-item-section>
+                        <q-item-section class="text-uppercase">Comments</q-item-section>
+                        <q-item-section side class="text-caption">
+                            {{ comments.length }} comment{{ comments.length === 1 ? '' : 's' }}
+                        </q-item-section>
+                    </template>
+                    <q-list dense separator>
+                        <q-item v-for="comment in comments" :key="comment?.id" class="q-ma-none q-pa-none">
+                            <q-item-section>
+                                <q-item-label class="text-weight-medium">
+                                    {{ comment?.author?.displayName }}
+                                    <span class="text-grey-7 text-caption q-ml-sm">
+                                        {{ new Date(comment?.created).toLocaleString() }}
+                                    </span>
+                                </q-item-label>
+                                <q-item-label>
+                                    <MarkdownViewer :content="comment?.body" />
+                                </q-item-label>
+                            </q-item-section>
+                        </q-item>
+                    </q-list>
+                </q-expansion-item>
+            </q-list>
+        </div>
         <!-- Improvements Column -->
         <div class="col-12 col-md-6 q-pa-sm">
             <div class="text-h2 q-mb-sm">AI Generated Improvement Proposals</div>
@@ -132,6 +229,7 @@
 
         </div>
     </div>
+
 </template>
 
 <script setup>
@@ -146,7 +244,6 @@ import { useLogger } from '../composables/Logger.js';
 
 import {
     parseYAML,
-    formatJiraMarkup,
     extractDescriptionSections,
     formatDescription
 } from '../helpers/markupUtils.js';
@@ -170,6 +267,9 @@ const improvementProposal = ref(null);
 const chunks = ref(0);
 const improvementFailed = ref(false);
 const errorMessage = ref('');
+const childIssues = ref([]);
+const relatedIssues = ref([]);
+const comments = ref([]);
 
 // Fields from the issue to display in the UI
 const issueDisplayFields = ['summary', 'description'];
@@ -302,11 +402,6 @@ const generateImprovement = async (issueKey) => {
     }
 };
 
-// Helper function to normalize field names for comparison
-const normalizeFieldName = (name) => {
-    return name.toLowerCase().replace(/\s+/g, '');
-};
-
 // Helper function to format array content as a numbered list
 const formatArrayContent = (content) => {
     if (Array.isArray(content)) {
@@ -410,11 +505,48 @@ const cancelEdit = () => {
     editingContent.value = '';
 };
 
+const fetchChildIssues = async () => {
+    try {
+        const jql = `parent = ${props.issueKey} ORDER BY created ASC`;
+        const result = await jiraClient.value.searchIssues(jql, 0, 50, ["summary", "status", "issuetype"]);
+        childIssues.value = result.issues || [];
+    } catch (error) {
+        logger.error(`Error fetching child issues: ${error}`);
+        childIssues.value = [];
+    }
+};
+
+const fetchRelatedIssues = async () => {
+    try {
+        // This JQL finds issues that are either linked to or from the current issue
+        const jql = `issue in linkedIssues(${props.issueKey}) ORDER BY created ASC`;
+        const result = await jiraClient.value.searchIssues(jql, 0, 50, ["summary", "status", "issuetype"]);
+        relatedIssues.value = result.issues || [];
+    } catch (error) {
+        logger.error(`Error fetching related issues: ${error}`);
+        relatedIssues.value = [];
+    }
+};
+
+const fetchComments = async () => {
+    try {
+        const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
+        comments.value = issueDetails.fields.comment?.comments || [];
+    } catch (error) {
+        logger.error(`Error fetching comments: ${error}`);
+        comments.value = [];
+    }
+};
 // Watch for changes in the issue key and fetch the issue details
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
         const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
         issueFields.value = issueDetails.fields;
+        await Promise.all([
+            fetchChildIssues(),
+            fetchRelatedIssues(),
+            fetchComments()
+        ]);
     }
 }, { immediate: true });
 
@@ -447,5 +579,15 @@ watch(() => props.issueKey, async (newIssueKey) => {
 
 .q-input {
     width: 100%;
+}
+
+.issue-key {
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.status-chip {
+    font-size: 0.8em;
+    padding: 2px 6px;
 }
 </style>
