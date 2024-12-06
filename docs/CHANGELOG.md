@@ -10,8 +10,13 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
 - Fix issue where tooltip for update button remains 'Restart and install update' after restart.
 
-
 ## Releases
+
+### v0.7.0 - 2024-12-06
+- Updated info box to be more dense.
+- Updated info box colors and transparency.
+- Added general application settings in Settings dialog.
+- Added mocked Jira data for testing purposes.
 
 ### v0.6.0 - 2024-12-05
 - Added support for listing child issues, linked issues, and issue comments.
