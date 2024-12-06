@@ -1,9 +1,9 @@
 <template>
-    <q-card v-if="isVisible" bordered dense flat>
+    <q-card v-if="isVisible" bordered dense flat style="border-color: var(--q-warning); background-color: rgb(from var(--q-warning) r g b / 10%)">
         <q-card-section class="q-pb-xs">
-            <q-icon name="mdi-information-outline" color="positive" size="sm"/>
+            <q-icon name="mdi-information-outline" color="warning" size="sm"/>
         </q-card-section>
-        <q-card-section class="q-pt-none q-pb-none">
+        <q-card-section class="q-pt-none q-pb-none text-caption">
             <MarkdownViewer :content="markdownContent" />
         </q-card-section>
         <q-card-actions align="right" class="q-pt-none">
