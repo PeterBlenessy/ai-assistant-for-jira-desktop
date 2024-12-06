@@ -16,7 +16,7 @@
 
             <q-card-section class="q-pa-none">
 
-                <q-splitter v-model="splitterModel" style="min-height: 176px">
+                <q-splitter v-model="splitterModel" style="min-height: 176px" disable>
                     <template v-slot:before>
                         <q-tabs v-model="activeTab" vertical dense active-color="primary" indicator-color="primary"
                             inline-label no-caps class="q-pt-sm">
@@ -59,6 +59,7 @@ const persistedStore = usePersistedStore();
 const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
 
 const model = defineModel({ default: false });
+const splitterModel = ref(30);
 const activeTab = ref('jira');
 // Markdown content for the InfoBox
 const infoBoxMarkdown = `
