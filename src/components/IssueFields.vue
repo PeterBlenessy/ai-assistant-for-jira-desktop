@@ -59,16 +59,20 @@
                     <q-list dense separator>
                         <q-item v-for="issue in childIssues" :key="issue?.key" class="q-ma-none q-pa-none">
                             <q-item-section avatar>
-                                <q-avatar size="24px">
-                                    <img :src="issue?.fields?.issuetype?.iconUrl" :alt="issue?.fields?.issuetype?.name">
-                                </q-avatar>
-                                <span class="issue-key q-ml-sm">{{ issue?.key }}</span>
+                                <q-chip color="transparent" class="q-pa-none" dense square :clickable="false"
+                                    :ripple="false" size="sm">
+                                    <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-xs q-pa-none"
+                                        style="width: 16px; height: 16px;" />
+                                </q-chip>
+                            </q-item-section>
+                            <q-item-section caption class="col-1">
+                                <q-item-label lines="1">{{ issue?.key }}</q-item-label>
                             </q-item-section>
                             <q-item-section>
                                 <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
                             </q-item-section>
                             <q-item-section side>
-                                <q-chip dense color="grey-7" text-color="white" class="status-chip">
+                                <q-chip dense color="grey-6" text-color="white" size="sm" square>
                                     {{ issue?.fields?.status?.name }}
                                 </q-chip>
                             </q-item-section>
@@ -77,7 +81,7 @@
                 </q-expansion-item>
                 <q-separator />
 
-                <!-- Related Issues -->
+                <!-- Linked Issues -->
                 <q-expansion-item dense>
                     <template v-slot:header>
                         <q-item-section avatar>
@@ -91,16 +95,21 @@
                     <q-list dense>
                         <q-item v-for="issue in relatedIssues" :key="issue?.key" class="q-ma-none q-pa-none">
                             <q-item-section avatar>
-                                <q-avatar size="24px">
-                                    <img :src="issue?.fields?.issuetype?.iconUrl" :alt="issue?.fields?.issuetype?.name">
-                                </q-avatar>
-                                <span class="issue-key q-ml-sm">{{ issue?.key }}</span>
+                                <q-chip color="transparent" class="q-pa-none" dense square :clickable="false"
+                                    :ripple="false" size="sm">
+                                    <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-xs q-pa-none"
+                                        style="width: 16px; height: 16px;" />
+
+                                </q-chip>
+                            </q-item-section>
+                            <q-item-section caption class="col-1">
+                                <q-item-label lines="1">{{ issue?.key }}</q-item-label>
                             </q-item-section>
                             <q-item-section>
                                 <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
                             </q-item-section>
                             <q-item-section side>
-                                <q-chip dense color="grey-7" text-color="white" class="status-chip">
+                                <q-chip dense color="grey-6" text-color="white" size="sm" square>
                                     {{ issue?.fields?.status?.name }}
                                 </q-chip>
                             </q-item-section>
@@ -237,6 +246,9 @@ import { ref, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useJiraClient } from '../composables/JiraClient.js';
 import { useOpenAIClient } from '../composables/OpenAIClient.js';
+import { usePersistedStore } from '../stores/persisted-store';
+import { storeToRefs } from 'pinia';
+import { mockJiraData } from '../test/mockJiraData';
 import MarkdownViewer from './MarkdownViewer.vue';
 import { useTemplateStore } from '../stores/template-store';
 import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../helpers/prompts.js";
@@ -247,6 +259,9 @@ import {
     extractDescriptionSections,
     formatDescription
 } from '../helpers/markupUtils.js';
+
+const store = usePersistedStore();
+const { isMockMode } = storeToRefs(store);
 
 const props = defineProps({
     issueKey: {
@@ -506,6 +521,10 @@ const cancelEdit = () => {
 };
 
 const fetchChildIssues = async () => {
+    if (isMockMode.value) {
+        childIssues.value = mockJiraData.childIssues || [];
+        return;
+    }
     try {
         const jql = `parent = ${props.issueKey} ORDER BY created ASC`;
         const result = await jiraClient.value.searchIssues(jql, 0, 50, ["summary", "status", "issuetype"]);
@@ -517,6 +536,10 @@ const fetchChildIssues = async () => {
 };
 
 const fetchRelatedIssues = async () => {
+    if (isMockMode.value) {
+        relatedIssues.value = mockJiraData.linkedIssues || [];
+        return;
+    }
     try {
         // This JQL finds issues that are either linked to or from the current issue
         const jql = `issue in linkedIssues(${props.issueKey}) ORDER BY created ASC`;
@@ -529,6 +552,10 @@ const fetchRelatedIssues = async () => {
 };
 
 const fetchComments = async () => {
+    if (isMockMode.value) {
+        comments.value = mockJiraData.comments || [];
+        return;
+    }
     try {
         const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
         comments.value = issueDetails.fields.comment?.comments || [];
@@ -537,11 +564,16 @@ const fetchComments = async () => {
         comments.value = [];
     }
 };
+
 // Watch for changes in the issue key and fetch the issue details
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
-        const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
-        issueFields.value = issueDetails.fields;
+        if (isMockMode.value) {
+            issueFields.value = mockJiraData.parentIssue.fields;
+        } else {
+            const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
+            issueFields.value = issueDetails.fields;
+        }
         await Promise.all([
             fetchChildIssues(),
             fetchRelatedIssues(),
@@ -584,10 +616,5 @@ watch(() => props.issueKey, async (newIssueKey) => {
 .issue-key {
     font-family: monospace;
     font-size: 0.9em;
-}
-
-.status-chip {
-    font-size: 0.8em;
-    padding: 2px 6px;
 }
 </style>
