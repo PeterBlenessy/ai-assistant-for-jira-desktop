@@ -16,6 +16,7 @@
     "log:default",
     "process:allow-exit",
     "process:allow-restart",
+    "shell:allow-open",
     "updater:allow-check",
     "updater:allow-download",
     "updater:allow-install",

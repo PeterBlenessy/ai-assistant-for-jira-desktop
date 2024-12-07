@@ -1,12 +1,16 @@
 <template>
     <q-card class="absolute-top q-pt-sm q-ma-none" flat style="height: 100%; width: 100%">
+        <!-- Info Box Section -->
+        <q-card-section class="q-pt-none" v-if="isInfoBoxVisible('JqlSearchInfo')">
+            <InfoBox :markdownContent="infoBoxMarkdown" @dismiss="dismissInfoBox('JqlSearchInfo')" />
+        </q-card-section>
+
         <q-card-section class="q-pt-none">
             <q-input label="Enter JQL Query" clearable dense filled style="width: 100%" v-model="jqlQuery"
                 @keydown.enter="performSearch" :error="!!searchError" :error-message="searchError" no-error-icon>
                 <template v-slot:prepend>
                     <q-btn dense flat icon="mdi-history" :disabled="searchHistory.length == 0"
-                        @click.stop="history = true"
-                    >
+                        @click.stop="history = true">
                         <q-menu anchor="bottom left" self="top left">
                             <q-list style="min-width: 200px">
                                 <q-item v-for="(query, index) in searchHistory" :key="index" v-close-popup clickable
@@ -14,8 +18,7 @@
                                     <q-item-section>{{ query }}</q-item-section>
                                     <q-item-section side>
                                         <q-btn dense flat size="sm" icon="mdi-delete-outline"
-                                            @click.stop="removeQueryFromHistory(query)" 
-                                        />
+                                            @click.stop="removeQueryFromHistory(query)" />
                                     </q-item-section>
                                 </q-item>
                             </q-list>
@@ -26,16 +29,9 @@
         </q-card-section>
 
         <q-card-section flat v-if="searchResults.length != 0">
-            <q-table bordered flat row-key="id" class="my-sticky-header-table q-pt-none q-ma-none" 
-                :columns="columns" 
-                :rows="searchResults"
-                :rows-per-page-options="[10, 20, 50]"
-                :visible-columns="visibleColumns"
-                v-model:pagination="pagination" 
-                @request="onRequest" 
-                :loading="loading" 
-                wrap-cells
-            >
+            <q-table bordered flat row-key="id" class="my-sticky-header-table q-pt-none q-ma-none" :columns="columns"
+                :rows="searchResults" :rows-per-page-options="[10, 20, 50]" :visible-columns="visibleColumns"
+                v-model:pagination="pagination" @request="onRequest" :loading="loading" wrap-cells>
 
                 <!-- Header columns -->
                 <template v-slot:header="props">
@@ -53,18 +49,17 @@
                     <q-tr :props="props" @click.stop="props.expand = !props.expand">
                         <q-td auto-width>
                             <q-btn size="sm" flat dense @click.stop="props.expand = !props.expand"
-                                :icon="props.expand ? 'mdi-chevron-up' : 'mdi-chevron-down'" 
-                            />
+                                :icon="props.expand ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
                         </q-td>
                         <!-- Body columns -->
                         <q-td v-for="col in props.cols" :key="col.name" :props="props">
                             <div v-if="col.name == 'key'" class="row items-center justify-between">
-                                <q-chip dense square color="transparent" :clickable="false" :ripple="false" class="q-pa-none" >
+                                <q-chip dense square color="transparent" :clickable="false" :ripple="false"
+                                    class="q-pa-none">
                                     <q-img :src="props.row.issueTypeIconURL" spinner-color="primary"
-                                        style="width: 16px; height: 16px;" class="q-mr-xs q-pa-none" 
-                                    />
+                                        style="width: 16px; height: 16px;" class="q-mr-xs q-pa-none" />
                                     {{ col.value }}
-                            </q-chip>
+                                </q-chip>
                             </div>
                             <div v-else>
                                 {{ col.value }}
@@ -90,6 +85,7 @@ import { usePersistedStore } from "../stores/persisted-store";
 import { useJiraClient } from "../composables/JiraClient.js";
 import IssueView from "./IssueView/IssueView.vue";
 import { useLogger } from "../composables/Logger.js";
+import InfoBox from './InfoBox.vue';
 
 const loading = ref(false);
 const jqlQuery = ref("");
@@ -135,6 +131,24 @@ const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 
 const persistedStore = usePersistedStore();
 const { searchHistory } = storeToRefs(persistedStore);
+const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
+
+const infoBoxMarkdown = `
+Search for issues on your Jira Server by entering a JQL (Jira Query Language) query in the input field below.
+Here are some JQL examples to get you started:
+
+Basic queries:
+- \`project = "MY-PROJECT"\` - Find all issues in a project
+- \`assignee = currentUser()\` - Your assigned issues
+- \`created >= -1w\` - Issues created in the last week
+
+Advanced queries:
+- \`project = "MY-PROJECT" AND status = "In Progress" ORDER BY priority DESC\`
+- \`assignee = currentUser() AND resolution = Unresolved\`
+- \`text ~ "search term" AND type = Bug\`
+
+[Learn more about JQL](https://www.atlassian.com/software/jira/guides/jql/overview#what-is-jql/)
+`;
 
 const { jiraClient } = useJiraClient();
 const logger = useLogger();
@@ -182,7 +196,7 @@ async function performSearch() {
             startAt,
             maxRows,
         );
-        
+
         pagination.value.rowsNumber = response.total;
 
         searchResults.value = response.issues.map((issue) => ({

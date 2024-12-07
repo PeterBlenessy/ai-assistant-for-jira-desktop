@@ -1,10 +1,11 @@
 <template>
-    <div class="markdown-body" v-html="renderedContent"></div>
+    <div class="markdown-body" v-external-links="handleExternalLink" v-html="renderedContent" :id="'markdown-viewer-' + (props.content?.length || 0)"></div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 import MarkdownIt from 'markdown-it';
+import { open } from '@tauri-apps/plugin-shell';
 
 const props = defineProps({
     content: {
@@ -14,7 +15,51 @@ const props = defineProps({
     }
 });
 
-const md = new MarkdownIt();
+// Handle external link clicks
+const handleExternalLink = async (href) => {
+    try {
+        await open(href);
+    } catch (error) {
+        console.error('Failed to open external link:', error);
+    }
+};
+
+// Custom directive to handle external links
+const vExternalLinks = {
+    mounted: (el, binding) => {
+        el.addEventListener('click', (event) => {
+            const target = event.target.closest('a');
+            if (!target) return;
+
+            const href = target.getAttribute('href');
+            if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+                event.preventDefault();
+                binding.value(href);
+            }
+        });
+    }
+};
+
+const md = new MarkdownIt({
+    html: true,
+    linkify: true,
+}).use((md) => {
+    const defaultRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
+        return self.renderToken(tokens, idx, options);
+    };
+
+    md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+        const token = tokens[idx];
+        const href = token.attrGet('href');
+        
+        // Just add the href attribute, the click handling is done by the directive
+        if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+            token.attrSet('href', href);
+        }
+
+        return defaultRender(tokens, idx, options, env, self);
+    };
+});
 
 // Function to convert Jira wiki markup to markdown
 const convertJiraToMarkdown = (text) => {
@@ -35,9 +80,10 @@ const convertJiraToMarkdown = (text) => {
         // Lists
         .replace(/^[-*]\s+/gm, '- ')         // Unordered lists
         .replace(/^#(?!#|\s*[A-Za-z])\s+/gm, '1. ')  // Jira wiki ordered lists only
-        // Links
-        .replace(/\[([^|]+)\|([^\]]+)\]/g, '[$2]($1)')  // Links with text
-        .replace(/\[([^\]]+)\]/g, '<$1>')     // URLs
+        // Links - handle both Jira and standard markdown links
+        .replace(/\[([^|]+)\|([^\]]+)\]/g, '[$2]($1)')  // Jira links with text
+        .replace(/(?<!\[)[^\]]*\]\(([^)]+)\)/g, match => match)  // Preserve standard markdown links
+        .replace(/(?<!\[)[^\]](?!\])\[([^\]]+)\](?!\()/g, '<$1>')  // Only convert bare brackets to Jira style
         // Tables
         .replace(/\|\|/g, '|')                // Table cells
         // Code blocks
