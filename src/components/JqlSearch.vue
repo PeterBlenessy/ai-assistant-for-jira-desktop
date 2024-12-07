@@ -74,7 +74,7 @@
                     <!-- Expanded Row -->
                     <q-tr v-if="props.expand" :props="props" no-hover>
                         <q-td colspan="100%">
-                            <IssueFields :issueKey="props.row.key" />
+                            <IssueView :issueKey="props.row.key" />
                         </q-td>
                     </q-tr>
                 </template>
@@ -88,7 +88,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
 import { useJiraClient } from "../composables/JiraClient.js";
-import IssueFields from "./IssueFields.vue";
+import IssueView from "./IssueView/IssueView.vue";
 import { useLogger } from "../composables/Logger.js";
 
 const loading = ref(false);

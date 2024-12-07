@@ -46,106 +46,15 @@
             <!-- Issues and Comments Section -->
             <q-list bordered class="rounded-borders q-mt-md q-pa-none" dense>
                 <!-- Child Issues -->
-                <q-expansion-item dense>
-                    <template v-slot:header>
-                        <q-item-section avatar>
-                            <q-avatar class="q-ma-none" icon="mdi-file-tree-outline" size="md" />
-                        </q-item-section>
-                        <q-item-section class="text-uppercase">Child Issues</q-item-section>
-                        <q-item-section side class="text-caption">
-                            {{ childIssues?.length }} issue{{ childIssues?.length === 1 ? '' : 's' }}
-                        </q-item-section>
-                    </template>
-                    <q-list dense separator>
-                        <q-item v-for="issue in childIssues" :key="issue?.key" class="q-ma-none q-pa-none">
-                            <q-item-section avatar>
-                                <q-chip color="transparent" class="q-pa-none" dense square :clickable="false"
-                                    :ripple="false" size="sm">
-                                    <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-xs q-pa-none"
-                                        style="width: 16px; height: 16px;" />
-                                </q-chip>
-                            </q-item-section>
-                            <q-item-section caption class="col-1">
-                                <q-item-label lines="1">{{ issue?.key }}</q-item-label>
-                            </q-item-section>
-                            <q-item-section>
-                                <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
-                            </q-item-section>
-                            <q-item-section side>
-                                <q-chip dense color="grey-6" text-color="white" size="sm" square>
-                                    {{ issue?.fields?.status?.name }}
-                                </q-chip>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </q-expansion-item>
+                <ChildIssues :child-issues="childIssues" />
                 <q-separator />
 
                 <!-- Linked Issues -->
-                <q-expansion-item dense>
-                    <template v-slot:header>
-                        <q-item-section avatar>
-                            <q-avatar class="q-ma-none" icon="mdi-link-variant" size="md" />
-                        </q-item-section>
-                        <q-item-section class="text-uppercase">Linked Issues</q-item-section>
-                        <q-item-section side class="text-caption">
-                            {{ relatedIssues.length }} issue{{ relatedIssues.length === 1 ? '' : 's' }}
-                        </q-item-section>
-                    </template>
-                    <q-list dense>
-                        <q-item v-for="issue in relatedIssues" :key="issue?.key" class="q-ma-none q-pa-none">
-                            <q-item-section avatar>
-                                <q-chip color="transparent" class="q-pa-none" dense square :clickable="false"
-                                    :ripple="false" size="sm">
-                                    <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-xs q-pa-none"
-                                        style="width: 16px; height: 16px;" />
-
-                                </q-chip>
-                            </q-item-section>
-                            <q-item-section caption class="col-1">
-                                <q-item-label lines="1">{{ issue?.key }}</q-item-label>
-                            </q-item-section>
-                            <q-item-section>
-                                <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
-                            </q-item-section>
-                            <q-item-section side>
-                                <q-chip dense color="grey-6" text-color="white" size="sm" square>
-                                    {{ issue?.fields?.status?.name }}
-                                </q-chip>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </q-expansion-item>
-
+                <LinkedIssues :related-issues="relatedIssues" />
                 <q-separator />
 
                 <!-- Comments -->
-                <q-expansion-item dense>
-                    <template v-slot:header>
-                        <q-item-section avatar>
-                            <q-avatar class="q-ma-none" icon="mdi-comment-text-multiple-outline" size="md" />
-                        </q-item-section>
-                        <q-item-section class="text-uppercase">Comments</q-item-section>
-                        <q-item-section side class="text-caption">
-                            {{ comments.length }} comment{{ comments.length === 1 ? '' : 's' }}
-                        </q-item-section>
-                    </template>
-                    <q-list dense separator>
-                        <q-item v-for="comment in comments" :key="comment?.id" class="q-ma-none q-pa-none">
-                            <q-item-section>
-                                <q-item-label class="text-weight-medium">
-                                    {{ comment?.author?.displayName }}
-                                    <span class="text-grey-7 text-caption q-ml-sm">
-                                        {{ new Date(comment?.created).toLocaleString() }}
-                                    </span>
-                                </q-item-label>
-                                <q-item-label>
-                                    <MarkdownViewer :content="comment?.body" />
-                                </q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </q-expansion-item>
+                <IssueComments :comments="comments" />
             </q-list>
         </div>
         <!-- Improvements Column -->
@@ -153,7 +62,7 @@
             <div class="text-h2 q-mb-sm">AI Generated Improvement Proposals</div>
             <!-- STATE: GENERATING -->
             <!-- Field text is displayed if updated; comment is always displayed if available -->
-            <q-list v-if="improvementProposal && improvementFieldsFiltered.length > 0" separator bordered padding
+            <q-list v-if="improvementProposal && improvementFieldsFiltered?.length > 0" separator bordered padding
                 class="rounded-borders q-pt-none">
                 <template v-for="(field, key) in improvementProposal" :key="key">
                     <q-item v-if="shouldDisplayField(key)">
@@ -235,7 +144,6 @@
                     </q-item>
                 </q-list>
             </div>
-
         </div>
     </div>
 
@@ -244,24 +152,23 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
-import { useJiraClient } from '../composables/JiraClient.js';
-import { useOpenAIClient } from '../composables/OpenAIClient.js';
-import { usePersistedStore } from '../stores/persisted-store';
+import { useJiraClient } from '../../composables/JiraClient.js';
+import { useOpenAIClient } from '../../composables/OpenAIClient.js';
+import { usePersistedStore } from '../../stores/persisted-store';
 import { storeToRefs } from 'pinia';
-import { mockJiraData } from '../test/mockJiraData';
-import MarkdownViewer from './MarkdownViewer.vue';
-import { useTemplateStore } from '../stores/template-store';
-import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../helpers/prompts.js";
-import { useLogger } from '../composables/Logger.js';
-
+import { mockJiraData } from '../../test/mockJiraData';
+import MarkdownViewer from '../MarkdownViewer.vue';
+import ChildIssues from './ChildIssues.vue';
+import LinkedIssues from './LinkedIssues.vue';
+import IssueComments from './IssueComments.vue';
+import { useLogger } from '../../composables/Logger.js';
+import { useTemplateStore } from '../../stores/template-store';
+import { PROMPT_GENERATE_IMPROVEMENT_MARKDOWN } from "../../helpers/prompts.js";
 import {
     parseYAML,
     extractDescriptionSections,
     formatDescription
-} from '../helpers/markupUtils.js';
-
-const store = usePersistedStore();
-const { isMockMode } = storeToRefs(store);
+} from '../../helpers/markupUtils.js';
 
 const props = defineProps({
     issueKey: {
@@ -273,15 +180,13 @@ const props = defineProps({
 const $q = useQuasar();
 const logger = useLogger();
 const { jiraClient } = useJiraClient();
-const { openAIClient } = useOpenAIClient();
-const templateStore = useTemplateStore();
+
+const store = usePersistedStore();
+const { isMockMode } = storeToRefs(store);
 
 const loading = ref(false);
 const issueFields = ref(null);
-const improvementProposal = ref(null);
-const chunks = ref(0);
-const improvementFailed = ref(false);
-const errorMessage = ref('');
+
 const childIssues = ref([]);
 const relatedIssues = ref([]);
 const comments = ref([]);
@@ -289,186 +194,18 @@ const comments = ref([]);
 // Fields from the issue to display in the UI
 const issueDisplayFields = ['summary', 'description'];
 
-// Fields in the template for the current issue type
-const templateFields = computed(() => {
-    const currentTemplate = templateStore.templates.find(t => t.name === getIssueField('issuetype.name'));
-    return currentTemplate?.fields?.map(field => field.name) || []
-});
+const { openAIClient } = useOpenAIClient();
+const templateStore = useTemplateStore();
 
-// Fields in the improvement proposal
-const improvementFields = computed(() => Object.keys(improvementProposal.value || {}));
-
-// Fields that exist in both the improvementFields and in templateFields
-const improvementFieldsFiltered = computed(() => {
-    return improvementFields.value.filter(field => templateFields.value.includes(field));
-});
-
-// Checks if field with fieldKey from the improvement proposal should be displayed in the UI
-const shouldDisplayField = (fieldKey) => {
-    return improvementFieldsFiltered.value.includes(fieldKey);
-};
-
-// Checks if the field with fieldKey from the improvement proposal has been updated
-const isFieldUpdated = (field) => {
-    return field?.updated == 'true' || field?.updated == true;
-};
+const improvementProposal = ref(null);
+const improvementFailed = ref(false);
+const errorMessage = ref('');
+const chunks = ref(0);
 
 // Get the value of a field from the issue fields object
 const getIssueField = (field, defaultValue = null) => {
     return field.split('.').reduce((obj, key) => obj && obj[key] !== undefined && obj[key] !== null ? obj[key] : defaultValue, issueFields.value);
 }
-
-const getIssueTypeInstructions = (issueType) => {
-    const templates = templateStore.templates;
-    const currentTemplate = templates.find(t => t.name === issueType);
-
-    let issueTypeInstructions = '';
-    if (currentTemplate) {
-        // Include definition
-        if (currentTemplate.definition) {
-            issueTypeInstructions += `\n\nIssue Type: ${currentTemplate.name}\nDefinition:\n${currentTemplate.definition}\n`;
-        }
-
-        // Include persona
-        if (currentTemplate.persona) {
-            issueTypeInstructions += `\nPersona: ${currentTemplate.persona.name}\nDefinition: ${currentTemplate.persona.definition}\n`;
-        }
-
-        // Include fields
-        if (currentTemplate.fields && currentTemplate.fields.length > 0) {
-            issueTypeInstructions += `\nFields:\n`;
-            currentTemplate.fields.forEach(field => {
-                issueTypeInstructions += `- **${field.title}**: ${field.definition}\n`;
-            });
-        }
-    } else {
-        $q.notify({
-            type: 'info',
-            message: `No prompt template exists for the issue type: ${issueType}`,
-            caption: 'You should consider adding one.',
-            color: 'warning',
-            timeout: 0,
-            actions: [
-                { label: 'Dismiss', color: 'white', handler: () => { /* ... */ } }
-            ]
-        });
-    }
-
-    return issueTypeInstructions;
-}
-
-const abortGeneration = () => {
-    openAIClient.value.abort();
-    loading.value = false;
-    improvementFailed.value = true;
-    errorMessage.value = 'Generation aborted by user';
-};
-
-const generateImprovement = async (issueKey) => {
-    loading.value = true;
-    chunks.value = 0;
-    improvementFailed.value = false;
-    improvementProposal.value = null;
-    errorMessage.value = '';
-    const issueType = getIssueField('issuetype.name');
-
-    const userMessage = {
-        "issueKey": issueKey,
-        "issueType": issueType,
-        "summary": getIssueField('summary'),
-        "description": getIssueField('description')
-    };
-    let fullResponse = "";
-    try {
-        const stream = await openAIClient.value.createChatCompletion([
-            { role: "system", content: PROMPT_GENERATE_IMPROVEMENT_MARKDOWN },
-            { role: "system", content: getIssueTypeInstructions(issueType) },
-            { role: "user", content: JSON.stringify(userMessage) }
-        ]);
-
-        if (!stream) {
-            // Stream is null when aborted
-            return;
-        }
-
-        for await (const chunk of stream) {
-            fullResponse += chunk.choices[0]?.delta?.content || "";
-            improvementProposal.value = parseYAML(fullResponse);
-
-            // Wait to improve streamed response UX
-            await new Promise(resolve => setTimeout(resolve, 5));
-        }
-    } catch (error) {
-        logger.error(`[IssueFields] - Error fetching improvements: ${error.message}`);
-        improvementFailed.value = true;
-        errorMessage.value = error.message;
-        $q.notify({
-            type: 'negative',
-            message: 'Failed to generate improvements',
-            caption: error.message,
-            timeout: 0,
-            actions: [
-                { label: 'Dismiss', color: 'white', handler: () => { /* ... */ } }
-            ]
-
-        });
-    } finally {
-        loading.value = false;
-    }
-};
-
-// Helper function to format array content as a numbered list
-const formatArrayContent = (content) => {
-    if (Array.isArray(content)) {
-        return content.map((item, index) => `${index + 1}. ${item}`).join('\n');
-    }
-    return content;
-};
-
-// Dynamic field handling for accepting an improvement proposal
-const acceptImprovement = async (type, improvement) => {
-    try {
-        let updateFields = {};
-        if (improvementProposal.value[type]) {
-            if (type === 'summary') {
-                updateFields.summary = improvement.text;
-            } else {
-                // Any field that's not summary is treated as a section in the description
-                const currentDescription = getIssueField('description') || '';
-                const descriptionSections = extractDescriptionSections(currentDescription);
-
-                // Format the content if it's an array
-                const formattedContent = formatArrayContent(improvement.text);
-
-                if (type === 'description') {
-                    // For main description, update the main content
-                    descriptionSections.description = formattedContent;
-                    updateFields.description = formatDescription(descriptionSections, {
-                        updated: false  // We've already updated the content
-                    });
-                } else {
-                    // For any other field, update or add it as a user-defined field
-                    const fieldLabel = improvementProposal.value[type].label || type;
-                    updateFields.description = formatDescription(descriptionSections, {
-                        updated: true,
-                        fieldName: fieldLabel,
-                        text: formattedContent
-                    });
-                }
-            }
-        }
-
-        await jiraClient.value.updateIssue(props.issueKey, { fields: updateFields });
-        improvementProposal.value[type].accepted = true;
-
-        // Refresh the issue fields to show updated content
-        const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
-        issueFields.value = issueDetails.fields;
-
-    } catch (error) {
-        logger.error(`[IssueFields] Error updating issue: ${error}`);
-    }
-};
 
 // State for editing
 const editingField = ref(null);
@@ -568,12 +305,8 @@ const fetchComments = async () => {
 // Watch for changes in the issue key and fetch the issue details
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
-        if (isMockMode.value) {
-            issueFields.value = mockJiraData.parentIssue.fields;
-        } else {
-            const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
-            issueFields.value = issueDetails.fields;
-        }
+        const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
+        issueFields.value = issueDetails.fields;
         await Promise.all([
             fetchChildIssues(),
             fetchRelatedIssues(),
@@ -581,6 +314,186 @@ watch(() => props.issueKey, async (newIssueKey) => {
         ]);
     }
 }, { immediate: true });
+
+// Fields in the template for the current issue type
+const templateFields = computed(() => {
+    const currentTemplate = templateStore.templates.find(t => t.name === getIssueField('issuetype.name'));
+    return currentTemplate?.fields?.map(field => field.name) || []
+});
+
+const getIssueTypeInstructions = (issueType) => {
+    const templates = templateStore.templates;
+    const currentTemplate = templates.find(t => t.name === issueType);
+
+    let issueTypeInstructions = '';
+    if (currentTemplate) {
+        // Include definition
+        if (currentTemplate.definition) {
+            issueTypeInstructions += `\n\nIssue Type: ${currentTemplate.name}\nDefinition:\n${currentTemplate.definition}\n`;
+        }
+
+        // Include persona
+        if (currentTemplate.persona) {
+            issueTypeInstructions += `\nPersona: ${currentTemplate.persona.name}\nDefinition: ${currentTemplate.persona.definition}\n`;
+        }
+
+        // Include fields
+        if (currentTemplate.fields && currentTemplate.fields.length > 0) {
+            issueTypeInstructions += `\nFields:\n`;
+            currentTemplate.fields.forEach(field => {
+                issueTypeInstructions += `- **${field.title}**: ${field.definition}\n`;
+            });
+        }
+    } else {
+        $q.notify({
+            type: 'info',
+            message: `No prompt template exists for the issue type: ${issueType}`,
+            caption: 'You should consider adding one.',
+            color: 'warning',
+            timeout: 0,
+            actions: [
+                { label: 'Dismiss', color: 'white', handler: () => { /* ... */ } }
+            ]
+        });
+    }
+
+    return issueTypeInstructions;
+}
+
+
+const generateImprovement = async (issueKey) => {
+    loading.value = true;
+    chunks.value = 0;
+    improvementFailed.value = false;
+    improvementProposal.value = null;
+    errorMessage.value = '';
+    const issueType = getIssueField('issuetype.name');
+
+    const userMessage = {
+        "issueKey": issueKey,
+        "issueType": issueType,
+        "summary": getIssueField('summary'),
+        "description": getIssueField('description')
+    };
+    let fullResponse = "";
+    try {
+        const stream = await openAIClient.value.createChatCompletion([
+            { role: "system", content: PROMPT_GENERATE_IMPROVEMENT_MARKDOWN },
+            { role: "system", content: getIssueTypeInstructions(issueType) },
+            { role: "user", content: JSON.stringify(userMessage) }
+        ]);
+
+        if (!stream) {
+            // Stream is null when aborted
+            return;
+        }
+
+        for await (const chunk of stream) {
+            fullResponse += chunk.choices[0]?.delta?.content || "";
+            improvementProposal.value = parseYAML(fullResponse);
+
+            // Wait to improve streamed response UX
+            await new Promise(resolve => setTimeout(resolve, 5));
+        }
+    } catch (error) {
+        logger.error(`[IssueFields] - Error fetching improvements: ${error.message}`);
+        improvementFailed.value = true;
+        errorMessage.value = error.message;
+        $q.notify({
+            type: 'negative',
+            message: 'Failed to generate improvements',
+            caption: error.message,
+            timeout: 0,
+            actions: [
+                { label: 'Dismiss', color: 'white', handler: () => { /* ... */ } }
+            ]
+
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+
+const abortGeneration = () => {
+    openAIClient.value.abort();
+    loading.value = false;
+    improvementFailed.value = true;
+    errorMessage.value = 'Generation aborted by user';
+};
+
+// Checks if the field with fieldKey from the improvement proposal has been updated
+const isFieldUpdated = (field) => {
+    return field?.updated == 'true' || field?.updated == true;
+};
+
+// Fields in the improvement proposal
+const improvementFields = computed(() => Object.keys(improvementProposal.value || {}));
+
+// Fields that exist in both the improvementFields and in templateFields
+const improvementFieldsFiltered = computed(() => {
+    return improvementFields.value.filter(field => templateFields.value.includes(field));
+});
+
+// Checks if field with fieldKey from the improvement proposal should be displayed in the UI
+const shouldDisplayField = (fieldKey) => {
+    return improvementFieldsFiltered.value.includes(fieldKey);
+};
+
+
+// Helper function to format array content as a numbered list
+const formatArrayContent = (content) => {
+    if (Array.isArray(content)) {
+        return content.map((item, index) => `${index + 1}. ${item}`).join('\n');
+    }
+    return content;
+};
+
+// Dynamic field handling for accepting an improvement proposal
+const acceptImprovement = async (type, improvement) => {
+    try {
+        let updateFields = {};
+        if (improvementProposal.value[type]) {
+            if (type === 'summary') {
+                updateFields.summary = improvement.text;
+            } else {
+                // Any field that's not summary is treated as a section in the description
+                const currentDescription = getIssueField('description') || '';
+                const descriptionSections = extractDescriptionSections(currentDescription);
+
+                // Format the content if it's an array
+                const formattedContent = formatArrayContent(improvement.text);
+
+                if (type === 'description') {
+                    // For main description, update the main content
+                    descriptionSections.description = formattedContent;
+                    updateFields.description = formatDescription(descriptionSections, {
+                        updated: false  // We've already updated the content
+                    });
+                } else {
+                    // For any other field, update or add it as a user-defined field
+                    const fieldLabel = improvementProposal.value[type].label || type;
+                    updateFields.description = formatDescription(descriptionSections, {
+                        updated: true,
+                        fieldName: fieldLabel,
+                        text: formattedContent
+                    });
+                }
+            }
+        }
+
+        await jiraClient.value.updateIssue(props.issueKey, { fields: updateFields });
+        improvementProposal.value[type].accepted = true;
+
+        // Refresh the issue fields to show updated content
+        const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
+        issueFields.value = issueDetails.fields;
+
+    } catch (error) {
+        logger.error(`[IssueFields] Error updating issue: ${error}`);
+    }
+};
+
 
 </script>
 
