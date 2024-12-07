@@ -11,6 +11,13 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.2 - 2024-12-07
+- Added support for indication of JQL query errors.
+- Added support for opening external links in the system's default browser.
+- Added informative JQL search help with examples.
+- Added persistence of last used settings tab.
+- Reduced log verboseness: filtered out window state related logs, such as resize or move window.
+
 ### v0.7.1 - 2024-12-07
 - Fixed error with Splitter configuration in Settings dialog.
 - Refactored IssueFields component by breaking out child issues, linked issues, and comments into their own components, making the code more modular and maintainable.
