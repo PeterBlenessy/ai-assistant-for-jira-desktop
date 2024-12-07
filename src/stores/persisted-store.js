@@ -46,6 +46,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
   const lastSplitterRatio = ref(
     loadStateFromLocalStorage("lastSplitterRatio") || 70
   );
+  const lastSettingsTab = ref(loadStateFromLocalStorage("lastSettingsTab") || "jira");
 
   // --- AI state ---
   const aiProviders = ref(
@@ -120,6 +121,9 @@ export const usePersistedStore = defineStore("persisted-store", () => {
   watch(lastSplitterRatio, (newValue) => {
     saveStateToLocalStorage("lastSplitterRatio", newValue);
   });
+  watch(lastSettingsTab, (newValue) => {
+    saveStateToLocalStorage("lastSettingsTab", newValue);
+  });
 
   // --- AI state watchers ---
   watch(
@@ -186,6 +190,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     splitterRatio,
     showRightPane,
     lastSplitterRatio,
+    lastSettingsTab,
 
     // AI state
     aiProviders,

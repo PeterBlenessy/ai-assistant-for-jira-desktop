@@ -48,19 +48,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import JiraSettings from './JiraSettings.vue';
 import ProviderSettings from './ProviderSettings.vue';
 import GeneralSettings from './GeneralSettings.vue';
 import { usePersistedStore } from '../stores/persisted-store';
+import { storeToRefs } from 'pinia';
 import InfoBox from './InfoBox.vue';
 
 const persistedStore = usePersistedStore();
 const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
+const { lastSettingsTab } = storeToRefs(persistedStore);
 
 const model = defineModel({ default: false });
 const splitterModel = ref(30);
-const activeTab = ref('jira');
+const activeTab = ref(lastSettingsTab.value);
+
+// Watch for tab changes and update the persisted store
+watch(activeTab, (newTab) => {
+    lastSettingsTab.value = newTab;
+});
+
 // Markdown content for the InfoBox
 const infoBoxMarkdown = `
 In order to be able to use the AI Assistant for Jira, you need to configure your Jira Server and AI providers.
