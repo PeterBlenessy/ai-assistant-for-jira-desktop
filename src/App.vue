@@ -47,7 +47,11 @@
                                     </q-item-label>
                                     <q-item-label v-if="isUpdateAvailable" caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
                                 </q-item-section>
-                                <q-tooltip>{{ isUpdateAvailable ? 'Download update' : 'Restart and install update...' }}</q-tooltip>
+                                <q-tooltip>{{ 
+                                    progress === 100 ? 'Restart and install update' :
+                                    isUpdateAvailable ? 'Download update' :
+                                    'Check for updates'
+                                }}</q-tooltip>
                             </q-item>
                         </q-list>
                     </q-menu>
