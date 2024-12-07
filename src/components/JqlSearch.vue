@@ -2,7 +2,7 @@
     <q-card class="absolute-top q-pt-sm q-ma-none" flat style="height: 100%; width: 100%">
         <q-card-section class="q-pt-none">
             <q-input label="Enter JQL Query" clearable dense filled style="width: 100%" v-model="jqlQuery"
-                @keydown.enter="performSearch">
+                @keydown.enter="performSearch" :error="!!searchError" :error-message="searchError" no-error-icon>
                 <template v-slot:prepend>
                     <q-btn dense flat icon="mdi-history" :disabled="searchHistory.length == 0"
                         @click.stop="history = true"
@@ -95,6 +95,7 @@ const loading = ref(false);
 const jqlQuery = ref("");
 const searchResults = ref([]);
 const showHistory = ref(false);
+const searchError = ref('');
 
 const pagination = ref({
     sortBy: "desc",
@@ -171,6 +172,7 @@ function onRequest(props) {
 async function performSearch() {
     if (jqlQuery.value == "") return;
 
+    searchError.value = ''; // Clear any previous errors
     const startAt = (pagination.value.page - 1) * pagination.value.rowsPerPage;
     const maxRows = pagination.value.rowsPerPage;
 
@@ -180,9 +182,7 @@ async function performSearch() {
             startAt,
             maxRows,
         );
-        // Comment removed since it was just a debug log
         
-        // Update pagination rows with total number of items for this search query
         pagination.value.rowsNumber = response.total;
 
         searchResults.value = response.issues.map((issue) => ({
@@ -202,7 +202,17 @@ async function performSearch() {
             searchHistory.value.push(jqlQuery.value);
         }
     } catch (error) {
-        logger.error(`[JqlSearch] Error performing JQL search ${page}`);
+        // Handle specific JQL syntax errors
+        if (error.details?.errors?.jql) {
+            searchError.value = `JQL Error: ${error.details.errors.jql}`;
+        } else if (error.details?.errorMessages?.length > 0) {
+            searchError.value = error.details.errorMessages[0];
+        } else {
+            searchError.value = 'Failed to perform search. Please check your JQL syntax.';
+        }
+        logger.error(`[JqlSearch] Error performing JQL search: ${error.message}`);
+        searchResults.value = []; // Clear results on error
+        pagination.value.rowsNumber = 0;
     }
 }
 
