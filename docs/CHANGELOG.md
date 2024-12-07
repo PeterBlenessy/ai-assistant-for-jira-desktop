@@ -8,9 +8,15 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 - Add support for fetching links in the description.
 - Add support for improving the context for the AI by adding child issues, comments, and attachments.
 - Add support for SSO authentication (https://confluence.atlassian.com/enterprise/sso-for-atlassian-data-center-990546150.html)
-- Fix issue where tooltip for update button remains 'Restart and install update' after restart.
 
 ## Releases
+
+### v0.7.1 - 2024-12-07
+- Fixed error with Splitter configuration in Settings dialog.
+- Refactored IssueFields component by breaking out child issues, linked issues, and comments into their own components, making the code more modular and maintainable.
+- Fixed issue where tooltip for update button remains 'Restart and install update' after restart.
+- Fixed error where show dismissed info boxes got set to true after a restart.
+- Fixed issue where `add new field` button in PromptManagementbecomes unresponsive when an issue type field is removed.
 
 ### v0.7.0 - 2024-12-06
 - Updated info box to be more dense.
