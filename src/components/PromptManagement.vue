@@ -426,9 +426,16 @@ function handleDeleteField(index) {
         message: `Are you sure you want to delete the <em><strong>${field.title}</strong></em> field?`,
         onConfirm: () => {
             const template = templates.value.find(t => t.issueType === selectedTemplateType.value);
+            if (!template) return;
+            
             const templateIndex = templates.value.indexOf(template);
-            template.fields.splice(index, 1);
-            templateStore.editTemplate(templateIndex, template);
+            // Create a new template object with a new fields array to ensure proper reactivity
+            const updatedTemplate = { ...template, fields: [...template.fields] };
+            updatedTemplate.fields.splice(index, 1);
+            
+            templateStore.editTemplate(templateIndex, updatedTemplate);
+            // Reset isNewField to ensure add new field button works
+            isNewField.value = false;
         }
     });
 }
