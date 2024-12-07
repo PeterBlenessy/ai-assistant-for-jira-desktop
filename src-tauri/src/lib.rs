@@ -6,7 +6,12 @@ pub fn run() {
                  tauri_plugin_log::TargetKind::LogDir {
                     file_name: Some("logs".to_string()),
                 },
-            )).build(),
+            ))
+            .filter(|metadata| {
+                // Filter out window-related logs
+                !metadata.target().contains("tao::platform_impl::platform::window_delegate")
+            })
+            .build(),
         )
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_window_state::Builder::new().build())
