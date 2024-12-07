@@ -68,7 +68,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
   // App Settings
   const isMockMode = ref(loadStateFromLocalStorage("isMockMode") || false);
   const showDismissedInfoBoxes = ref(
-    loadStateFromLocalStorage("showDismissedInfoBoxes") || true
+    loadStateFromLocalStorage("showDismissedInfoBoxes") || false
   );
 
   // Persisted state management functions
