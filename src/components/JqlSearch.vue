@@ -98,7 +98,7 @@ const showHistory = ref(false);
 const searchError = ref('');
 
 const pagination = ref({
-    sortBy: "desc",
+    sortBy: 'key',
     descending: false,
     page: 1,
     rowsPerPage: 20,
@@ -106,13 +106,29 @@ const pagination = ref({
 });
 
 const columns = [
-    { name: "id", label: "ID", field: "id" },
+    { 
+        name: "id", 
+        label: "ID", 
+        field: "id",
+        sortable: true,
+        sort: (a, b) => Number(a) - Number(b)
+    },
     {
         name: "key",
         label: "Key",
         field: "key",
         align: "center",
         required: true,
+        sortable: true,
+        sort: (a, b) => {
+            // Extract project and number parts (e.g., "PROJ-123" -> ["PROJ", "123"])
+            const [aProj, aNum] = a.split('-');
+            const [bProj, bNum] = b.split('-');
+            // First compare project parts
+            if (aProj !== bProj) return aProj.localeCompare(bProj);
+            // Then compare number parts
+            return Number(aNum) - Number(bNum);
+        }
     },
     {
         name: "summary",
@@ -121,6 +137,8 @@ const columns = [
         align: "left",
         style: "max-width: 500px",
         required: true,
+        sortable: true,
+        sort: (a, b) => a.localeCompare(b)
     },
     {
         name: "status",
@@ -128,8 +146,22 @@ const columns = [
         field: "status",
         align: "left",
         required: true,
+        sortable: true,
+        sort: (a, b) => a.localeCompare(b)
     },
-    { name: "assignee", label: "Assignee", field: "assignee", align: "left" },
+    {
+        name: "assignee",
+        label: "Assignee",
+        field: "assignee",
+        align: "left",
+        sortable: true,
+        sort: (a, b) => {
+            // Handle null/undefined assignees
+            if (!a) return 1;
+            if (!b) return -1;
+            return a.localeCompare(b);
+        }
+    },
 ];
 const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 
@@ -201,8 +233,11 @@ function onRequest(props) {
 
     loading.value = true;
 
+    // Update all pagination values including sort
     pagination.value.page = page;
     pagination.value.rowsPerPage = rowsPerPage;
+    pagination.value.sortBy = sortBy;
+    pagination.value.descending = descending;
 
     performSearch()
         .then(() => {
@@ -214,7 +249,6 @@ function onRequest(props) {
         });
 }
 
-// Perform the JQL search
 async function performSearch() {
     if (jqlQuery.value == "") return;
 
@@ -233,7 +267,7 @@ async function performSearch() {
             if (query.includes('project =')) {
                 const projectKey = query.match(/project\s*=\s*["']?([^"'\s]+)["']?/i)?.[1];
                 if (projectKey) {
-                    filteredIssues = filteredIssues.filter(issue => 
+                    filteredIssues = filteredIssues.filter(issue =>
                         issue.fields.project?.key.toLowerCase() === projectKey.toLowerCase()
                     );
                 }
@@ -241,7 +275,7 @@ async function performSearch() {
             if (query.includes('status =')) {
                 const status = query.match(/status\s*=\s*["']?([^"'\s]+)["']?/i)?.[1];
                 if (status) {
-                    filteredIssues = filteredIssues.filter(issue => 
+                    filteredIssues = filteredIssues.filter(issue =>
                         issue.fields.status?.name.toLowerCase() === status.toLowerCase()
                     );
                 }
@@ -249,18 +283,14 @@ async function performSearch() {
             if (query.includes('type =') || query.includes('issuetype =')) {
                 const type = query.match(/(?:type|issuetype)\s*=\s*["']?([^"'\s]+)["']?/i)?.[1];
                 if (type) {
-                    filteredIssues = filteredIssues.filter(issue => 
+                    filteredIssues = filteredIssues.filter(issue =>
                         issue.fields.issuetype?.name.toLowerCase() === type.toLowerCase()
                     );
                 }
             }
 
-            // Apply pagination
-            const total = filteredIssues.length;
-            const paginatedIssues = filteredIssues.slice(startAt, startAt + maxRows);
-
-            pagination.value.rowsNumber = total;
-            searchResults.value = paginatedIssues.map((issue) => ({
+            // Map the filtered issues to the required format
+            let mappedIssues = filteredIssues.map((issue) => ({
                 id: issue.id,
                 key: issue.key,
                 summary: issue.fields?.summary || '',
@@ -269,6 +299,24 @@ async function performSearch() {
                 issueType: issue.fields?.issuetype?.name || '',
                 issueTypeIconURL: '' // Demo mode doesn't need icons
             }));
+
+            // Sort results based on current sort settings
+            if (pagination.value.sortBy) {
+                const sortFn = columns.find(col => col.name === pagination.value.sortBy)?.sort;
+                if (sortFn) {
+                    mappedIssues.sort((a, b) => {
+                        const result = sortFn(a[pagination.value.sortBy], b[pagination.value.sortBy]);
+                        return pagination.value.descending ? -result : result;
+                    });
+                }
+            }
+
+            // Apply pagination after sorting
+            const total = mappedIssues.length;
+            const paginatedIssues = mappedIssues.slice(startAt, startAt + maxRows);
+
+            pagination.value.rowsNumber = total;
+            searchResults.value = paginatedIssues;
 
             if (jqlQuery.value.length != 0 && !searchHistory.value.includes(jqlQuery.value)) {
                 searchHistory.value.push(jqlQuery.value);
@@ -284,7 +332,7 @@ async function performSearch() {
 
         pagination.value.rowsNumber = response.total;
 
-        searchResults.value = response.issues.map((issue) => ({
+        let mappedIssues = response.issues.map((issue) => ({
             id: issue.id,
             key: issue.key,
             summary: issue?.fields?.summary || '',
@@ -293,6 +341,19 @@ async function performSearch() {
             issueType: issue?.fields?.issuetype?.name || '',
             issueTypeIconURL: issue?.fields?.issuetype?.iconUrl || ''
         }));
+
+        // Sort results based on current sort settings
+        if (pagination.value.sortBy) {
+            const sortFn = columns.find(col => col.name === pagination.value.sortBy)?.sort;
+            if (sortFn) {
+                mappedIssues.sort((a, b) => {
+                    const result = sortFn(a[pagination.value.sortBy], b[pagination.value.sortBy]);
+                    return pagination.value.descending ? -result : result;
+                });
+            }
+        }
+
+        searchResults.value = mappedIssues;
 
         if (jqlQuery.value.length != 0 && !searchHistory.value.includes(jqlQuery.value)) {
             searchHistory.value.push(jqlQuery.value);
