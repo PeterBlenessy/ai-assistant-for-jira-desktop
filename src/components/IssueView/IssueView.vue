@@ -259,7 +259,7 @@ const cancelEdit = () => {
 
 const fetchChildIssues = async () => {
     if (isDemoMode.value) {
-        childIssues.value = mockJiraData.childIssues || [];
+        childIssues.value = mockJiraData.getChildIssues(props.issueKey) || [];
         return;
     }
     try {
@@ -274,7 +274,17 @@ const fetchChildIssues = async () => {
 
 const fetchRelatedIssues = async () => {
     if (isDemoMode.value) {
-        relatedIssues.value = mockJiraData.linkedIssues || [];
+        // In demo mode, we'll show other issues from the same epic/initiative as related
+        const currentIssue = mockJiraData.getIssue(props.issueKey);
+        if (currentIssue) {
+            const parent = mockJiraData.getIssue(currentIssue.fields.parent?.key);
+            if (parent) {
+                relatedIssues.value = mockJiraData.getChildIssues(parent.key)
+                    .filter(issue => issue.key !== props.issueKey) || [];
+                return;
+            }
+        }
+        relatedIssues.value = [];
         return;
     }
     try {
@@ -290,7 +300,7 @@ const fetchRelatedIssues = async () => {
 
 const fetchComments = async () => {
     if (isDemoMode.value) {
-        comments.value = mockJiraData.comments || [];
+        comments.value = mockJiraData.getComments(props.issueKey) || [];
         return;
     }
     try {
@@ -305,6 +315,18 @@ const fetchComments = async () => {
 // Watch for changes in the issue key and fetch the issue details
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
+        if (isDemoMode.value) {
+            const issue = mockJiraData.getIssue(newIssueKey);
+            if (issue) {
+                issueFields.value = issue.fields;
+                await Promise.all([
+                    fetchChildIssues(),
+                    fetchRelatedIssues(),
+                    fetchComments()
+                ]);
+            }
+            return;
+        }
         const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
         issueFields.value = issueDetails.fields;
         await Promise.all([

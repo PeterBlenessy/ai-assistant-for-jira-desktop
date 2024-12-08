@@ -4,6 +4,9 @@
         <q-card-section class="q-pt-none" v-if="isInfoBoxVisible('JqlSearchInfo')">
             <InfoBox :markdownContent="infoBoxMarkdown" @dismiss="dismissInfoBox('JqlSearchInfo')" />
         </q-card-section>
+        <q-card-section class="q-pt-none" v-if="isDemoMode && isInfoBoxVisible('JqlSearchDemoModeInfo')">
+            <InfoBox :markdownContent="demoModeInfoMarkdown" @dismiss="dismissInfoBox('JqlSearchDemoModeInfo')" />
+        </q-card-section>
 
         <q-card-section class="q-pt-none">
             <q-input label="Enter JQL Query" clearable dense filled style="width: 100%" v-model="jqlQuery"
@@ -83,6 +86,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
 import { useJiraClient } from "../composables/JiraClient.js";
+import { mockJiraData } from "../test/mockJiraData";
 import IssueView from "./IssueView/IssueView.vue";
 import { useLogger } from "../composables/Logger.js";
 import InfoBox from './InfoBox.vue';
@@ -130,7 +134,7 @@ const columns = [
 const visibleColumns = ref(["key", "summary", "status", "assignee"]);
 
 const persistedStore = usePersistedStore();
-const { searchHistory } = storeToRefs(persistedStore);
+const { searchHistory, isDemoMode } = storeToRefs(persistedStore);
 const { isInfoBoxVisible, dismissInfoBox } = persistedStore;
 
 const infoBoxMarkdown = `
@@ -148,6 +152,34 @@ Advanced queries:
 - \`text ~ "search term" AND type = Bug\`
 
 [Learn more about JQL](https://www.atlassian.com/software/jira/guides/jql/overview#what-is-jql/)
+`;
+
+const demoModeInfoMarkdown = `
+🎮 Demo Mode Active
+
+You're currently in demo mode with access to a rich set of sample data. Try these example queries:
+
+Available Projects:
+- \`project = "MOBILE"\` - Mobile App project
+- \`project = "WEB"\` - Web Platform project
+- \`project = "API"\` - API Services project
+- \`project = "INFRA"\` - Infrastructure project
+- \`project = "DATA"\` - Data Platform project
+
+Issue Types:
+- \`type = "Initiative"\` - Strategic initiatives
+- \`type = "Epic"\` - Project epics
+- \`type = "Story"\` - User stories
+- \`type = "Task"\` - Technical tasks
+- \`type = "Sub-task"\` - Sub-tasks
+
+Status Filter:
+- \`status = "In Progress"\`
+- \`status = "To Do"\`
+- \`status = "Done"\`
+- \`status = "In Review"\`
+
+Note: In demo mode, complex JQL with AND/OR operators is not supported.
 `;
 
 const { jiraClient } = useJiraClient();
@@ -191,6 +223,59 @@ async function performSearch() {
     const maxRows = pagination.value.rowsPerPage;
 
     try {
+        if (isDemoMode.value) {
+            // In demo mode, we'll do client-side filtering of the mock data
+            const allIssues = mockJiraData.getAllIssues();
+            let filteredIssues = allIssues;
+
+            // Basic JQL parsing and filtering
+            const query = jqlQuery.value.toLowerCase();
+            if (query.includes('project =')) {
+                const projectKey = query.match(/project\s*=\s*["']?([^"'\s]+)["']?/i)?.[1];
+                if (projectKey) {
+                    filteredIssues = filteredIssues.filter(issue => 
+                        issue.fields.project?.key.toLowerCase() === projectKey.toLowerCase()
+                    );
+                }
+            }
+            if (query.includes('status =')) {
+                const status = query.match(/status\s*=\s*["']?([^"'\s]+)["']?/i)?.[1];
+                if (status) {
+                    filteredIssues = filteredIssues.filter(issue => 
+                        issue.fields.status?.name.toLowerCase() === status.toLowerCase()
+                    );
+                }
+            }
+            if (query.includes('type =') || query.includes('issuetype =')) {
+                const type = query.match(/(?:type|issuetype)\s*=\s*["']?([^"'\s]+)["']?/i)?.[1];
+                if (type) {
+                    filteredIssues = filteredIssues.filter(issue => 
+                        issue.fields.issuetype?.name.toLowerCase() === type.toLowerCase()
+                    );
+                }
+            }
+
+            // Apply pagination
+            const total = filteredIssues.length;
+            const paginatedIssues = filteredIssues.slice(startAt, startAt + maxRows);
+
+            pagination.value.rowsNumber = total;
+            searchResults.value = paginatedIssues.map((issue) => ({
+                id: issue.id,
+                key: issue.key,
+                summary: issue.fields?.summary || '',
+                status: issue.fields?.status?.name || '',
+                assignee: issue.fields?.assignee?.displayName || "Unassigned",
+                issueType: issue.fields?.issuetype?.name || '',
+                issueTypeIconURL: '' // Demo mode doesn't need icons
+            }));
+
+            if (jqlQuery.value.length != 0 && !searchHistory.value.includes(jqlQuery.value)) {
+                searchHistory.value.push(jqlQuery.value);
+            }
+            return;
+        }
+
         const response = await jiraClient.value.searchIssues(
             jqlQuery.value,
             startAt,
@@ -209,10 +294,7 @@ async function performSearch() {
             issueTypeIconURL: issue?.fields?.issuetype?.iconUrl || ''
         }));
 
-        if (
-            jqlQuery.value.length != 0 &&
-            !searchHistory.value.includes(jqlQuery.value)
-        ) {
+        if (jqlQuery.value.length != 0 && !searchHistory.value.includes(jqlQuery.value)) {
             searchHistory.value.push(jqlQuery.value);
         }
     } catch (error) {
