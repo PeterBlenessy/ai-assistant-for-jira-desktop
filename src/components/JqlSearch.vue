@@ -399,7 +399,7 @@ defineExpose({ setQuery });
 <style lang="sass">
 .my-sticky-header-table
     /* height or max-height is important */
-    height: calc(100vh - 130px)
+    height: calc(100vh - 160px)
 
     .q-table__top,
     .q-table__bottom,

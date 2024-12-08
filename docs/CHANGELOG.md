@@ -11,6 +11,13 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.3 - 2024-12-07
+- Changed `mock mode` to `demo mode` to better make it easier to understand.
+- Re-implemented the mock data to have a rich hierarchy of issues, generated deterministically but with random variations in statuses, priorities, and assignees to simulate real-world scenarios.
+- Added `demo mode` to JqlSearch component.
+- Added InfoBox about `demo mode`, displayed in JqlSearch component when `demo mode` is enabled.
+- Added support for sorting the JqlSearch table.
+
 ### v0.7.2 - 2024-12-07
 - Added support for indication of JQL query errors.
 - Added support for opening external links in the system's default browser.
