@@ -67,7 +67,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
   );
 
   // App Settings
-  const isMockMode = ref(loadStateFromLocalStorage("isMockMode") || false);
+  const isDemoMode = ref(loadStateFromLocalStorage("isDemoMode") || false);
   const showDismissedInfoBoxes = ref(
     loadStateFromLocalStorage("showDismissedInfoBoxes") || false
   );
@@ -151,8 +151,8 @@ export const usePersistedStore = defineStore("persisted-store", () => {
   );
 
   // Watch settings for persistence
-  watch(isMockMode, (newValue) =>
-    saveStateToLocalStorage("isMockMode", newValue)
+  watch(isDemoMode, (newValue) =>
+    saveStateToLocalStorage("isDemoMode", newValue)
   );
   watch(showDismissedInfoBoxes, (newValue) =>
     saveStateToLocalStorage("showDismissedInfoBoxes", newValue)
@@ -200,7 +200,7 @@ export const usePersistedStore = defineStore("persisted-store", () => {
     infoBoxes,
 
     // App Settings
-    isMockMode,
+    isDemoMode,
     showDismissedInfoBoxes,
 
     dismissInfoBox,

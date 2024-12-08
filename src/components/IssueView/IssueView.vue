@@ -182,7 +182,7 @@ const logger = useLogger();
 const { jiraClient } = useJiraClient();
 
 const store = usePersistedStore();
-const { isMockMode } = storeToRefs(store);
+const { isDemoMode } = storeToRefs(store);
 
 const loading = ref(false);
 const issueFields = ref(null);
@@ -258,7 +258,7 @@ const cancelEdit = () => {
 };
 
 const fetchChildIssues = async () => {
-    if (isMockMode.value) {
+    if (isDemoMode.value) {
         childIssues.value = mockJiraData.childIssues || [];
         return;
     }
@@ -273,7 +273,7 @@ const fetchChildIssues = async () => {
 };
 
 const fetchRelatedIssues = async () => {
-    if (isMockMode.value) {
+    if (isDemoMode.value) {
         relatedIssues.value = mockJiraData.linkedIssues || [];
         return;
     }
@@ -289,7 +289,7 @@ const fetchRelatedIssues = async () => {
 };
 
 const fetchComments = async () => {
-    if (isMockMode.value) {
+    if (isDemoMode.value) {
         comments.value = mockJiraData.comments || [];
         return;
     }
