@@ -15,13 +15,11 @@
                     <q-chip color="transparent" class="q-pa-none" dense square :clickable="false" :ripple="false" size="sm">
                         <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-xs q-pa-none"
                             style="width: 16px; height: 16px;" />
+                            {{ issue?.key }}
                     </q-chip>
                 </q-item-section>
-                <q-item-section caption class="col-1">
-                    <q-item-label lines="1">{{ issue?.key }}</q-item-label>
-                </q-item-section>
                 <q-item-section>
-                    <q-item-label>{{ issue?.fields?.summary }}</q-item-label>
+                    <q-item-label lines="1">{{ issue?.fields?.summary }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                     <q-chip dense color="grey-6" text-color="white" size="sm" square>

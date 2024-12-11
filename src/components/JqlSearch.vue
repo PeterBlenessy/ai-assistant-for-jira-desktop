@@ -297,7 +297,7 @@ async function performSearch() {
                 status: issue.fields?.status?.name || '',
                 assignee: issue.fields?.assignee?.displayName || "Unassigned",
                 issueType: issue.fields?.issuetype?.name || '',
-                issueTypeIconURL: '' // Demo mode doesn't need icons
+                issueTypeIconURL: issue.fields?.issuetype?.iconUrl
             }));
 
             // Sort results based on current sort settings

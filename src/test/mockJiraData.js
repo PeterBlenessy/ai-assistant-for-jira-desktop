@@ -45,6 +45,14 @@ const ASSIGNEES = [
   'Frank Architect'
 ];
 
+const ISSUE_TYPE_ICONS = {
+  Initiative: 'src/assets/issue-icons/initiative.png',
+  Epic: 'src/assets/issue-icons/epic.png',
+  Story: 'src/assets/issue-icons/story.png',
+  Task: 'src/assets/issue-icons/task.png',
+  'Sub-task': 'src/assets/issue-icons/subtask.png'
+};
+
 const generateIssue = (project, type, index, parent = null) => {
   const key = `${project.key}-${index}`;
   const typePrefix = {
@@ -61,7 +69,10 @@ const generateIssue = (project, type, index, parent = null) => {
     fields: {
       summary: `${typePrefix} ${parent ? `${parent.fields.summary} -` : ''} ${project.name} ${type} ${index}`,
       description: `Detailed description for ${type} ${key} in project ${project.name}`,
-      issuetype: { name: type },
+      issuetype: { 
+        name: type,
+        iconUrl: ISSUE_TYPE_ICONS[type]
+      },
       status: { name: STATUS_TYPES[Math.floor(Math.random() * STATUS_TYPES.length)] },
       priority: { name: PRIORITY_TYPES[Math.floor(Math.random() * PRIORITY_TYPES.length)] },
       assignee: { displayName: ASSIGNEES[Math.floor(Math.random() * ASSIGNEES.length)] },
