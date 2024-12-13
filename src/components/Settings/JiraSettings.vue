@@ -37,7 +37,7 @@
                         outline 
                         size="xs"
                         class="cursor-pointer"
-                        @click="showServerInfo = true"
+                        @click="serverInfo ? showServerInfo = true : null"
                     >
                         {{ serverInfo ? 'version '+serverInfo.version : 'no connection' }}
                         <q-icon class="q-pl-md" size="xs" 
