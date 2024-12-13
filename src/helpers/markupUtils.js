@@ -111,58 +111,47 @@ const normalizeFieldName = (name) => {
 
 // Helper function to extract description sections
 export const extractDescriptionSections = (currentDescription) => {
-    const sections = {
-        description: '',
-        userDefinedFields: {}
-    };
+    if (!currentDescription) return { description: '', sections: {} };
 
-    // Extract main description
-    // Match content until the first h2. or ## heading
-    const mainDescMatch = currentDescription.match(/^([^]*?)(?=\n+(?:h2\.|##)|$)/);
-    sections.description = mainDescMatch ? mainDescMatch[1].trim() : '';
-
-    // Extract user-defined fields
-    // Match both Jira wiki markup (h2.) and markdown (##) headings
-    const sectionMatches = currentDescription.match(/(?:h2\.|##)\s*(.*?)\s*\n+([^]*?)(?=\n+(?:h2\.|##)|$)/g) || [];
-    sectionMatches.forEach(section => {
-        const [title, content] = section.split(/\n+/).filter(Boolean);
-        // Remove both h2. and ## prefixes
-        const fieldName = title.replace(/^(?:h2\.|##)\s*/, '').trim();
-        sections.userDefinedFields[fieldName] = content.trim();
-    });
+    const sections = {};
+    
+    // Split by both h2. and ## headings
+    const parts = currentDescription.split(/\n+(?:h2\.|##)\s*/);
+    
+    // First part is the main description
+    sections.description = parts[0].trim();
+    
+    // Process remaining parts as sections
+    for (let i = 1; i < parts.length; i++) {
+        const part = parts[i];
+        const lines = part.split('\n');
+        const heading = lines[0].trim();
+        const content = lines.slice(1).join('\n').trim();
+        sections[heading] = content;
+    }
 
     return sections;
 };
 
 // Helper function to format the description
-export const formatDescription = (sections, improvement) => {
-    // Start with the main description section
-    let formattedDescription = sections.description.trim();
-
-    // Handle user-defined fields
-    const existingFields = Object.keys(sections.userDefinedFields);
-    const fieldsToProcess = new Set(existingFields);
-
-    // If we're adding/updating a field, make sure it's in our processing list
-    if (improvement.updated && improvement.fieldName) {
-        fieldsToProcess.add(improvement.fieldName);
+export const formatDescription = (sections) => {
+    let formattedDescription = '';
+    
+    // Add main description if it exists
+    if (sections.description) {
+        formattedDescription = sections.description;
     }
 
-    // Process all fields
-    for (const field of fieldsToProcess) {
-        formattedDescription += '\n\n';
-        
-        // If this is the field we're updating
-        if (improvement.updated && improvement.fieldName && 
-            normalizeFieldName(field) === normalizeFieldName(improvement.fieldName)) {
-            // Use the original field name if it exists, otherwise use the new one
-            const fieldName = existingFields.find(f => normalizeFieldName(f) === normalizeFieldName(field)) || field;
-            formattedDescription += `h2. ${fieldName}\n${improvement.text}`;
-        } else if (sections.userDefinedFields[field]) {
-            // Otherwise use the existing content
-            formattedDescription += `h2. ${field}\n${sections.userDefinedFields[field]}`;
+    // Add all other sections
+    Object.entries(sections).forEach(([heading, content]) => {
+        if (heading !== 'description' && content) {
+            // Add double newline before each section
+            if (formattedDescription) {
+                formattedDescription += '\n\n';
+            }
+            formattedDescription += `h2. ${heading}\n${content}`;
         }
-    }
+    });
 
     return formattedDescription;
 };

@@ -479,7 +479,7 @@ const acceptImprovement = async (type, improvement) => {
             if (type === 'summary') {
                 updateFields.summary = improvement.text;
             } else {
-                // Any field that's not summary is treated as a section in the description
+                // Get current description and parse its sections
                 const currentDescription = getIssueField('description') || '';
                 const descriptionSections = extractDescriptionSections(currentDescription);
 
@@ -489,17 +489,16 @@ const acceptImprovement = async (type, improvement) => {
                 if (type === 'description') {
                     // For main description, update the main content
                     descriptionSections.description = formattedContent;
-                    updateFields.description = formatDescription(descriptionSections, {
-                        updated: false  // We've already updated the content
-                    });
+                    updateFields.description = formatDescription(descriptionSections);
                 } else {
-                    // For any other field, update or add it as a user-defined field
+                    // For any other field, get the field label
                     const fieldLabel = improvementProposal.value[type].label || type;
-                    updateFields.description = formatDescription(descriptionSections, {
-                        updated: true,
-                        fieldName: fieldLabel,
-                        text: formattedContent
-                    });
+                    
+                    // Update the specific section in descriptionSections
+                    descriptionSections[fieldLabel] = formattedContent;
+                    
+                    // Format the entire description with all sections
+                    updateFields.description = formatDescription(descriptionSections);
                 }
             }
         }
