@@ -11,6 +11,14 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.4 - 2024-12-13
+- Added support for displaying issue icons in demo mode.
+- Reorganized the settings components into a new "Settings" folder.
+- Fixed error where the Jira Server Info dialog could open, dispite jira server no connection.
+- Fixed error where an existing description section could become duplicated when accepting an improvement.
+- Updated the acceptance flow to include an additional `Sync to Jira` step.
+- Added option to revert an accepted improvement before it's synced to Jira.
+
 ### v0.7.3 - 2024-12-07
 - Changed `mock mode` to `demo mode` to better make it easier to understand.
 - Re-implemented the mock data to have a rich hierarchy of issues, generated deterministically but with random variations in statuses, priorities, and assignees to simulate real-world scenarios.
