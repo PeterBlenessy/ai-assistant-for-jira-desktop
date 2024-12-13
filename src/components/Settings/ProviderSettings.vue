@@ -170,7 +170,7 @@ import {
     usePersistedStore,
     PROTECTED_PROVIDER_IDS,
     PROTECTED_MODELS
-} from '../stores/persisted-store';
+} from '../../stores/persisted-store';
 
 const persistedStore = usePersistedStore();
 

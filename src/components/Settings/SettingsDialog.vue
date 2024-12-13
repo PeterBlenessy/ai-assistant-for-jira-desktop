@@ -52,9 +52,9 @@ import { ref, watch } from "vue";
 import JiraSettings from './JiraSettings.vue';
 import ProviderSettings from './ProviderSettings.vue';
 import GeneralSettings from './GeneralSettings.vue';
-import { usePersistedStore } from '../stores/persisted-store';
+import { usePersistedStore } from '../../stores/persisted-store';
 import { storeToRefs } from 'pinia';
-import InfoBox from './InfoBox.vue';
+import InfoBox from '../InfoBox.vue';
 
 const persistedStore = usePersistedStore();
 const { isInfoBoxVisible, dismissInfoBox } = persistedStore;

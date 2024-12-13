@@ -112,7 +112,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import SettingsDialog from "./components/SettingsDialog.vue";
+import SettingsDialog from "./components/Settings/SettingsDialog.vue";
 import { usePersistedStore } from "./stores/persisted-store";
 import { useJiraClient } from "./composables/JiraClient.js";
 import JqlSearch from "./components/JqlSearch.vue";

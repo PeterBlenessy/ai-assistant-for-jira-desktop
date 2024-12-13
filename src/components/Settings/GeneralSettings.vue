@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { usePersistedStore } from '../stores/persisted-store';
+import { usePersistedStore } from '../../stores/persisted-store';
 import { storeToRefs } from 'pinia';
 
 const store = usePersistedStore();

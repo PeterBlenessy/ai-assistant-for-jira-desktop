@@ -140,9 +140,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { usePersistedStore } from '../stores/persisted-store';
-import { useJiraClient } from "../composables/JiraClient.js";
-import InfoDialog from './InfoDialog.vue';
+import { usePersistedStore } from '../../stores/persisted-store';
+import { useJiraClient } from "../../composables/JiraClient.js";
+import InfoDialog from '../InfoDialog.vue';
 
 const persistedStore = usePersistedStore();
 const { jiraClient } = useJiraClient();
