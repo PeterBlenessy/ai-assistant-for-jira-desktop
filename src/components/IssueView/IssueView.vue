@@ -95,11 +95,27 @@
                             </q-item-label>
                         </q-item-section>
                         <q-item-section side top v-if="isFieldUpdated(field)" class="floating-accept">
-                            <q-btn class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" color="primary"
-                                size="sm" :clickable="!field.accepted" :outline="field.accepted"
-                                :label="field.accepted ? 'Accepted' : 'Accept'"
-                                :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
-                                @click="acceptImprovement(key, field)" />
+                            <div class="row">
+                                <q-btn class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" 
+                                    color="primary"
+                                    size="sm" 
+                                    :disable="field.accepted"
+                                    :outline="field.accepted"
+                                    :label="field.accepted ? 'Accepted' : 'Accept'"
+                                    :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
+                                    @click="acceptImprovement(key, field)" 
+                                />
+                                <!-- Add revert button that shows only when change is accepted -->
+                                <q-btn v-if="field.accepted && isPendingChange(key)"
+                                    class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" 
+                                    color="negative"
+                                    size="sm"
+                                    outline
+                                    icon="mdi-undo"
+                                    label="Revert"
+                                    @click="revertImprovement(key)" 
+                                />
+                            </div>
                         </q-item-section>
                     </q-item>
                 </template>
@@ -571,6 +587,50 @@ const syncToJira = async () => {
 
 // Add computed property to check if there are pending changes
 const hasPendingChanges = computed(() => Object.keys(pendingChanges.value).length > 0);
+
+// Add the revert function in the script section
+const revertImprovement = async (type) => {
+    try {
+        // Remove the pending change
+        delete pendingChanges.value[type];
+
+        // Reset the field to its original value from Jira
+        if (isDemoMode.value) {
+            const issue = mockJiraData.getIssue(props.issueKey);
+            if (issue) {
+                issueFields.value = issue.fields;
+            }
+        } else {
+            const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
+            issueFields.value = issueDetails.fields;
+        }
+
+        // Reset the accepted state in the improvement proposal
+        if (improvementProposal.value[type]) {
+            improvementProposal.value[type].accepted = false;
+        }
+
+        // Show success notification
+        $q.notify({
+            type: 'positive',
+            message: 'Change reverted successfully',
+            timeout: 2000
+        });
+    } catch (error) {
+        logger.error(`[IssueFields] Error reverting improvement: ${error}`);
+        $q.notify({
+            type: 'negative',
+            message: 'Failed to revert change',
+            caption: error.message,
+            timeout: 5000
+        });
+    }
+};
+
+// Add this helper function in the script section
+const isPendingChange = (type) => {
+    return type in pendingChanges.value;
+};
 
 </script>
 
