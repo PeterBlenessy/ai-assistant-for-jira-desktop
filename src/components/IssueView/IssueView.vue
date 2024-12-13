@@ -5,9 +5,22 @@
             <div class="row items-center justify-between">
                 <div class="text-h2">Original Issue Fields</div>
                 <div>
-                    <q-btn class="q-pl-xs q-mb-sm" size="sm" :color="loading ? 'negative' : 'primary'"
-                        :label="loading ? 'ABORT' : 'IMPROVE'" :icon="loading ? 'mdi-stop' : 'mdi-creation-outline'"
-                        @click="() => loading ? abortGeneration() : generateImprovement(props.issueKey)" />
+                    <q-btn v-if="hasPendingChanges"
+                        class="q-pl-xs q-mb-sm q-mr-sm"
+                        size="sm"
+                        color="warning"
+                        label="SYNC TO JIRA"
+                        icon="mdi-database-sync-outline"
+                        @click="syncToJira"
+                    />
+                    <q-btn
+                        class="q-pl-xs q-mb-sm"
+                        size="sm"
+                        :color="loading ? 'negative' : 'primary'"
+                        :label="loading ? 'ABORT' : 'IMPROVE'"
+                        :icon="loading ? 'mdi-stop' : 'mdi-creation-outline'"
+                        @click="() => loading ? abortGeneration() : generateImprovement(props.issueKey)"
+                    />
                 </div>
             </div>
             <q-list separator bordered padding class="rounded-borders q-pt-none">
@@ -471,7 +484,10 @@ const formatArrayContent = (content) => {
     return content;
 };
 
-// Dynamic field handling for accepting an improvement proposal
+// Add this new ref to track pending changes
+const pendingChanges = ref({});
+
+// Modify the acceptImprovement function
 const acceptImprovement = async (type, improvement) => {
     try {
         let updateFields = {};
@@ -479,42 +495,82 @@ const acceptImprovement = async (type, improvement) => {
             if (type === 'summary') {
                 updateFields.summary = improvement.text;
             } else {
-                // Get current description and parse its sections
                 const currentDescription = getIssueField('description') || '';
                 const descriptionSections = extractDescriptionSections(currentDescription);
-
-                // Format the content if it's an array
                 const formattedContent = formatArrayContent(improvement.text);
 
                 if (type === 'description') {
-                    // For main description, update the main content
                     descriptionSections.description = formattedContent;
                     updateFields.description = formatDescription(descriptionSections);
                 } else {
-                    // For any other field, get the field label
                     const fieldLabel = improvementProposal.value[type].label || type;
-                    
-                    // Update the specific section in descriptionSections
                     descriptionSections[fieldLabel] = formattedContent;
-                    
-                    // Format the entire description with all sections
                     updateFields.description = formatDescription(descriptionSections);
                 }
             }
         }
 
-        await jiraClient.value.updateIssue(props.issueKey, { fields: updateFields });
+        // Store the changes locally instead of sending to Jira
+        pendingChanges.value = {
+            ...pendingChanges.value,
+            [type]: updateFields
+        };
+
+        // Update local state to show the changes in UI
+        if (updateFields.summary) {
+            issueFields.value.summary = updateFields.summary;
+        }
+        if (updateFields.description) {
+            issueFields.value.description = updateFields.description;
+        }
+
         improvementProposal.value[type].accepted = true;
 
-        // Refresh the issue fields to show updated content
-        const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
-        issueFields.value = issueDetails.fields;
-
     } catch (error) {
-        logger.error(`[IssueFields] Error updating issue: ${error}`);
+        logger.error(`[IssueFields] Error accepting improvement: ${error}`);
     }
 };
 
+// Add new function to sync changes to Jira
+const syncToJira = async () => {
+    try {
+        // Combine all pending changes
+        const allChanges = { fields: {} };
+        Object.values(pendingChanges.value).forEach(changes => {
+            Object.entries(changes).forEach(([field, value]) => {
+                allChanges.fields[field] = value;
+            });
+        });
+
+        // Send to Jira
+        await jiraClient.value.updateIssue(props.issueKey, allChanges);
+        
+        // Clear pending changes
+        pendingChanges.value = {};
+
+        // Refresh the issue fields to confirm changes
+        const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
+        issueFields.value = issueDetails.fields;
+
+        // Show success notification
+        $q.notify({
+            type: 'positive',
+            message: 'Changes synced to Jira successfully',
+            timeout: 2000
+        });
+    } catch (error) {
+        logger.error(`[IssueFields] Error syncing to Jira: ${error}`);
+        $q.notify({
+            type: 'negative',
+            message: 'Failed to sync changes to Jira',
+            caption: error.message,
+            timeout: 5000
+        });
+    }
+};
+
+// Add computed property to check if there are pending changes
+const hasPendingChanges = computed(() => Object.keys(pendingChanges.value).length > 0);
 
 </script>
 
