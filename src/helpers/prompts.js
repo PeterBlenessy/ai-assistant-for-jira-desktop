@@ -55,7 +55,7 @@ Analyze the information and suggest improvements where necessary.
 Potential issues include:
 
 - Vague or missing summaries.
-- Descriptions that are vague, incomplete, or misaligned with the summary.
+- Descriptions that are missing, vague, incomplete, or misaligned with the summary.
 - Missing or vague child issues.
 - Misalignment between child issues and parent issues.
 
@@ -122,7 +122,8 @@ acceptanceCriteria:
         - ...
     comment: The acceptance criteria were not specific enough.
 
-Be concise and ensure clarity for both engineers and Product Owners. 
+Be concise and ensure clarity for both engineers and Product Owners.
+Your response must always contain a summary and description, even if missing in the user input.
 `;
 
 // Old prompt kept for reference
