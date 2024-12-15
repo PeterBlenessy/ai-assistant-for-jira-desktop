@@ -242,14 +242,13 @@
                                 @paste="e => handleInputPaste(e, v => editingField.definition = v)"
                                 :rules="[val => !!val || 'Field definition is required']" lazy-rules="ondemand" />
                         </div>
-                    </div>
-                </q-item-section>
-
-                <q-item-section side class="floating-buttons">
-                    <div class="row q-gutter-sm">
-                        <q-btn flat icon="mdi-check" size="sm" class="q-pa-xs q-ma-none" color="primary"
-                            @click="handleSaveField" />
-                        <q-btn flat icon="mdi-close" size="sm" class="q-pa-xs q-ma-none" @click="cancelEdit" />
+                        <!-- Add buttons below the input fields -->
+                        <div class="col-12 q-gutter-sm q-mt-nont">
+                            <q-btn color="primary" icon="mdi-check" label="Save" size="sm" class="q-pl-xs"
+                                @click="handleSaveField" />
+                            <q-btn icon="mdi-close" label="Cancel" size="sm" class="q-pl-xs"
+                                @click="cancelEdit" />
+                        </div>
                     </div>
                 </q-item-section>
             </q-item>
