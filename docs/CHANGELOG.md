@@ -11,6 +11,20 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.5 - 2024-12-15
+- Fixed error where issue type icons were not displayed in production when using demo mode.
+- Changed child and linked issue key column to be fixed width to improve UX.
+- Fixed error where the loading indication was not working when checking for and downloading updates.
+- Added `demo mode` to AI improvement generation.
+- Fixed error with editing an issue field before generating/accepting/reverting an improvement.
+- Fixed error where accepting two different fields and then reverting any one of them, reverted both.
+- Fixed error where accepting a `description` improvement replaced the first section when the description section was missing in the original issue.
+- Improved UX for `Add field` in `PromptManagement` by making the save/cancel buttons clearly visible below the input fields instead of being hidden in the floating menu on the right side.
+- Updated JqlSearch component to be responsive to switching `demo mode` on/off and rerun the JQL query to provide a seamless experience to users.
+- Fixed error where when a generation is aborted and a new one is started, sometimes the previous aborted generation continued.
+- Updated the system prompt to instruct the AI to always respond with a summary and a description, even if missing in the user input.
+- Moved and renamed `mockJiraData.js` to `helpers/demoMode.js` to better reflect its purpose.
+
 ### v0.7.4 - 2024-12-13
 - Added support for displaying issue icons in demo mode.
 - Reorganized the settings components into a new "Settings" folder.
