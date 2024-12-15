@@ -86,7 +86,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { usePersistedStore } from "../stores/persisted-store";
 import { useJiraClient } from "../composables/JiraClient.js";
-import { mockJiraData } from "../test/mockJiraData";
+import { mockJiraData } from "../helpers/demoMode.js";
 import IssueView from "./IssueView/IssueView.vue";
 import { useLogger } from "../composables/Logger.js";
 import InfoBox from './InfoBox.vue';

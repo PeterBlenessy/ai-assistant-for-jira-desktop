@@ -185,7 +185,7 @@ import { useJiraClient } from '../../composables/JiraClient.js';
 import { useOpenAIClient } from '../../composables/OpenAIClient.js';
 import { usePersistedStore } from '../../stores/persisted-store';
 import { storeToRefs } from 'pinia';
-import { mockJiraData } from '../../test/mockJiraData';
+import { mockJiraData } from "../../helpers/demoMode.js";
 import MarkdownViewer from '../MarkdownViewer.vue';
 import ChildIssues from './ChildIssues.vue';
 import LinkedIssues from './LinkedIssues.vue';
