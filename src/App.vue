@@ -309,6 +309,15 @@ async function openMarkdownDialog(key) {
     showMarkdownDialog.value = true;
 }
 
+// Update the watcher to use the composition API style
+watch(
+    () => persistedStore.isDemoMode,
+    (newValue) => {
+        // Trigger a refresh of the current JQL search
+        jqlSearch.value?.refreshSearch();
+    }
+);
+
 </script>
 
 <style scoped>

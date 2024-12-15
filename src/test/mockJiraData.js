@@ -229,3 +229,13 @@ export const mockJiraData = (() => {
     }
   };
 })();
+
+export function getMockSearchResults(jql) {
+  // You can implement basic JQL parsing here if needed
+  // For now, just return all mock issues
+  return mockIssues;
+}
+
+export const mockIssues = [
+  // ... your existing mock issues ...
+];

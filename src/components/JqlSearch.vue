@@ -392,8 +392,19 @@ function setQuery(query) {
     performSearch();
 }
 
-// Expose the setQuery method to the parent component
-defineExpose({ setQuery });
+// In the script setup section, add a refreshSearch method
+const refreshSearch = () => {
+    if (jqlQuery.value) {
+        resetSearch();
+        performSearch();
+    }
+};
+
+// Expose the methods to the parent component
+defineExpose({
+    setQuery,
+    refreshSearch
+});
 
 </script>
 <style lang="sass">
