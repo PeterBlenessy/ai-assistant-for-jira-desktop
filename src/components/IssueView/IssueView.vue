@@ -341,13 +341,17 @@ const fetchComments = async () => {
     }
 };
 
-// Watch for changes in the issue key and fetch the issue details
+const originalValues = ref({});
+
+// Modify the watch handler for issueKey to store original values
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
         if (isDemoMode.value) {
             const issue = mockJiraData.getIssue(newIssueKey);
             if (issue) {
                 issueFields.value = issue.fields;
+                // Store original values
+                originalValues.value = JSON.parse(JSON.stringify(issue.fields));
                 await Promise.all([
                     fetchChildIssues(),
                     fetchRelatedIssues(),
@@ -358,6 +362,8 @@ watch(() => props.issueKey, async (newIssueKey) => {
         }
         const issueDetails = await jiraClient.value.getIssueDetails(newIssueKey);
         issueFields.value = issueDetails.fields;
+        // Store original values
+        originalValues.value = JSON.parse(JSON.stringify(issueDetails.fields));
         await Promise.all([
             fetchChildIssues(),
             fetchRelatedIssues(),
@@ -420,6 +426,36 @@ const generateImprovement = async (issueKey) => {
     errorMessage.value = '';
     const issueType = getIssueField('issuetype.name');
 
+    // Handle demo mode
+    if (isDemoMode.value) {
+        try {
+            // Simulate streaming response
+            const mockImprovement = mockJiraData.getMockImprovement(issueType);
+            
+            // Split the response into chunks to simulate streaming
+            const chunks = Object.entries(mockImprovement).map(([key, value]) => ({
+                [key]: value
+            }));
+            
+            for (const chunk of chunks) {
+                await new Promise(resolve => setTimeout(resolve, 500)); // Add delay for realistic effect
+                improvementProposal.value = {
+                    ...(improvementProposal.value || {}),
+                    ...chunk
+                };
+            }
+            
+        } catch (error) {
+            logger.error(`[IssueFields] - Error in demo mode: ${error.message}`);
+            improvementFailed.value = true;
+            errorMessage.value = error.message;
+        } finally {
+            loading.value = false;
+            return;
+        }
+    }
+
+    // Rest of the existing function for non-demo mode
     const userMessage = {
         "issueKey": issueKey,
         "issueType": issueType,
@@ -544,12 +580,37 @@ const acceptImprovement = async (type, improvement) => {
 
     } catch (error) {
         logger.error(`[IssueFields] Error accepting improvement: ${error}`);
+        // Add error notification
+        $q.notify({
+            type: 'negative',
+            message: 'Error accepting improvement',
+            caption: error.message,
+            timeout: 5000
+        });
     }
 };
 
 // Add new function to sync changes to Jira
 const syncToJira = async () => {
     try {
+        // Handle demo mode
+        if (isDemoMode.value) {
+            // Clear pending changes in demo mode
+            pendingChanges.value = {};
+            
+            // Show success notification for demo mode
+            $q.notify({
+                type: 'positive',
+                message: 'Demo Mode: Changes would be synced to Jira',
+                caption: 'In real mode, these changes would be saved to your Jira instance',
+                timeout: 3000,
+                actions: [
+                    { label: 'Dismiss', color: 'white' }
+                ]
+            });
+            return;
+        }
+
         // Combine all pending changes
         const allChanges = { fields: {} };
         Object.values(pendingChanges.value).forEach(changes => {
@@ -588,21 +649,16 @@ const syncToJira = async () => {
 // Add computed property to check if there are pending changes
 const hasPendingChanges = computed(() => Object.keys(pendingChanges.value).length > 0);
 
-// Add the revert function in the script section
 const revertImprovement = async (type) => {
     try {
         // Remove the pending change
         delete pendingChanges.value[type];
 
-        // Reset the field to its original value from Jira
-        if (isDemoMode.value) {
-            const issue = mockJiraData.getIssue(props.issueKey);
-            if (issue) {
-                issueFields.value = issue.fields;
-            }
+        // Reset the field to its original value
+        if (type === 'summary') {
+            issueFields.value.summary = originalValues.value.summary;
         } else {
-            const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
-            issueFields.value = issueDetails.fields;
+            issueFields.value.description = originalValues.value.description;
         }
 
         // Reset the accepted state in the improvement proposal

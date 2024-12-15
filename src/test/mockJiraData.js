@@ -87,6 +87,79 @@ const generateIssue = (project, type, index, parent = null) => {
   };
 };
 
+const MOCK_IMPROVEMENTS = {
+  'Initiative': {
+    summary: {
+      text: "Strategic Initiative: Enhance Mobile Platform Capabilities",
+      comment: "Made the summary more specific and action-oriented",
+      updated: true,
+      label: "Summary"
+    },
+    description: {
+      text: "This strategic initiative aims to significantly enhance our mobile platform capabilities to meet evolving market demands and user expectations.\n\n**Key Objectives:**\n1. Improve app performance metrics by 50%\n2. Implement next-gen security features\n3. Enhance user experience through modern UI/UX\n4. Enable offline capabilities\n5. Integrate advanced analytics",
+      comment: "Added clear objectives and structured the description better",
+      updated: true,
+      label: "Description"
+    }
+  },
+  'Epic': {
+    summary: {
+      text: "Epic: Implement Comprehensive User Authentication System",
+      comment: "Added clarity about the epic's scope",
+      updated: true,
+      label: "Summary"
+    },
+    description: {
+      text: "Implement a robust authentication system that provides secure access while maintaining excellent user experience.\n\n**Key Deliverables:**\n1. Multi-factor authentication\n2. Social login integration\n3. Biometric authentication\n4. Password recovery workflow\n5. Session management",
+      comment: "Added specific deliverables and improved structure",
+      updated: true,
+      label: "Description"
+    }
+  },
+  'Story': {
+    summary: {
+      text: "User Story: Enable Social Media Login Integration",
+      comment: "Made the story title more specific",
+      updated: true,
+      label: "Summary"
+    },
+    description: {
+      text: "**As a** mobile app user\n**I want to** log in using my social media accounts\n**So that** I can quickly access the app without creating new credentials\n\n**Acceptance Criteria:**\n1. Support login with Facebook\n2. Support login with Google\n3. Support login with Apple ID\n4. Implement proper error handling\n5. Ensure data privacy compliance",
+      comment: "Added user story format and clear acceptance criteria",
+      updated: true,
+      label: "Description"
+    }
+  },
+  'Task': {
+    summary: {
+      text: "Technical Task: Implement OAuth2.0 Authentication Flow",
+      comment: "Added technical specificity to the task title",
+      updated: true,
+      label: "Summary"
+    },
+    description: {
+      text: "**Technical Requirements:**\n1. Implement OAuth2.0 authorization code flow\n2. Set up secure token storage\n3. Handle token refresh mechanism\n4. Implement logout functionality\n5. Add proper error handling\n\n**Technical Notes:**\n- Use latest OAuth2.0 libraries\n- Follow security best practices\n- Add comprehensive logging",
+      comment: "Added technical details and implementation notes",
+      updated: true,
+      label: "Description"
+    }
+  },
+  'Sub-task': {
+    summary: {
+      text: "Implement Token Refresh Mechanism",
+      comment: "Made the subtask more specific",
+      updated: true,
+      label: "Summary"
+    },
+    description: {
+      text: "**Implementation Steps:**\n1. Create token refresh service\n2. Add token expiration check\n3. Implement automatic refresh logic\n4. Add retry mechanism\n5. Implement error handling\n\n**Testing Requirements:**\n- Unit tests for refresh logic\n- Integration tests for token flow\n- Error scenario testing",
+      comment: "Added clear implementation steps and testing requirements",
+      updated: true,
+      label: "Description"
+    }
+  }
+};
+
 export const mockJiraData = (() => {
   const allIssues = {};
   let currentIndex = 1;
@@ -150,6 +223,9 @@ export const mockJiraData = (() => {
     getChildIssues: (key) => allIssues[key]?.childIssues || [],
     getComments: (key) => allIssues[key]?.comments || [],
     getAllIssues: () => Object.values(allIssues),
-    getProjects: () => PROJECTS
+    getProjects: () => PROJECTS,
+    getMockImprovement: (issueType) => {
+      return MOCK_IMPROVEMENTS[issueType] || MOCK_IMPROVEMENTS['Task'];
+    }
   };
 })();
