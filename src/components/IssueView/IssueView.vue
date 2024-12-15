@@ -662,7 +662,24 @@ const revertImprovement = async (type) => {
         if (type === 'summary') {
             issueFields.value.summary = originalValues.value.summary;
         } else {
-            issueFields.value.description = originalValues.value.description;
+            // For description fields, only revert the specific section
+            const currentDescription = issueFields.value.description;
+            const originalDescription = originalValues.value.description;
+            
+            const currentSections = extractDescriptionSections(currentDescription);
+            const originalSections = extractDescriptionSections(originalDescription);
+            
+            // Get the field label that needs to be reverted
+            const fieldLabel = improvementProposal.value[type].label || type;
+            
+            if (type === 'description') {
+                currentSections.description = originalSections.description;
+            } else {
+                currentSections[fieldLabel] = originalSections[fieldLabel];
+            }
+            
+            // Update the description with the reverted section
+            issueFields.value.description = formatDescription(currentSections);
         }
 
         // Reset the accepted state in the improvement proposal

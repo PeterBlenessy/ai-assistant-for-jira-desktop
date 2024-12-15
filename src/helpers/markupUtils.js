@@ -111,9 +111,12 @@ const normalizeFieldName = (name) => {
 
 // Helper function to extract description sections
 export const extractDescriptionSections = (currentDescription) => {
-    if (!currentDescription) return { description: '', sections: {} };
+    // Initialize with just description, remove the unused sections object
+    if (!currentDescription) return { description: '' };
 
-    const sections = {};
+    const sections = {
+        description: ''  // Initialize description field
+    };
     
     // Split by both h2. and ## headings
     const parts = currentDescription.split(/\n+(?:h2\.|##)\s*/);
@@ -124,10 +127,16 @@ export const extractDescriptionSections = (currentDescription) => {
     // Process remaining parts as sections
     for (let i = 1; i < parts.length; i++) {
         const part = parts[i];
+        if (!part.trim()) continue;  // Skip empty sections
+        
         const lines = part.split('\n');
         const heading = lines[0].trim();
+        if (!heading) continue;  // Skip if heading is empty
+        
         const content = lines.slice(1).join('\n').trim();
-        sections[heading] = content;
+        if (content) {  // Only add section if it has content
+            sections[heading] = content;
+        }
     }
 
     return sections;
