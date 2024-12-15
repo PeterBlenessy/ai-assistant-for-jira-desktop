@@ -111,32 +111,44 @@ const normalizeFieldName = (name) => {
 
 // Helper function to extract description sections
 export const extractDescriptionSections = (currentDescription) => {
-    // Initialize with just description, remove the unused sections object
     if (!currentDescription) return { description: '' };
 
-    const sections = {
-        description: ''  // Initialize description field
-    };
+    const sections = {};
     
-    // Split by both h2. and ## headings
-    const parts = currentDescription.split(/\n+(?:h2\.|##)\s*/);
+    // Split by both h2. and ## headings, but keep the heading marker
+    const parts = currentDescription.split(/(?=\n+(?:h2\.|##)\s*)/);
     
-    // First part is the main description
-    sections.description = parts[0].trim();
-    
-    // Process remaining parts as sections
-    for (let i = 1; i < parts.length; i++) {
-        const part = parts[i];
-        if (!part.trim()) continue;  // Skip empty sections
+    // Process each part
+    parts.forEach(part => {
+        const trimmedPart = part.trim();
+        if (!trimmedPart) return;  // Skip empty parts
         
-        const lines = part.split('\n');
-        const heading = lines[0].trim();
-        if (!heading) continue;  // Skip if heading is empty
+        // Check if part starts with a heading
+        const headingMatch = trimmedPart.match(/^(?:h2\.|##)\s*([^\n]+)/);
         
-        const content = lines.slice(1).join('\n').trim();
-        if (content) {  // Only add section if it has content
-            sections[heading] = content;
+        if (headingMatch) {
+            // This part starts with a heading
+            const heading = headingMatch[1].trim();
+            const content = trimmedPart.substring(headingMatch[0].length).trim();
+            
+            // If heading is "Description" (case insensitive), use special key
+            if (heading.toLowerCase() === 'description') {
+                sections.description = content;
+            } else {
+                sections[heading] = content;
+            }
+        } else {
+            // No heading - this is the main description
+            // Only set if description hasn't been set by a "Description" heading
+            if (!sections.description) {
+                sections.description = trimmedPart;
+            }
         }
+    });
+    
+    // Ensure description key exists
+    if (!sections.description) {
+        sections.description = '';
     }
 
     return sections;
