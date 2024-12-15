@@ -262,10 +262,14 @@ const saveEdit = async () => {
         };
 
         // Save to Jira
-        await jiraClient.value.updateIssue(props.issueKey, updateFields);
+        if (!isDemoMode.value) {
+            await jiraClient.value.updateIssue(props.issueKey, updateFields);
+        }
 
         // Update local state
         issueFields.value[editingField.value] = editingContent.value;
+        // Also update originalValues to reflect the new state
+        originalValues.value[editingField.value] = editingContent.value;
     } catch (error) {
         console.error('Error saving edit:', error);
         $q.notify({
