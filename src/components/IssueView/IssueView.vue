@@ -421,13 +421,20 @@ const getIssueTypeInstructions = (issueType) => {
     return issueTypeInstructions;
 }
 
+const fullResponse = ref("");
 
 const generateImprovement = async (issueKey) => {
+    // First abort any existing generation
+    abortGeneration();
+    
+    // Reset states for new generation
     loading.value = true;
     chunks.value = 0;
     improvementFailed.value = false;
     improvementProposal.value = null;
     errorMessage.value = '';
+    fullResponse.value = "";  // Use .value since it's now a ref
+    
     const issueType = getIssueField('issuetype.name');
 
     // Handle demo mode
@@ -466,7 +473,6 @@ const generateImprovement = async (issueKey) => {
         "summary": getIssueField('summary'),
         "description": getIssueField('description')
     };
-    let fullResponse = "";
     try {
         const stream = await openAIClient.value.createChatCompletion([
             { role: "system", content: PROMPT_GENERATE_IMPROVEMENT_MARKDOWN },
@@ -480,8 +486,8 @@ const generateImprovement = async (issueKey) => {
         }
 
         for await (const chunk of stream) {
-            fullResponse += chunk.choices[0]?.delta?.content || "";
-            improvementProposal.value = parseYAML(fullResponse);
+            fullResponse.value += chunk.choices[0]?.delta?.content || "";  // Use .value
+            improvementProposal.value = parseYAML(fullResponse.value);  // Use .value
 
             // Wait to improve streamed response UX
             await new Promise(resolve => setTimeout(resolve, 5));
@@ -505,12 +511,18 @@ const generateImprovement = async (issueKey) => {
     }
 };
 
-
+// Modify abortGeneration function
 const abortGeneration = () => {
+    // First abort the OpenAI client
     openAIClient.value.abort();
+    
+    // Reset all generation-related state
     loading.value = false;
     improvementFailed.value = true;
     errorMessage.value = 'Generation aborted by user';
+    improvementProposal.value = null;
+    chunks.value = 0;
+    fullResponse.value = "";  // Use .value since it's now a ref
 };
 
 // Checks if the field with fieldKey from the improvement proposal has been updated
