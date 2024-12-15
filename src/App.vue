@@ -26,7 +26,7 @@
                     <q-badge v-if="isUpdateAvailable" floating rounded />
                     <q-tooltip>Menu</q-tooltip>
                     <q-menu anchor="bottom right" self="top right" class="q-pa-sm">
-                        <q-list dense style="min-width: 100px">
+                        <q-list dense style="min-width: 100px; width: 230px">
                             <q-item v-for="(md, key) in appMenu" :key="key" clickable v-ripple v-close-popup
                                 @click="openMarkdownDialog(key)">
                                 <q-item-section avatar>
@@ -37,17 +37,28 @@
                             <q-separator spaced inset class="q-ma-sm" />
                             <q-item clickable @click.stop="handleClickUpdateButton()">
                                 <q-item-section avatar>
-                                    <q-icon :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
-                                        :color="isUpdateAvailable ? 'positive' : ''"
-                                        :loading="progress > 0 && progress < 100" />
+                                    <template v-if="isChecking">
+                                        <q-spinner color="primary" size="1.5em" />
+                                    </template>
+                                    <template v-else-if="progress > 0 && progress < 100">
+                                        <q-spinner color="primary" size="1.5em" />
+                                    </template>
+                                    <q-icon v-else
+                                        :name="progress == 0 ? 'mdi-download' : 'mdi-restart'"
+                                        :color="isUpdateAvailable ? 'positive' : ''" />
                                 </q-item-section>
                                 <q-item-section>
-                                    <q-item-label>
-                                        {{ isUpdateAvailable ? 'Update available' : 'Check for updates...' }}
+                                    <q-item-label class="text-no-wrap">
+                                        {{ 
+                                            isChecking ? 'Checking for updates...' :
+                                            isUpdateAvailable ? 'Update available' : 
+                                            'Check for updates...'
+                                        }}
                                     </q-item-label>
                                     <q-item-label v-if="isUpdateAvailable" caption lines="1">{{ 'Version ' + newUpdate.version }}</q-item-label>
                                 </q-item-section>
                                 <q-tooltip>{{ 
+                                    isChecking ? 'Checking for updates...' :
                                     progress === 100 ? 'Restart and install update' :
                                     isUpdateAvailable ? 'Download update' :
                                     'Check for updates'
@@ -187,15 +198,19 @@ watch(downloaded, () => {
     progress.value = Math.round((downloaded.value / contentLength.value) * 100);
 });
 
+const isChecking = ref(false);
+
 const handleClickUpdateButton = async () => {
     try {
         if (!isUpdateAvailable.value) {
+            isChecking.value = true;
             newUpdate.value = await checkForUpdates();
             if (newUpdate.value) {
                 isUpdateAvailable.value = true;
             } else {
                 $q.notify({message: "No updates available"});
             }
+            isChecking.value = false;
         }
 
         if (isUpdateAvailable.value && progress.value == 0) {
@@ -206,11 +221,13 @@ const handleClickUpdateButton = async () => {
             relaunchApp();
         }
     } catch (error) {
+        isChecking.value = false;
         logger.error(`[app] Checking for updates error: ${error}`);
     }
 };
 
 onMounted(() => {
+    isChecking.value = true;
     checkForUpdates().then((update) => {
         if (update) {
             isUpdateAvailable.value = true;
@@ -218,6 +235,8 @@ onMounted(() => {
         }
     }).catch((error) => {
         logger.error(`[app] Checking for updates error: ${error}`);
+    }).finally(() => {
+        isChecking.value = false;
     });
 });
 
