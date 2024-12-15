@@ -29,4 +29,14 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+
+  // Add explicit asset handling configuration
+  build: {
+    assetsInclude: ['**/*.png'], // Explicitly include PNG files
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[hash][extname]' // Consistent asset file naming
+      }
+    }
+  },
 }));

@@ -60,7 +60,7 @@
                                 <q-chip dense square color="transparent" :clickable="false" :ripple="false"
                                     class="q-pa-none">
                                     <q-img :src="props.row.issueTypeIconURL" spinner-color="primary"
-                                        style="width: 16px; height: 16px;" class="q-mr-xs q-pa-none" />
+                                        style="width: 16px; height: 16px;" class="q-mr-sm q-pa-none" />
                                     {{ col.value }}
                                 </q-chip>
                             </div>

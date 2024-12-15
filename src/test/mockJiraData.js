@@ -45,12 +45,16 @@ const ASSIGNEES = [
   'Frank Architect'
 ];
 
+const getIconUrl = (name) => {
+  return new URL(`../assets/issue-icons/${name}.png`, import.meta.url).href;
+};
+
 const ISSUE_TYPE_ICONS = {
-  Initiative: 'src/assets/issue-icons/initiative.png',
-  Epic: 'src/assets/issue-icons/epic.png',
-  Story: 'src/assets/issue-icons/story.png',
-  Task: 'src/assets/issue-icons/task.png',
-  'Sub-task': 'src/assets/issue-icons/subtask.png'
+  Initiative: getIconUrl('initiative'),
+  Epic: getIconUrl('epic'),
+  Story: getIconUrl('story'),
+  Task: getIconUrl('task'),
+  'Sub-task': getIconUrl('subtask')
 };
 
 const generateIssue = (project, type, index, parent = null) => {

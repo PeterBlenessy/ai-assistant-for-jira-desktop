@@ -11,9 +11,9 @@
         </template>
         <q-list dense separator>
             <q-item v-for="issue in childIssues" :key="issue?.key" class="q-ma-none q-pa-none">
-                <q-item-section avatar>
+                <q-item-section avatar style="width: 100px" class="text-no-wrap">
                     <q-chip color="transparent" class="q-pa-none" dense square :clickable="false" :ripple="false" size="sm">
-                        <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-xs q-pa-none"
+                        <q-img :src="issue?.fields?.issuetype?.iconUrl" class="q-mr-sm q-pa-none"
                             style="width: 16px; height: 16px;" />
                             {{ issue?.key }}
                     </q-chip>
