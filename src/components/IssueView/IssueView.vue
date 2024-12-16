@@ -347,7 +347,6 @@ const fetchComments = async () => {
 
 const originalValues = ref({});
 
-// Modify the watch handler for issueKey to store original values
 watch(() => props.issueKey, async (newIssueKey) => {
     if (newIssueKey) {
         if (isDemoMode.value) {
@@ -443,6 +442,11 @@ const generateImprovement = async (issueKey) => {
             // Simulate streaming response
             const mockImprovement = mockJiraData.getMockImprovement(issueType);
             
+            // Reset accepted state for all improvements
+            Object.values(mockImprovement).forEach(improvement => {
+                improvement.accepted = false;
+            });
+            
             // Split the response into chunks to simulate streaming
             const chunks = Object.entries(mockImprovement).map(([key, value]) => ({
                 [key]: value
@@ -511,7 +515,6 @@ const generateImprovement = async (issueKey) => {
     }
 };
 
-// Modify abortGeneration function
 const abortGeneration = () => {
     // First abort the OpenAI client
     openAIClient.value.abort();
@@ -552,10 +555,9 @@ const formatArrayContent = (content) => {
     return content;
 };
 
-// Add this new ref to track pending changes
+// Track pending changes
 const pendingChanges = ref({});
 
-// Modify the acceptImprovement function
 const acceptImprovement = async (type, improvement) => {
     try {
         let updateFields = {};
@@ -606,7 +608,7 @@ const acceptImprovement = async (type, improvement) => {
     }
 };
 
-// Add new function to sync changes to Jira
+// Sync changes to Jira
 const syncToJira = async () => {
     try {
         // Handle demo mode
@@ -662,7 +664,7 @@ const syncToJira = async () => {
     }
 };
 
-// Add computed property to check if there are pending changes
+// Computed property to check if there are pending changes
 const hasPendingChanges = computed(() => Object.keys(pendingChanges.value).length > 0);
 
 const revertImprovement = async (type) => {
@@ -716,7 +718,6 @@ const revertImprovement = async (type) => {
     }
 };
 
-// Add this helper function in the script section
 const isPendingChange = (type) => {
     return type in pendingChanges.value;
 };
