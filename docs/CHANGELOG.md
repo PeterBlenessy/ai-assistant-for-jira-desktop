@@ -11,6 +11,12 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.6 - 2024-12-17
+- Fixed error where the `Accept` button remained disabled when generating improvements multiple times in demo mode.
+- Added setting for `generating child issues`. Functionality not implemented yet.
+- Added setting to `add AI improvement comments to Jira` when syncing accepted improvement. Functionality not implemented yet.
+- Changed settings tab labels to be left-aligned for better UX.
+
 ### v0.7.5 - 2024-12-15
 - Fixed error where issue type icons were not displayed in production when using demo mode.
 - Changed child and linked issue key column to be fixed width to improve UX.
