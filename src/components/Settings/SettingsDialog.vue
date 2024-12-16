@@ -18,12 +18,21 @@
 
                 <q-splitter v-model="splitterModel" style="min-height: 176px" disable>
                     <template v-slot:before>
-                        <q-tabs v-model="activeTab" vertical dense active-color="primary" indicator-color="primary"
-                            inline-label no-caps class="q-pt-sm">
-                            <q-tab name="jira" label="Jira" icon="mdi-atlassian" />
-                            <q-tab name="provider" label="AI Providers" icon="mdi-creation" />
-                            <q-tab name="general" label="General" icon="mdi-cog" />
-                        </q-tabs>
+                        <q-list dense>
+                            <q-item v-for="tab in tabs" :key="tab.name" 
+                                clickable
+                                @click="activeTab = tab.name" 
+                                :active="tab.name == activeTab"
+                                active-class="text-primary"
+                            >
+                                <q-item-section avatar>
+                                    <q-icon :name="tab.icon" />
+                                </q-item-section>
+                                <q-item-section>
+                                    {{ tab.label }}
+                                </q-item-section>
+                            </q-item>
+                        </q-list>
                     </template>
 
                     <template v-slot:after>
@@ -73,6 +82,12 @@ watch(activeTab, (newTab) => {
 const infoBoxMarkdown = `
 In order to be able to use the AI Assistant for Jira, you need to configure your Jira Server and AI providers.
 If you just want to try it out, you can enable the mock mode.`;
+
+const tabs = [
+    { name: 'jira', label: 'Jira', icon: 'mdi-atlassian' },
+    { name: 'provider', label: 'AI Providers', icon: 'mdi-creation' },
+    { name: 'general', label: 'General', icon: 'mdi-cog' }
+];
 </script>
 <style scoped>
 .align-left {
