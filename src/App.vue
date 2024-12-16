@@ -241,6 +241,17 @@ onMounted(() => {
 });
 
 // --- Jira ---
+
+async function fetchIssueTypes() {
+    try {
+        const types = await jiraClient.value.getIssueTypes();
+        const formattedTypes = types.map(type => ({ label: type.name, value: type.name }));
+        persistedStore.availableIssueTypes = formattedTypes;
+    } catch (error) {
+        console.error(`Error fetching issue types: ${error.message}`);
+    }
+}
+
 async function checkJiraConnection() {
     if (persistedStore.selectedJiraConfig.serverAddress === "" || persistedStore.selectedJiraConfig.personalAccessToken === "") {
         logger.log("[app] Missing Jira server address or personal access token");
@@ -248,18 +259,16 @@ async function checkJiraConnection() {
         return;
     }
 
-    jiraClient.value
-        .getUser()
-        .then((response) => {
-            user.value = response;
-            isConnected.value = true;
-        })
-        .catch((error) => {
-            logger.error(`[app] - ${error}`);
-            user.value = null;
-            isConnected.value = false;
-            showSettingsDialog.value = true;
-        });
+    try {
+        user.value = await jiraClient.value.getUser();
+        isConnected.value = true;
+        await fetchIssueTypes();
+    } catch (error) {
+        logger.error(`[app] - ${error}`);
+        user.value = null;
+        isConnected.value = false;
+        showSettingsDialog.value = true;
+    }
 }
 
 onMounted(() => {
