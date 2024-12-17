@@ -11,7 +11,13 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
-### v0.7.6 - 2024-12-17
+### v0.7.7 - 2024-12-17
+- Changed width of settings dialog to make tab names fit.
+- Added support for adding `AI improvement comments to Jira` when syncing accepted improvements.
+- Replaced the separate accept and revert buttons with a single button.
+- Added `sync to Jira` functionality for manual changes.
+
+### v0.7.6 - 2024-12-16
 - Fixed error where the `Accept` button remained disabled when generating improvements multiple times in demo mode.
 - Added setting for `generating child issues`. Functionality not implemented yet.
 - Added setting to `add AI improvement comments to Jira` when syncing accepted improvement. Functionality not implemented yet.
