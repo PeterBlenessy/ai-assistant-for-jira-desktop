@@ -1,6 +1,6 @@
 <template>
     <q-dialog v-model="model">
-        <q-card style="width: 550px; max-width: 75vw">
+        <q-card style="width: 600px; max-width: 75vw">
             <q-card-section class="row q-pa-sm q-pl-md vertical-middle" style="height: 45px">
                 <div class="text-subtitle1 text-weight-bold">Settings</div>
                 <q-space />
