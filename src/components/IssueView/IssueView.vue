@@ -96,24 +96,15 @@
                         </q-item-section>
                         <q-item-section side top v-if="isFieldUpdated(field)" class="floating-accept">
                             <div class="row">
-                                <q-btn class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" 
-                                    color="primary"
-                                    size="sm" 
-                                    :disable="field.accepted"
-                                    :outline="field.accepted"
-                                    :label="field.accepted ? 'Accepted' : 'Accept'"
-                                    :icon="field.accepted ? 'mdi-check' : 'mdi-plus'"
-                                    @click="acceptImprovement(key, field)" 
-                                />
-                                <!-- Add revert button that shows only when change is accepted -->
-                                <q-btn v-if="field.accepted && isPendingChange(key)"
+                                <!-- Only show button if there's a pending change or improvement not yet accepted -->
+                                <q-btn v-if="isPendingChange(key) || !field.accepted"
                                     class="text-uppercase q-ma-sm q-pb-none q-pt-none q-pl-sm q-pr-sm" 
-                                    color="negative"
-                                    size="sm"
-                                    outline
-                                    icon="mdi-undo"
-                                    label="Revert"
-                                    @click="revertImprovement(key)" 
+                                    :color="field.accepted ? 'negative' : 'primary'"
+                                    size="sm" 
+                                    :outline="field.accepted"
+                                    :label="field.accepted ? 'Revert' : 'Accept'"
+                                    :icon="field.accepted ? 'mdi-undo' : 'mdi-plus'"
+                                    @click="field.accepted ? revertImprovement(key) : acceptImprovement(key, field)" 
                                 />
                             </div>
                         </q-item-section>
