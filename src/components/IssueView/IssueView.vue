@@ -210,8 +210,9 @@ const $q = useQuasar();
 const logger = useLogger();
 const { jiraClient } = useJiraClient();
 
+// Modify store initialization to get the new setting
 const store = usePersistedStore();
-const { isDemoMode } = storeToRefs(store);
+const { addImprovementCommentsToJira, isDemoMode } = storeToRefs(store);
 
 const loading = ref(false);
 const issueFields = ref(null);
@@ -631,21 +632,38 @@ const syncToJira = async () => {
 
         // Combine all pending changes
         const allChanges = { fields: {} };
-        Object.values(pendingChanges.value).forEach(changes => {
-            Object.entries(changes).forEach(([field, value]) => {
-                allChanges.fields[field] = value;
+        
+        // Collect improvement comments
+        const improvementComments = [];
+        
+        Object.entries(pendingChanges.value).forEach(([field, changes]) => {
+            Object.entries(changes).forEach(([fieldName, value]) => {
+                allChanges.fields[fieldName] = value;
+                
+                // Add comment if available from improvement proposal
+                const improvement = improvementProposal.value[field];
+                if (improvement?.comment) {
+                    improvementComments.push(improvement.comment);
+                }
             });
         });
 
-        // Send to Jira
+        // Send field updates to Jira
         await jiraClient.value.updateIssue(props.issueKey, allChanges);
+        
+        // Add a comment with the improvement details if there are any comments and the setting is enabled
+        if (improvementComments.length > 0 && addImprovementCommentsToJira.value) {
+            const comment = `Accepted AI generated improvements with below comments:\n\n${improvementComments.map(c => `- ${c}`).join('\n')}`;
+            await jiraClient.value.addComment(props.issueKey, comment);
+        }
         
         // Clear pending changes
         pendingChanges.value = {};
 
-        // Refresh the issue fields to confirm changes
+        // Refresh the issue fields and comments to confirm changes
         const issueDetails = await jiraClient.value.getIssueDetails(props.issueKey);
         issueFields.value = issueDetails.fields;
+        comments.value = issueDetails.fields.comment?.comments || [];
 
         // Show success notification
         $q.notify({

@@ -126,6 +126,18 @@ const JiraClient = (options) => {
         }
     };
 
+    const addComment = async (issueKey, comment) => {
+        try {
+            return await jiraFetch(`/rest/api/latest/issue/${issueKey}/comment`, {
+                method: 'POST',
+                body: { body: comment }
+            });
+        } catch (error) {
+            console.error(`Error in addComment: ${error.message}`);
+            throw error;
+        }
+    };
+
     const getServerInfo = async () => {
         try {
             return await jiraFetch(`/rest/api/latest/serverInfo`);
@@ -153,6 +165,7 @@ const JiraClient = (options) => {
         getIssueDetails,
         updateIssue,
         getServerInfo,
+        addComment,
     };
 };
 
