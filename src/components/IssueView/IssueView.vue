@@ -248,20 +248,20 @@ const saveEdit = async () => {
 
     try {
         const updateFields = {
-            fields: {
+            [editingField.value]: editingContent.value
+        };
+
+        // Store changes locally instead of sending to Jira
+        pendingChanges.value = {
+            ...pendingChanges.value,
+            [`manual_${editingField.value}`]: { // prefix with 'manual_' to distinguish from AI changes
                 [editingField.value]: editingContent.value
             }
         };
 
-        // Save to Jira
-        if (!isDemoMode.value) {
-            await jiraClient.value.updateIssue(props.issueKey, updateFields);
-        }
-
         // Update local state
         issueFields.value[editingField.value] = editingContent.value;
-        // Also update originalValues to reflect the new state
-        originalValues.value[editingField.value] = editingContent.value;
+
     } catch (error) {
         console.error('Error saving edit:', error);
         $q.notify({
@@ -631,10 +631,12 @@ const syncToJira = async () => {
             Object.entries(changes).forEach(([fieldName, value]) => {
                 allChanges.fields[fieldName] = value;
                 
-                // Add comment if available from improvement proposal
-                const improvement = improvementProposal.value[field];
-                if (improvement?.comment) {
-                    improvementComments.push(improvement.comment);
+                // Add comment if available from improvement proposal and it's not a manual change
+                if (!field.startsWith('manual_')) {
+                    const improvement = improvementProposal.value[field];
+                    if (improvement?.comment) {
+                        improvementComments.push(improvement.comment);
+                    }
                 }
             });
         });
@@ -642,12 +644,17 @@ const syncToJira = async () => {
         // Send field updates to Jira
         await jiraClient.value.updateIssue(props.issueKey, allChanges);
         
-        // Add a comment with the improvement details if there are any comments and the setting is enabled
+        // Add comments only for AI improvements
         if (improvementComments.length > 0 && addImprovementCommentsToJira.value) {
             const comment = `Accepted AI generated improvements with below comments:\n\n${improvementComments.map(c => `- ${c}`).join('\n')}`;
             await jiraClient.value.addComment(props.issueKey, comment);
         }
         
+        // Update originalValues with the new synced values
+        Object.entries(allChanges.fields).forEach(([field, value]) => {
+            originalValues.value[field] = value;
+        });
+
         // Clear pending changes
         pendingChanges.value = {};
 
