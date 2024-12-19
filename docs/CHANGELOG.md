@@ -11,6 +11,9 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.8 - 2024-12-20
+- Updated `Getting started guide` with additional instruction when using Ollama.
+
 ### v0.7.7 - 2024-12-17
 - Changed width of settings dialog to make tab names fit.
 - Added support for adding `AI improvement comments to Jira` when syncing accepted improvements.
