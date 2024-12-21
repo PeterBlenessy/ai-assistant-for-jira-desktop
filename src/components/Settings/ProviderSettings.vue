@@ -14,12 +14,35 @@
                         emit-value
                         map-options
                     >
+                        <template v-slot:append>
+                            <q-btn v-if="isOllamaProviderById(selectedProviderId)"
+                                flat dense size="sm" 
+                                icon="mdi-restart"
+                                :loading="restartingOllama"
+                                @click.stop.prevent="configureAndRestartOllama"
+                            >
+                                <q-tooltip>Configure & Restart Ollama</q-tooltip>
+                            </q-btn>
+                        </template>
                         <template v-slot:option="scope">
                             <q-item v-bind="scope.itemProps" @click.stop="selectProvider(scope.opt.value)">
                                 <q-item-section>{{ scope.opt.label }}</q-item-section>
-                                <q-item-section side v-if="!PROTECTED_PROVIDER_IDS.includes(scope.opt.value)">
-                                    <q-btn flat dense size="sm" icon="mdi-close"
-                                        @click.stop="confirmDeleteProvider(scope.opt.value)" />
+                                <q-item-section side class="q-gutter-x-sm">
+                                    <!-- Configure Ollama button -->
+                                    <q-btn v-if="isOllamaProviderById(scope.opt.value)"
+                                        flat dense size="sm" 
+                                        icon="mdi-restart"
+                                        :loading="restartingOllama"
+                                        @click.stop="configureAndRestartOllama"
+                                    >
+                                        <q-tooltip>Configure & Restart Ollama</q-tooltip>
+                                    </q-btn>
+                                    <!-- Delete button -->
+                                    <q-btn v-if="!PROTECTED_PROVIDER_IDS.includes(scope.opt.value)"
+                                        flat dense size="sm" 
+                                        icon="mdi-close"
+                                        @click.stop="confirmDeleteProvider(scope.opt.value)" 
+                                    />
                                 </q-item-section>
                             </q-item>
                         </template>
@@ -166,6 +189,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { Command } from '@tauri-apps/plugin-shell';
 import {
     usePersistedStore,
     PROTECTED_PROVIDER_IDS,
@@ -327,6 +351,48 @@ function deleteModel() {
 // Helper function to check if a model is protected
 function isProtectedModel(model) {
     return PROTECTED_MODELS[selectedProviderId.value]?.includes(model);
+}
+
+const restartingOllama = ref(false);
+
+const isOllamaProvider = computed(() => {
+    return editProviderData.value.name?.toLowerCase().includes('ollama') || 
+           editProviderData.value.baseURL?.toLowerCase().includes('ollama');
+});
+
+// Add new helper function to check if a provider is Ollama by ID
+function isOllamaProviderById(providerId) {
+    const provider = persistedStore.aiProviders.find(p => p.id === providerId);
+    return provider && (
+        provider.name.toLowerCase().includes('ollama') || 
+        provider.baseURL.toLowerCase().includes('ollama')
+    );
+}
+
+async function configureAndRestartOllama() {
+    restartingOllama.value = true;
+    try {
+        // Set environment variable
+        await new Command('launchctl')
+            .execute(['setenv', 'OLLAMA_ORIGINS', '*']);
+        
+        // Kill Ollama
+        await new Command('killall')
+            .execute(['Ollama']);
+        
+        // Wait a moment for the process to fully terminate
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Start Ollama
+        await new Command('open')
+            .execute(['-a', 'Ollama']);
+            
+        console.log('Successfully configured and restarted Ollama');
+    } catch (error) {
+        console.error('Failed to configure and restart Ollama:', error);
+    } finally {
+        restartingOllama.value = false;
+    }
 }
 
 </script>

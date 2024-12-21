@@ -46,12 +46,16 @@ To configure your AI provider, follow the steps below:
 6. Enter your API key in the designated field
 
 ### Ollama Setup
-1. Install Ollama (https://ollama.com)
-2. From the terminal, pull your desired model (e.g. `ollama pull mistral`)
-3. In the app settings, select "Ollama" as provider
-4. Select the model name
-5. Fill out the Ollama endpoint URL (default: http://localhost:11434/v1)
-6. Add `ollama` as API  Key
+1. Install [Ollama](https://ollama.com)
+2. From the terminal, pull your desired model (e.g. `ollama pull qwen2.5`)
+3. Configure Ollama to accept API calls from this application
+   - Automatically from the Provider Settings dialog, by clicking the `Configure & Restart Ollama` button.
+   - Manually, by starting Ollama server from the command line like this: `OLLAMA_ORIGINS=* ollama serve`
+   - Manually setting globally (once) `launchctl setenv OLLAMA_ORIGINS '*'` and restart Ollama server (works on Mac)
+4. In the app settings, select "Ollama" as provider
+5. Select the downloaded model's name or add it if it's missing by editing Ollama config
+6. Fill out the Ollama endpoint URL (default: http://localhost:11434/v1)
+7. Add `ollama` as API Key
 
 ### Custom AI Endpoint
 1. In the app settings, select "Add new"
