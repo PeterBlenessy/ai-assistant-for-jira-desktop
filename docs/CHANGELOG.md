@@ -11,8 +11,10 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
-### v0.7.8 - 2024-12-20
+### v0.7.8 - 2024-12-21
 - Updated `Getting started guide` with additional instruction when using Ollama.
+- Added support for configuring Ollama server on Mac so it accepts API calls from this application.
+- Added LICENSE.md to repo.
 
 ### v0.7.7 - 2024-12-17
 - Changed width of settings dialog to make tab names fit.
