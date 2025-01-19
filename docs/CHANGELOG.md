@@ -11,6 +11,11 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.9 - 2025-01-19
+- Added input field validation in JiraSettings and ProviderSettings.
+- Added support for checking Ollama server availability when Ollama is the selected provider.
+- Updated package dependencies.
+
 ### v0.7.8 - 2024-12-21
 - Updated `Getting started guide` with additional instruction when using Ollama.
 - Added support for configuring Ollama server on Mac so it accepts API calls from this application.
