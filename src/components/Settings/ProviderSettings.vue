@@ -17,26 +17,18 @@
                         <template v-slot:append>
                             <q-btn v-if="isOllamaProviderById(selectedProviderId)"
                                 flat dense size="sm" 
-                                icon="mdi-restart"
+                                :icon="ollamaRunning ? 'mdi-circle' : 'mdi-restart'"
+                                :color="ollamaRunning ? 'positive' : 'grey'"
                                 :loading="restartingOllama"
                                 @click.stop.prevent="configureAndRestartOllama"
                             >
-                                <q-tooltip>Configure & Restart Ollama</q-tooltip>
+                                <q-tooltip>{{ ollamaRunning ? 'Ollama is running' : 'Configure & Restart Ollama' }}</q-tooltip>
                             </q-btn>
                         </template>
                         <template v-slot:option="scope">
                             <q-item v-bind="scope.itemProps" @click.stop="selectProvider(scope.opt.value)">
                                 <q-item-section>{{ scope.opt.label }}</q-item-section>
                                 <q-item-section side class="q-gutter-x-sm">
-                                    <!-- Configure Ollama button -->
-                                    <q-btn v-if="isOllamaProviderById(scope.opt.value)"
-                                        flat dense size="sm" 
-                                        icon="mdi-restart"
-                                        :loading="restartingOllama"
-                                        @click.stop="configureAndRestartOllama"
-                                    >
-                                        <q-tooltip>Configure & Restart Ollama</q-tooltip>
-                                    </q-btn>
                                     <!-- Delete button -->
                                     <q-btn v-if="!PROTECTED_PROVIDER_IDS.includes(scope.opt.value)"
                                         flat dense size="sm" 
@@ -196,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Command } from '@tauri-apps/plugin-shell';
 import {
     usePersistedStore,
@@ -442,6 +434,82 @@ function isOllamaProviderById(providerId) {
     );
 }
 
+const ollamaRunning = ref(false);
+let statusCheckInterval = null; // Add this to track the interval
+
+// Add function to check Ollama status
+async function checkOllamaStatus() {
+    if (!isOllamaProviderById(selectedProviderId.value)) {
+        ollamaRunning.value = false;
+        return;
+    }
+
+    try {
+        const provider = persistedStore.aiProviders.find(p => p.id === selectedProviderId.value);
+        if (!provider) return;
+
+        // Create URL object to manipulate the URL
+        const url = new URL(provider.baseURL);
+        // Use only origin (protocol + hostname + port)
+        const baseUrl = url.origin;
+        
+        const response = await fetch(`${baseUrl}/api/tags`);
+        ollamaRunning.value = response.ok;
+    } catch (error) {
+        ollamaRunning.value = false;
+    }
+}
+
+// Function to start periodic status checking
+function startOllamaStatusCheck() {
+    // Clear any existing interval first
+    stopOllamaStatusCheck();
+    
+    if (isOllamaProviderById(selectedProviderId.value)) {
+        checkOllamaStatus();
+        statusCheckInterval = setInterval(checkOllamaStatus, 5000);
+    }
+}
+
+// Function to stop status checking
+function stopOllamaStatusCheck() {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+        statusCheckInterval = null;
+    }
+}
+
+// Replace existing provider watcher with this consolidated one
+watch(selectedProviderId, async (newValue) => {
+    const provider = persistedStore.aiProviders.find(p => p.id === newValue);
+    if (provider) {
+        persistedStore.selectedProvider = {
+            providerId: provider.id,
+            model: provider.models[0]
+        };
+        selectedModel.value = provider.models[0];
+        
+        // Handle Ollama status checking
+        if (isOllamaProviderById(newValue)) {
+            startOllamaStatusCheck();
+        } else {
+            stopOllamaStatusCheck();
+            ollamaRunning.value = false;
+        }
+    }
+});
+
+// Update onMounted
+onMounted(() => {
+    startOllamaStatusCheck();
+});
+
+// Add onUnmounted to clean up
+onUnmounted(() => {
+    stopOllamaStatusCheck();
+});
+
+// Update configureAndRestartOllama
 async function configureAndRestartOllama() {
     restartingOllama.value = true;
     try {
@@ -461,6 +529,10 @@ async function configureAndRestartOllama() {
             .execute(['-a', 'Ollama']);
             
         console.log('Successfully configured and restarted Ollama');
+        
+        // Add delay and status check after restart
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await checkOllamaStatus();
     } catch (error) {
         console.error('Failed to configure and restart Ollama:', error);
     } finally {
