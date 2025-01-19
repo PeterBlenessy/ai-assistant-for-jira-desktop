@@ -68,6 +68,8 @@
                         label="Config Name"
                         dense
                         filled
+                        :error="!!errors.name"
+                        :error-message="errors.name"
                     />
                 </q-item-section>
             </q-item>
@@ -79,6 +81,8 @@
                         label="JIRA Server Address"
                         dense
                         filled
+                        :error="!!errors.serverAddress"
+                        :error-message="errors.serverAddress"
                     />
                 </q-item-section>
             </q-item>
@@ -91,6 +95,8 @@
                         dense
                         filled
                         :type="hidePAT ? 'password' : 'text'"
+                        :error="!!errors.personalAccessToken"
+                        :error-message="errors.personalAccessToken"
                     >
                         <template v-slot:append>
                             <q-icon
@@ -171,6 +177,20 @@ const configToDelete = ref(null);
 const serverInfo = ref(null);
 const showServerInfo = ref(false);
 
+const errors = ref({
+    name: '',
+    serverAddress: '',
+    personalAccessToken: ''
+});
+
+function clearErrors() {
+    errors.value = {
+        name: '',
+        serverAddress: '',
+        personalAccessToken: ''
+    };
+}
+
 async function fetchServerInfo() {
     try {
         serverInfo.value = await jiraClient.value.getServerInfo();
@@ -208,7 +228,8 @@ function editJiraConfig() {
     mode.value = 'edit';
     const config = persistedStore.jiraConfigs.find(c => c.name === selectedJiraConfigName.value);
     if (config) {
-        editJiraConfigData.value = { ...config };
+        // Create a complete copy of the config object
+        editJiraConfigData.value = JSON.parse(JSON.stringify(config));
     }
 }
 
@@ -221,30 +242,77 @@ function addJiraConfig() {
     };
 }
 
-function saveJiraConfig() {
-    if (!editJiraConfigData.value.name || !editJiraConfigData.value.serverAddress || !editJiraConfigData.value.personalAccessToken) {
+async function saveJiraConfig() {
+    clearErrors();
+    let hasErrors = false;
+
+    // Name validation
+    if (!editJiraConfigData.value.name?.trim()) {
+        errors.value.name = 'Config name is required';
+        hasErrors = true;
+    } else if (mode.value === 'add' && 
+        persistedStore.jiraConfigs.some(c => c.name === editJiraConfigData.value.name)) {
+        errors.value.name = 'Config name already exists';
+        hasErrors = true;
+    }
+
+    // Server address validation
+    if (!editJiraConfigData.value.serverAddress?.trim()) {
+        errors.value.serverAddress = 'Server address is required';
+        hasErrors = true;
+    } else {
+        try {
+            new URL(editJiraConfigData.value.serverAddress);
+        } catch {
+            errors.value.serverAddress = 'Invalid server address format';
+            hasErrors = true;
+        }
+    }
+
+    // PAT validation
+    if (!editJiraConfigData.value.personalAccessToken?.trim()) {
+        errors.value.personalAccessToken = 'Personal access token is required';
+        hasErrors = true;
+    }
+
+    if (hasErrors) {
         return;
     }
-    if (mode.value === 'edit') {
-        // Find the original config being edited
-        const originalConfig = persistedStore.jiraConfigs.find(c => c.name === selectedJiraConfigName.value);
-        if (originalConfig) {
-            // Find the index of the original config
-            const index = persistedStore.jiraConfigs.indexOf(originalConfig);
-            // Update the config at that index
-            persistedStore.jiraConfigs[index] = { ...editJiraConfigData.value };
-            // Update selected config name in case it changed
-            selectedJiraConfigName.value = editJiraConfigData.value.name;
+
+    try {
+
+        if (mode.value === 'add') {
+            // Add new config. Deep copy.
+            persistedStore.jiraConfigs.push(JSON.parse(JSON.stringify(editJiraConfigData.value)));
+            // Auto-select if this is the first config
+            if (persistedStore.jiraConfigs.length === 1) {
+                selectedJiraConfigName.value = editJiraConfigData.value.name;
+            }
+        } else {
+            // Update existing config
+            const index = persistedStore.jiraConfigs.findIndex(
+                c => c.name === selectedJiraConfigName.value
+            );
+            if (index !== -1) {
+                // Replace the config at the index with a deep copy of the edited config
+                persistedStore.jiraConfigs[index] = JSON.parse(JSON.stringify(editJiraConfigData.value));
+                // Update selected config name in case it changed
+                selectedJiraConfigName.value = editJiraConfigData.value.name;
+            }
         }
-    } else if (mode.value === 'add') {
-        const newConfig = { ...editJiraConfigData.value };
-        if (!persistedStore.jiraConfigs.some(c => c.name === newConfig.name)) {
-            persistedStore.jiraConfigs.push(newConfig);
-            selectedJiraConfigName.value = newConfig.name;
-        }
+
+        // Verify connection before saving
+        //await checkJiraConnection(editJiraConfigData.value);
+
+        mode.value = 'view';
+        editJiraConfigData.value = null;
+    } catch (error) {
+        console.error('Failed to save Jira config:', error);
+        // Show generic error in name field
+        errors.value.name = error.message;
+        throw error;
     }
-    persistedStore.selectedJiraConfig = { ...editJiraConfigData.value };
-    mode.value = 'view';
+
 }
 
 function cancelEdit() {
@@ -263,6 +331,11 @@ watch(
     ],
     fetchServerInfo
 );
+
+// Watch for input changes to clear errors
+watch(editJiraConfigData, () => {
+    clearErrors();
+}, { deep: true });
 
 // Initial fetch of server info
 if (selectedJiraConfigName.value) {

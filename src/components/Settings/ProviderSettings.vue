@@ -94,6 +94,8 @@
                         label="Provider Name"
                         dense
                         filled
+                        :error="!!errors.name"
+                        :error-message="errors.name"
                     />
                 </q-item-section>
             </q-item>
@@ -105,6 +107,8 @@
                         label="API Endpoint"
                         dense
                         filled
+                        :error="!!errors.baseURL"
+                        :error-message="errors.baseURL"
                     />
                 </q-item-section>
             </q-item>
@@ -117,6 +121,8 @@
                         dense
                         filled
                         :type="hideApiKey ? 'password' : 'text'"
+                        :error="!!errors.apiKey"
+                        :error-message="errors.apiKey"
                     >
                         <template v-slot:append>
                             <q-icon
@@ -143,6 +149,8 @@
                         new-value-mode="add-unique"
                         input-debounce="0"
                         hide-dropdown-icon
+                        :error="!!errors.models"
+                        :error-message="errors.models"
                     />
                 </q-item-section>
             </q-item>
@@ -229,11 +237,29 @@ const editProviderData = ref({
 
 const hideApiKey = ref(true);
 
+const errors = ref({
+    name: '',
+    baseURL: '',
+    apiKey: '',
+    models: ''
+});
+
+function clearErrors() {
+    errors.value = {
+        name: '',
+        baseURL: '',
+        apiKey: '',
+        models: ''
+    };
+}
+
 function editProvider() {
     mode.value = 'edit';
     const provider = persistedStore.aiProviders.find(p => p.id === selectedProviderId.value);
     if (provider) {
-        editProviderData.value = { ...provider };
+        //editProviderData.value = { ...provider };
+        // Create a complete copy of the config object
+        editProviderData.value = JSON.parse(JSON.stringify(provider));
     }
 }
 
@@ -250,24 +276,71 @@ function addProvider() {
 }
 
 function saveProvider() {
-    if (!editProviderData.value.name || !editProviderData.value.baseURL || !editProviderData.value.apiKey || editProviderData.value.models.length === 0) {
+    clearErrors();
+    let hasErrors = false;
+
+    // Name validation
+    if (!editProviderData.value.name?.trim()) {
+        errors.value.name = 'Provider name is required';
+        hasErrors = true;
+    } else if (mode.value === 'add' && 
+        persistedStore.aiProviders.some(p => p.name.toLowerCase() === editProviderData.value.name.toLowerCase())) {
+        errors.value.name = 'Provider name already exists';
+        hasErrors = true;
+    }
+
+    // Base URL validation
+    if (!editProviderData.value.baseURL?.trim()) {
+        errors.value.baseURL = 'API endpoint is required';
+        hasErrors = true;
+    } else {
+        try {
+            new URL(editProviderData.value.baseURL);
+        } catch {
+            errors.value.baseURL = 'Invalid API endpoint format';
+            hasErrors = true;
+        }
+    }
+
+    // API Key validation
+    if (!editProviderData.value.apiKey?.trim()) {
+        errors.value.apiKey = 'API key is required';
+        hasErrors = true;
+    }
+
+    // Models validation
+    if (!editProviderData.value.models?.length) {
+        errors.value.models = 'At least one model is required';
+        hasErrors = true;
+    }
+
+    if (hasErrors) {
         return;
     }
-    if (mode.value === 'edit') {
-        const index = persistedStore.aiProviders.findIndex(p => p.id === editProviderData.value.id);
-        if (index !== -1) {
-            persistedStore.aiProviders[index] = { ...editProviderData.value };
-            selectedProviderId.value = editProviderData.value.id;
-        }
-    } else if (mode.value === 'add') {
-        const newProvider = { ...editProviderData.value };
-        newProvider.id = newProvider.name.toLowerCase().replace(/\s+/g, '-');
-        if (!persistedStore.aiProviders.some(p => p.id === newProvider.id)) {
+
+    try {
+        if (mode.value === 'add') {
+            const newProvider = JSON.parse(JSON.stringify(editProviderData.value));
+            newProvider.id = newProvider.name.toLowerCase().replace(/\s+/g, '-');
             persistedStore.aiProviders.push(newProvider);
-            selectedProviderId.value = newProvider.id;
+            // Only set selectedProviderId if this is the first provider
+            if (persistedStore.aiProviders.length === 1) {
+                selectedProviderId.value = newProvider.id;
+            }
+        } else if (mode.value === 'edit') {
+            const index = persistedStore.aiProviders.findIndex(p => p.id === editProviderData.value.id);
+            if (index !== -1) {
+                persistedStore.aiProviders[index] = JSON.parse(JSON.stringify(editProviderData.value));
+                selectedProviderId.value = editProviderData.value.id;
+            }
         }
+
+        mode.value = 'view';
+        editProviderData.value = null;
+    } catch (error) {
+        console.error('Failed to save provider:', error);
+        errors.value.name = error.message;
     }
-    mode.value = 'view';
 }
 
 function cancelEdit() {
@@ -394,5 +467,10 @@ async function configureAndRestartOllama() {
         restartingOllama.value = false;
     }
 }
+
+// Add watcher to clear errors
+watch(editProviderData, () => {
+    clearErrors();
+}, { deep: true });
 
 </script>
