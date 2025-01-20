@@ -215,8 +215,13 @@ function deleteConfig() {
         if (index !== -1) {
             persistedStore.jiraConfigs.splice(index, 1);
             if (selectedJiraConfigName.value === configToDelete.value) {
-                // Switch to first available config
-                selectedJiraConfigName.value = persistedStore.jiraConfigs[0].name;
+                // Switch to first available config and update store
+                if (persistedStore.jiraConfigs.length > 0) {
+                    selectConfig(persistedStore.jiraConfigs[0].name);
+                } else {
+                    selectedJiraConfigName.value = '';
+                    persistedStore.selectedJiraConfig = { name: '', serverAddress: '', personalAccessToken: '' };
+                }
             }
         }
     }
@@ -322,6 +327,16 @@ function cancelEdit() {
 function selectConfig(configName) {
     selectedJiraConfigName.value = configName;
 }
+
+// Add a watcher for selectedJiraConfigName changes
+watch(selectedJiraConfigName, (newConfigName) => {
+    if (newConfigName) {
+        const config = persistedStore.jiraConfigs.find(c => c.name === newConfigName);
+        if (config) {
+            persistedStore.selectedJiraConfig = JSON.parse(JSON.stringify(config));
+        }
+    }
+});
 
 watch(
     () => [
