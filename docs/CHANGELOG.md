@@ -11,6 +11,10 @@ All notable changes to AI Assistant for Jira Desktop are documented below.
 
 ## Releases
 
+### v0.7.10 - 2025-01-20
+- Fixed issue where selected JiraConfig could not be edited or deleted.
+- Added unit tests for some helper functions.
+
 ### v0.7.9 - 2025-01-19
 - Added input field validation in JiraSettings and ProviderSettings.
 - Added support for checking Ollama server availability when Ollama is the selected provider.
